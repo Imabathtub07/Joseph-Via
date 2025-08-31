@@ -4,13 +4,14 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Joseph Via</title>
-  <meta name="description" content="Notes, projects, and photos by Joseph Via" />
+  <meta name="description" content="Notes, projects, podcasts, and photos by Joseph Via" />
   <meta property="og:title" content="Joseph Via" />
-  <meta property="og:description" content="Notes, projects, and photos by Joseph Via" />
+  <meta property="og:description" content="Notes, projects, podcasts, and photos by Joseph Via" />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content="/images/cover.jpg.jpg" />
+  <meta property="og:image" content="https://josephvia.com/images/cover.jpg" />
   <meta name="theme-color" content="#111827" />
 
+  <!-- Tailwind (CDN) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -27,51 +28,70 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
   <style>
-    :root { --ring: 24 100% 50%; }
-    .glass { backdrop-filter: blur(8px); background: hsl(220 14% 6% /.6); }
+    /* ---- Optional "cool background" mesh ---- */
+    .bg-mesh::before{
+      content:"";
+      position:fixed; inset:0; z-index:-10;
+      background:
+        radial-gradient(40% 60% at 10% 10%, hsl(230 90% 60% / .35), transparent 60%),
+        radial-gradient(50% 50% at 90% 20%, hsl(280 85% 62% / .35), transparent 60%),
+        radial-gradient(60% 50% at 20% 85%, hsl(190 90% 58% / .35), transparent 60%),
+        radial-gradient(50% 60% at 80% 80%, hsl(45 95% 60% / .35), transparent 60%);
+      filter: saturate(1.05) blur(30px);
+      animation: floaty 24s ease-in-out infinite alternate;
+    }
+    @keyframes floaty{
+      0%{ background-position: 0% 0%, 100% 0%, 0% 100%, 100% 100%; }
+      100%{ background-position: 15% 10%, 85% 15%, 10% 85%, 90% 90%; }
+    }
+    /* Nice link underline */
     .prose a { text-decoration: underline; }
   </style>
 </head>
-<body class="bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 font-body">
+
+<body class="bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 font-body bg-mesh">
   <!-- Header -->
   <header class="sticky top-0 z-50 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:supports-[backdrop-filter]:bg-zinc-900/60 border-b border-zinc-200 dark:border-zinc-800">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-4">
-      <a href="#top" class="flex items-center gap-3 group">
+      <a href="#top" class="flex items-center gap-3">
         <div class="h-9 w-9 rounded-full overflow-hidden ring-2 ring-zinc-300 dark:ring-zinc-700">
-          <img src="/images/avatar.jpg.jpeg" alt="Joseph Via" class="h-full w-full object-cover" />
+          <img src="images/avatar.jpg" alt="Joseph Via" class="h-full w-full object-cover" />
         </div>
         <span class="font-display font-semibold tracking-tight text-lg">Joseph Via</span>
       </a>
-      <nav class="ml-auto flex items-center gap-3 text-sm">
+      <nav class="ml-auto flex flex-wrap items-center gap-3 text-sm">
         <a href="#now" class="hover:opacity-80">Now</a>
-        <a href="#updates" class="hover:opacity-80">Updates</a>
-        <a href="#photos" class="hover:opacity-80">Photos</a>
-        <a href="#links" class="hover:opacity-80">Links</a>
+        <a href="#blog" class="hover:opacity-80">Blog</a>
+        <a href="#podcasts" class="hover:opacity-80">Podcasts</a>
+        <a href="#albums" class="hover:opacity-80">Photo Albums</a>
         <button id="themeToggle" class="ml-1 px-2 py-1 rounded-xl border border-zinc-300 dark:border-zinc-700 text-xs">Toggle</button>
       </nav>
     </div>
   </header>
 
-  <!-- Intro -->
+  <!-- Hero -->
   <section id="top" class="relative">
-    <div class="absolute inset-0 -z-10 bg-gradient-to-b from-zinc-100 to-transparent dark:from-zinc-900"></div>
+    <div class="absolute inset-0 -z-10 bg-gradient-to-b from-zinc-100/70 to-transparent dark:from-zinc-900/70"></div>
     <div class="max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
       <div class="grid md:grid-cols-[auto,1fr] gap-6 items-center">
-        <img src="/images/avatar.jpg" alt="Joseph Via" class="md:h-36 md:w-36 h-24 w-24 rounded-2xl object-cover ring-4 ring-white dark:ring-zinc-900 shadow-xl" />
+        <img src="images/avatar.jpg" alt="Joseph Via" class="md:h-36 md:w-36 h-24 w-24 rounded-2xl object-cover ring-4 ring-white dark:ring-zinc-900 shadow-xl" />
         <div>
           <h1 class="font-display text-3xl sm:text-4xl font-extrabold leading-tight">Hi, I’m Joseph.</h1>
-          <p class="mt-3 text-zinc-600 dark:text-zinc-300 max-w-2xl">I work with youth and community in Washington, D.C., tinker with audio/podcasting, and dabble in film clubs, D&D, and assorted experiments. This is my cozy corner of the web for quick updates and photo drops.</p>
+          <p class="mt-3 text-zinc-600 dark:text-zinc-300 max-w-2xl">
+            Youth & community in DC. Podcasts, film club bits, D&D one-shots, and small experiments.
+          </p>
           <div class="mt-5 flex flex-wrap items-center gap-3">
-            <a href="#updates" class="px-4 py-2 rounded-2xl bg-zinc-900 text-white dark:bg-white dark:text-zinc-900">See what’s new</a>
-            <a href="#photos" class="px-4 py-2 rounded-2xl border border-zinc-300 dark:border-zinc-700">Photo grid</a>
+            <a href="#blog" class="px-4 py-2 rounded-2xl bg-zinc-900 text-white dark:bg-white dark:text-zinc-900">Latest posts</a>
+            <a href="#podcasts" class="px-4 py-2 rounded-2xl border border-zinc-300 dark:border-zinc-700">Listen</a>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Now -->
+  <!-- NOW -->
   <section id="now" class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
     <h2 class="font-display text-2xl font-bold">Now</h2>
     <p class="text-sm text-zinc-500 dark:text-zinc-400">Updated <span id="nowDate">—</span></p>
@@ -79,63 +99,71 @@
       <div class="p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800">
         <h3 class="font-semibold">Projects</h3>
         <ul class="mt-2 space-y-1 list-disc list-inside text-zinc-700 dark:text-zinc-200">
-          <li>🎙️ <strong>Ethically Sourced</strong> – a podcast of bite-size ethical conundrums.</li>
-          <li>🎬 WES film club monthly picks & discussions.</li>
-          <li>🎲 D&D one-shots + map doodles.</li>
+          <li>🎙️ <strong>Ethically Sourced</strong> — podcast experiments.</li>
+          <li>🎬 WES film club picks.</li>
+          <li>🎲 D&D one-shots + maps.</li>
         </ul>
       </div>
       <div class="p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800">
-        <h3 class="font-semibold">Learning / tinkering</h3>
+        <h3 class="font-semibold">Learning</h3>
         <ul class="mt-2 space-y-1 list-disc list-inside text-zinc-700 dark:text-zinc-200">
-          <li>Audio cleanup chains in Audacity & VSTs.</li>
-          <li>Photo workflow experiments with mobile.</li>
-          <li>Simple web automations and forms.</li>
+          <li>Audio cleanup chains.</li>
+          <li>Photo workflow.</li>
+          <li>Little web automations.</li>
         </ul>
       </div>
       <div class="p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800">
         <h3 class="font-semibold">Elsewhere</h3>
         <ul class="mt-2 space-y-1 list-disc list-inside text-zinc-700 dark:text-zinc-200">
-          <li>DC hikes & scooters with family.</li>
+          <li>DC hikes & scooters.</li>
           <li>Working with youth in DC.</li>
-          <li>Collecting snack recs from Asian markets.</li>
+          <li>Snack runs at Asian markets.</li>
         </ul>
       </div>
     </div>
   </section>
 
-  <!-- Updates -->
-  <section id="updates" class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
-    <h2 class="font-display text-2xl font-bold">Updates</h2>
-    <p class="text-sm text-zinc-500 dark:text-zinc-400">Little life notes. Newest on top.</p>
-    <div id="updatesList" class="mt-4 grid gap-3"></div>
+  <!-- BLOG (short entries) -->
+  <section id="blog" class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
+    <h2 class="font-display text-2xl font-bold">Blog</h2>
+    <p class="text-sm text-zinc-500 dark:text-zinc-400">Quick notes & tiny updates.</p>
+    <div id="blogList" class="mt-4 grid gap-3"></div>
   </section>
 
-  <!-- Photos -->
-  <section id="photos" class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
-    <h2 class="font-display text-2xl font-bold">Photos</h2>
-    <p class="text-sm text-zinc-500 dark:text-zinc-400">Drop images into <code>/images</code> and update the gallery list below.</p>
-    <div id="gallery" class="mt-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"></div>
+  <!-- PODCASTS -->
+  <section id="podcasts" class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
+    <h2 class="font-display text-2xl font-bold">Podcasts</h2>
+    <p class="text-sm text-zinc-500 dark:text-zinc-400">Drop in embeds from Buzzsprout, Spotify, Apple, etc.</p>
+    <div id="podcastEmbeds" class="mt-4 grid gap-4"></div>
+    <details class="mt-3 text-sm text-zinc-500 dark:text-zinc-400">
+      <summary class="cursor-pointer">How to add an embed</summary>
+      <div class="mt-2 prose dark:prose-invert">
+        <ul>
+          <li><strong>Buzzsprout:</strong> copy the “Embed Player” code and paste it into the <code>podcasts</code> array below.</li>
+          <li><strong>Spotify:</strong> right-click an episode → <em>Share → Embed episode</em> → copy iframe.</li>
+          <li><strong>Apple Podcasts:</strong> use the “Embed” button on the episode page → copy iframe.</li>
+        </ul>
+      </div>
+    </details>
   </section>
 
-  <!-- Links -->
-  <section id="links" class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
-    <h2 class="font-display text-2xl font-bold">Links</h2>
-    <div class="mt-4 grid sm:grid-cols-2 gap-4">
-      <a class="p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100/60 dark:hover:bg-zinc-900/60" href="mailto:joseph.via@josephvia.com">Email me</a>
-      <a class="p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100/60 dark:hover:bg-zinc-900/60" href="#">Podcast: Ethically Sourced (soon)</a>
-      <a class="p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100/60 dark:hover:bg-zinc-900/60" href="#">Film club notes</a>
-      <a class="p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100/60 dark:hover:bg-zinc-900/60" href="#">D&D one-shots</a>
-    </div>
+  <!-- PHOTO ALBUM LINKS (OneDrive) -->
+  <section id="albums" class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
+    <h2 class="font-display text-2xl font-bold">Photo Albums</h2>
+    <p class="text-sm text-zinc-500 dark:text-zinc-400">Links to OneDrive folders.</p>
+    <div id="albumList" class="mt-4 grid sm:grid-cols-2 gap-3"></div>
   </section>
 
+  <!-- Footer -->
   <footer class="border-t border-zinc-200 dark:border-zinc-800">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 py-8 text-sm text-zinc-500 dark:text-zinc-400">
-      <p>© <span id="year"></span> Joseph Via • Built with a single HTML file ✨</p>
+      <p>© <span id="year"></span> Joseph Via • Built with a single HTML file ✨ • <a class="underline" href="mailto:joseph.via@josephvia.com">Email me</a></p>
     </div>
   </footer>
 
   <script>
-    const $ = (sel) => document.querySelector(sel);
+    // --- Theme + dates ---
+    const $ = (s)=>document.querySelector(s);
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const saved = localStorage.getItem('theme');
     if ((saved === 'dark') || (!saved && prefersDark)) document.documentElement.classList.add('dark');
@@ -143,53 +171,83 @@
       document.documentElement.classList.toggle('dark');
       localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
     });
-
     $('#year').textContent = new Date().getFullYear();
     $('#nowDate').textContent = new Date().toLocaleDateString();
 
-    const updates = [
-      { date: '2025-08-27', text: 'Spinning up this little site. Keeping it simple and cozy.' },
-      { date: '2025-08-20', text: 'Scooter tour of DC w/ my niece. Protected lanes FTW.', img: '/images/scooters.jpg' },
-      { date: '2025-08-13', text: 'Tuning podcast mouth-sound chain. Progress!', link: { href: '#', label: 'notes' } }
+    // --- BLOG DATA: edit here ---
+    // Use simple HTML in "body" if you want (links, <em>, <strong>, etc.)
+    const blog = [
+      { date: '2025-08-27', title: 'Site launched!', body: 'Spun up this little vibe site. Keeping it simple and cozy.' },
+      { date: '2025-08-20', title: 'Scooter day', body: 'Protected lanes FTW. Added a few pics to the albums.' }
     ];
 
-    function renderUpdates() {
-      const container = $('#updatesList');
-      container.innerHTML = '';
-      updates.sort((a,b) => b.date.localeCompare(a.date));
-      for (const u of updates) {
-        const card = document.createElement('article');
-        card.className = 'p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 flex gap-4';
-        card.innerHTML = `
-          ${u.img ? `<img src="${u.img}" alt="" class="h-20 w-28 object-cover rounded-xl">` : ''}
-          <div class="min-w-0">
-            <div class="text-xs text-zinc-500 dark:text-zinc-400">${new Date(u.date).toLocaleDateString()}</div>
-            <p class="mt-1">${u.text}</p>
-            ${u.link ? `<a class="mt-2 inline-block text-sm underline" href="${u.link.href}">${u.link.label}</a>` : ''}
-          </div>`;
-        container.appendChild(card);
+    function renderBlog() {
+      const c = $('#blogList');
+      c.innerHTML = '';
+      blog.sort((a,b)=>b.date.localeCompare(a.date));
+      for (const post of blog) {
+        const el = document.createElement('article');
+        el.className = 'p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800';
+        el.innerHTML = `
+          <div class="text-xs text-zinc-500 dark:text-zinc-400">${new Date(post.date).toLocaleDateString()}</div>
+          <h3 class="mt-1 font-semibold">${post.title}</h3>
+          <div class="mt-1 text-zinc-700 dark:text-zinc-200">${post.body}</div>
+        `;
+        c.appendChild(el);
       }
     }
-    renderUpdates();
 
-    const gallery = [
-      '/images/cover.jpg.jpg',
-      '/images/park.jpg.',
-      '/images/podcast.jpg',
-      '/images/dnd.jpg'
+    // --- PODCAST EMBEDS: paste iframes here ---
+    // Example placeholders below. Replace with your real embed codes.
+    const podcasts = [
+      // Buzzsprout small player example (replace with yours):
+      // '<iframe src="https://www.buzzsprout.com/XXXX/episodes/YYYY?client_source=small_player&iframe=true" loading="lazy" width="100%" height="200" frameborder="0" scrolling="no"></iframe>',
+      // Spotify example:
+      // '<iframe style="border-radius:12px" src="https://open.spotify.com/embed/episode/EPISODE_ID?utm_source=generator" width="100%" height="232" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>',
     ];
-    (function renderGallery(){
-      const g = $('#gallery');
-      g.innerHTML = '';
-      for (const src of gallery) {
-        const fig = document.createElement('figure');
-        fig.className = 'relative overflow-hidden rounded-2xl aspect-[4/3] ring-1 ring-zinc-200 dark:ring-zinc-800';
-        fig.innerHTML = `<img loading="lazy" src="${src}" class="h-full w-full object-cover" alt="">`;
-        g.appendChild(fig);
+
+    function renderPodcasts(){
+      const c = $('#podcastEmbeds');
+      c.innerHTML = '';
+      if (podcasts.length === 0) {
+        c.innerHTML = '<p class="text-zinc-600 dark:text-zinc-300">Add an embed in the <code>podcasts</code> array in your HTML.</p>';
+        return;
       }
-    })();
+      for (const code of podcasts) {
+        const card = document.createElement('div');
+        card.className = 'p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/60 backdrop-blur';
+        card.innerHTML = code;
+        c.appendChild(card);
+      }
+    }
+
+    // --- ALBUM LINKS: OneDrive folders here ---
+    const albums = [
+      // { title: 'Rock Creek Park walk', url: 'https://1drv.ms/f/...' , note: 'Morning hike + lunch.' },
+      // { title: 'Family weekend', url: 'https://1drv.ms/f/...' , note: 'A few fav shots.' },
+    ];
+
+    function renderAlbums(){
+      const c = $('#albumList');
+      c.innerHTML = '';
+      for (const a of albums) {
+        const el = document.createElement('a');
+        el.href = a.url;
+        el.target = '_blank';
+        el.rel = 'noopener';
+        el.className = 'p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100/60 dark:hover:bg-zinc-900/60';
+        el.innerHTML = `<div class="font-semibold">${a.title}</div><div class="text-sm text-zinc-600 dark:text-zinc-400">${a.note??''}</div>`;
+        c.appendChild(el);
+      }
+      if (albums.length === 0) {
+        c.innerHTML = '<p class="text-zinc-600 dark:text-zinc-300">Add your OneDrive folder links in the <code>albums</code> array.</p>';
+      }
+    }
+
+    // Kick it all off
+    renderBlog();
+    renderPodcasts();
+    renderAlbums();
   </script>
 </body>
 </html>
-
- 
