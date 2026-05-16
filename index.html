@@ -1353,7 +1353,7 @@ async function onSignedIn(user) {
   updateMastUser();
 
   // Check allowlist
-  const { data: allowed, error } = await supabase
+  const { data: allowed, error } = await sb
     .from('allowed_emails')
     .select('email')
     .eq('email', user.email.toLowerCase())
@@ -1425,7 +1425,7 @@ async function loadDashboard() {
   list.innerHTML = '<p style="color: var(--ink-3); font-style: italic;">Loading…</p>';
 
   const email = currentUser.email.toLowerCase();
-  const { data: debates, error } = await supabase
+  const { data: debates, error } = await sb
     .from('debates')
     .select('*')
     .or(`creator_email.eq.${email},opponent_email.eq.${email}`)
@@ -1556,7 +1556,7 @@ async function createDebate() {
 
   try {
     // Check opponent is on allowlist
-    const { data: oppAllowed } = await supabase
+    const { data: oppAllowed } = await sb
       .from('allowed_emails')
       .select('email')
       .eq('email', state.oppEmail)
@@ -1611,7 +1611,7 @@ async function createDebate() {
 // OPEN / LOAD DEBATE
 // ============================================================================
 async function loadDebateFromUrl(debateId) {
-  const { data: debate, error } = await supabase
+  const { data: debate, error } = await sb
     .from('debates')
     .select('*')
     .eq('id', debateId)
@@ -1625,7 +1625,7 @@ async function loadDebateFromUrl(debateId) {
 }
 
 async function openDebate(debateId) {
-  const { data: debate, error } = await supabase
+  const { data: debate, error } = await sb
     .from('debates')
     .select('*')
     .eq('id', debateId)
@@ -1677,7 +1677,7 @@ function showCreatorWaiting() {
 }
 
 async function acceptInvite() {
-  const { error } = await supabase
+  const { error } = await sb
     .from('debates')
     .update({ status: 'active', accepted_at: new Date().toISOString() })
     .eq('id', currentDebate.id);
@@ -1776,7 +1776,7 @@ function computeScore(role) {
 // MESSAGES — load, render, subscribe
 // ============================================================================
 async function loadMessages(debateId) {
-  const { data: msgs, error } = await supabase
+  const { data: msgs, error } = await sb
     .from('messages')
     .select('*')
     .eq('debate_id', debateId)
