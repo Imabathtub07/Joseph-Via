@@ -1,249 +1,2193 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Joseph Via</title>
-  <meta name="description" content="Notes, projects, podcasts, and photos by Joseph Via" />
-  <meta property="og:title" content="Joseph Via" />
-  <meta property="og:description" content="Notes, projects, podcasts, and photos by Joseph Via" />
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://josephvia.com/images/cover.jpg" />
-  <meta name="theme-color" content="#111827" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DISCOURSE // Mediated Debate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700;800&family=Bowlby+One&display=swap" rel="stylesheet">
+<style>
+  /* ============================================
+     ⚡ DISCOURSE — DARK ARCADE EDITION ⚡
+     ============================================ */
+  :root {
+    --void: #0a0612;
+    --void-2: #14092b;
+    --void-3: #1d1240;
+    --void-4: #2a1858;
+    --ink: #ece3ff;
+    --ink-2: #b4a8d4;
+    --ink-3: #7a6f9c;
 
-  <!-- Tailwind (CDN) -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            display: ['Inter','ui-sans-serif','system-ui','sans-serif'],
-            body: ['Inter','ui-sans-serif','system-ui','sans-serif']
-          }
-        }
-      }
-    }
-  </script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    --hot-pink: #ff2e88;
+    --hot-pink-dim: rgba(255, 46, 136, 0.18);
+    --hot-pink-glow: rgba(255, 46, 136, 0.5);
 
-  <style>
-    /* ---- Optional "cool background" mesh ---- */
-    .bg-mesh::before{
-      content:"";
-      position:fixed; inset:0; z-index:-10;
-      background:
-        radial-gradient(40% 60% at 10% 10%, hsl(230 90% 60% / .35), transparent 60%),
-        radial-gradient(50% 50% at 90% 20%, hsl(280 85% 62% / .35), transparent 60%),
-        radial-gradient(60% 50% at 20% 85%, hsl(190 90% 58% / .35), transparent 60%),
-        radial-gradient(50% 60% at 80% 80%, hsl(45 95% 60% / .35), transparent 60%);
-      filter: saturate(1.05) blur(30px);
-      animation: floaty 24s ease-in-out infinite alternate;
-    }
-    @keyframes floaty{
-      0%{ background-position: 0% 0%, 100% 0%, 0% 100%, 100% 100%; }
-      100%{ background-position: 15% 10%, 85% 15%, 10% 85%, 90% 90%; }
-    }
-    /* Nice link underline */
-    .prose a { text-decoration: underline; }
-  </style>
+    --cyan: #5ef9d4;
+    --cyan-dim: rgba(94, 249, 212, 0.18);
+    --cyan-glow: rgba(94, 249, 212, 0.5);
+
+    --amber: #ffb547;
+    --amber-dim: rgba(255, 181, 71, 0.18);
+    --amber-glow: rgba(255, 181, 71, 0.5);
+
+    --gold: #ffd34d;
+    --violet: #b388ff;
+
+    --rule: rgba(236, 227, 255, 0.12);
+    --rule-strong: rgba(236, 227, 255, 0.25);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Space Grotesk', -apple-system, sans-serif;
+    background: var(--void);
+    color: var(--ink);
+    line-height: 1.5;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(ellipse 80% 60% at 20% 0%, rgba(179, 136, 255, 0.18), transparent 60%),
+      radial-gradient(ellipse 70% 50% at 90% 100%, rgba(94, 249, 212, 0.12), transparent 60%),
+      radial-gradient(ellipse 50% 40% at 50% 50%, rgba(255, 46, 136, 0.05), transparent 70%);
+    min-height: 100vh;
+  }
+  /* faint scanline texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px);
+    z-index: 1;
+    mix-blend-mode: overlay;
+  }
+  /* grain */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    opacity: 0.5;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.08 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+  .display { font-family: 'Bowlby One', serif; letter-spacing: 0; line-height: 0.9; }
+  .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+  button {
+    font-family: inherit;
+    font-size: inherit;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: inherit;
+  }
+  button:disabled { cursor: not-allowed; opacity: 0.4; }
+  input, textarea, select {
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+    background: transparent;
+    border: none;
+    outline: none;
+  }
+  textarea { resize: none; }
+  .smallcaps {
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  /* ===== APP SHELL ===== */
+  .app { max-width: 1100px; margin: 0 auto; padding: 28px 24px 80px; position: relative; z-index: 10; }
+
+  /* HUD-style masthead */
+  .masthead {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px;
+    margin-bottom: 28px;
+    border: 1px solid var(--rule);
+    background: linear-gradient(180deg, rgba(29, 18, 64, 0.6), rgba(20, 9, 43, 0.4));
+    backdrop-filter: blur(8px);
+    position: relative;
+    overflow: hidden;
+  }
+  .masthead::before {
+    content: '';
+    position: absolute; left: 0; right: 0; top: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--hot-pink), var(--violet), var(--cyan), transparent);
+  }
+  .masthead .brand {
+    font-family: 'Bowlby One', serif;
+    font-size: 22px;
+    letter-spacing: 0.08em;
+    color: var(--ink);
+  }
+  .masthead .brand .slash { color: var(--hot-pink); margin: 0 4px; }
+  .masthead .brand .sub { color: var(--cyan); font-size: 12px; letter-spacing: 0.3em; margin-left: 8px; font-family: 'JetBrains Mono', monospace; }
+  .masthead .user { display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--ink-2); font-family: 'JetBrains Mono', monospace; letter-spacing: 0.08em; }
+  .masthead .user .pill { padding: 4px 10px; border: 1px solid var(--rule-strong); background: rgba(94, 249, 212, 0.08); color: var(--cyan); }
+
+  /* screens */
+  .screen { display: none; animation: fadein 0.4s cubic-bezier(.2,.7,.3,1); }
+  .screen.active { display: block; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  /* ===== AUTH SCREEN ===== */
+  .auth-wrap { max-width: 480px; margin: 40px auto; }
+  .auth-card {
+    border: 1px solid var(--rule);
+    background: linear-gradient(180deg, rgba(29, 18, 64, 0.6), rgba(20, 9, 43, 0.4));
+    padding: 36px;
+    position: relative;
+  }
+  .auth-card::before {
+    content: '';
+    position: absolute; top: -1px; left: -1px; right: -1px; height: 3px;
+    background: linear-gradient(90deg, var(--hot-pink), var(--violet), var(--cyan));
+  }
+
+  /* ===== WELCOME / HERO ===== */
+  .hero { text-align: center; padding: 24px 0 16px; position: relative; }
+  .hero .kicker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--cyan);
+    text-transform: uppercase;
+    letter-spacing: 0.4em;
+    margin-bottom: 28px;
+    text-shadow: 0 0 12px var(--cyan-glow);
+  }
+  .hero h1 {
+    font-family: 'Bowlby One', serif;
+    font-size: clamp(64px, 11vw, 144px);
+    line-height: 0.85;
+    letter-spacing: -0.01em;
+    margin-bottom: 24px;
+    background: linear-gradient(180deg, var(--ink) 0%, var(--ink) 50%, var(--violet) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    position: relative;
+  }
+  .hero h1 em {
+    font-style: normal;
+    background: linear-gradient(135deg, var(--hot-pink), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 22px var(--hot-pink-glow));
+  }
+  .hero .lede {
+    font-size: 18px;
+    max-width: 600px;
+    margin: 0 auto 36px;
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+
+  /* card grid for the rules */
+  .rules-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 40px 0; }
+  @media (max-width: 720px) { .rules-grid { grid-template-columns: repeat(2, 1fr); } }
+  .rule-card {
+    border: 1px solid var(--rule);
+    background: rgba(20, 9, 43, 0.4);
+    padding: 20px 18px;
+    text-align: left;
+    transition: all .2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .rule-card:hover { transform: translateY(-3px); border-color: var(--rule-strong); background: rgba(42, 24, 88, 0.5); }
+  .rule-card:nth-child(1) { --hue: var(--hot-pink); --hue-glow: var(--hot-pink-glow); }
+  .rule-card:nth-child(2) { --hue: var(--violet); --hue-glow: rgba(179, 136, 255, 0.5); }
+  .rule-card:nth-child(3) { --hue: var(--cyan); --hue-glow: var(--cyan-glow); }
+  .rule-card:nth-child(4) { --hue: var(--gold); --hue-glow: rgba(255, 211, 77, 0.5); }
+  .rule-card .num {
+    font-family: 'Bowlby One', serif;
+    font-size: 44px; line-height: 1;
+    color: var(--hue);
+    text-shadow: 0 0 18px var(--hue-glow);
+    margin-bottom: 10px;
+  }
+  .rule-card .lbl {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--ink);
+    font-weight: 700;
+  }
+  .rule-card p { font-size: 13px; color: var(--ink-2); margin-top: 6px; line-height: 1.45; }
+
+  .cta-row { display: flex; justify-content: center; gap: 14px; margin-top: 24px; flex-wrap: wrap; }
+
+  /* ===== BUTTONS (arcade) ===== */
+  .btn {
+    padding: 14px 28px;
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    transition: all .15s;
+    position: relative;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .btn-primary {
+    background: var(--hot-pink);
+    color: var(--void);
+    box-shadow: 0 0 0 1px var(--hot-pink), 4px 4px 0 var(--void-3), 4px 4px 0 1px var(--hot-pink);
+  }
+  .btn-primary:hover:not(:disabled) {
+    transform: translate(-2px,-2px);
+    box-shadow: 0 0 0 1px var(--hot-pink), 6px 6px 0 var(--void-3), 6px 6px 0 1px var(--hot-pink), 0 0 24px var(--hot-pink-glow);
+  }
+  .btn-primary:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 1px var(--hot-pink); }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--cyan);
+    border: 1.5px solid var(--cyan);
+  }
+  .btn-secondary:hover:not(:disabled) {
+    background: var(--cyan-dim);
+    box-shadow: 0 0 18px var(--cyan-glow);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink-2);
+    border: 1px solid var(--rule-strong);
+  }
+  .btn-ghost:hover:not(:disabled) { color: var(--ink); border-color: var(--ink-3); }
+
+  /* ===== CONTRACT SCREEN ===== */
+  .contract { display: grid; grid-template-columns: 1fr 340px; gap: 32px; }
+  @media (max-width: 800px) { .contract { grid-template-columns: 1fr; } }
+
+  .panel {
+    border: 1px solid var(--rule);
+    background: linear-gradient(180deg, rgba(29, 18, 64, 0.5), rgba(20, 9, 43, 0.35));
+    padding: 28px;
+    position: relative;
+  }
+  .panel .panel-tag {
+    position: absolute;
+    top: -10px; left: 18px;
+    background: var(--void);
+    padding: 0 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--cyan);
+    text-transform: uppercase;
+  }
+  .panel h2 {
+    font-family: 'Bowlby One', serif;
+    font-size: 36px;
+    margin-bottom: 6px;
+    background: linear-gradient(135deg, var(--ink), var(--violet));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .panel .sub { color: var(--ink-3); margin-bottom: 28px; font-size: 13px; }
+
+  .field { margin-bottom: 24px; }
+  .field label {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: var(--ink-3);
+    margin-bottom: 10px;
+    font-weight: 700;
+  }
+  .field input[type="text"], .field input[type="email"], .field textarea {
+    width: 100%;
+    background: rgba(10, 6, 18, 0.6);
+    border: 1px solid var(--rule-strong);
+    padding: 12px 14px;
+    font-size: 16px;
+    color: var(--ink);
+    transition: all .15s;
+  }
+  .field input:focus, .field textarea:focus {
+    border-color: var(--hot-pink);
+    box-shadow: 0 0 0 3px var(--hot-pink-dim);
+  }
+  .field input::placeholder { color: var(--ink-3); }
+
+  .chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    border: 1px solid var(--rule-strong);
+    padding: 8px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    background: rgba(10, 6, 18, 0.4);
+    color: var(--ink-2);
+    transition: all .12s;
+    letter-spacing: 0.06em;
+  }
+  .chip:hover { border-color: var(--cyan); color: var(--cyan); }
+  .chip.active {
+    background: var(--cyan);
+    color: var(--void);
+    border-color: var(--cyan);
+    box-shadow: 0 0 18px var(--cyan-glow);
+  }
+
+  .mode-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .mode-card {
+    border: 1px solid var(--rule-strong);
+    padding: 16px;
+    text-align: left;
+    background: rgba(10, 6, 18, 0.4);
+    transition: all .15s;
+    position: relative;
+  }
+  .mode-card:hover { transform: translateY(-2px); border-color: var(--violet); }
+  .mode-card.active {
+    background: linear-gradient(135deg, rgba(179, 136, 255, 0.15), rgba(255, 46, 136, 0.15));
+    border-color: var(--violet);
+    box-shadow: 0 0 22px rgba(179, 136, 255, 0.3);
+  }
+  .mode-card .mtitle {
+    font-family: 'Bowlby One', serif;
+    font-size: 18px;
+    margin-bottom: 6px;
+    color: var(--ink);
+    letter-spacing: 0.02em;
+  }
+  .mode-card.active .mtitle { color: var(--gold); }
+  .mode-card .mdesc { font-size: 12px; color: var(--ink-3); line-height: 1.4; }
+
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px dashed var(--rule); }
+  .toggle-row:last-child { border-bottom: none; }
+  .toggle-row .tlabel { font-size: 14px; color: var(--ink); }
+  .toggle-row .thint { font-size: 12px; color: var(--ink-3); margin-top: 2px; }
+  .switch {
+    width: 48px; height: 26px;
+    background: rgba(10, 6, 18, 0.6);
+    border: 1px solid var(--rule-strong);
+    border-radius: 999px;
+    position: relative;
+    transition: all .15s;
+    flex-shrink: 0;
+  }
+  .switch::after {
+    content: '';
+    position: absolute; top: 2px; left: 2px;
+    width: 20px; height: 20px;
+    background: var(--ink-3);
+    border-radius: 50%;
+    transition: all .15s;
+  }
+  .switch.on { background: var(--hot-pink-dim); border-color: var(--hot-pink); }
+  .switch.on::after { transform: translateX(22px); background: var(--hot-pink); box-shadow: 0 0 12px var(--hot-pink-glow); }
+
+  /* contract sidebar */
+  .contract-side { align-self: start; position: sticky; top: 24px; }
+  .contract-side h3 {
+    font-family: 'Bowlby One', serif;
+    font-size: 20px;
+    margin-bottom: 16px;
+    color: var(--gold);
+    letter-spacing: 0.04em;
+  }
+  .summary-row {
+    display: flex; justify-content: space-between; gap: 12px;
+    padding: 10px 0; font-size: 13px;
+    border-bottom: 1px dashed var(--rule);
+  }
+  .summary-row:last-child { border-bottom: none; }
+  .summary-row .k {
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+  }
+  .summary-row .v { text-align: right; font-weight: 600; color: var(--ink); }
+
+  /* ===== INVITE LANDING (for invitee) ===== */
+  .invite-pending {
+    text-align: center;
+    padding: 24px;
+    border: 1px solid var(--rule);
+    background: rgba(29, 18, 64, 0.4);
+    margin-bottom: 24px;
+  }
+  .invite-pending .from {
+    color: var(--cyan);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .invite-pending .vs-block {
+    font-family: 'Bowlby One', serif;
+    font-size: 28px;
+    margin: 12px 0;
+  }
+  .invite-pending .vs-block .vs { color: var(--hot-pink); margin: 0 12px; }
+  .invite-pending .topic {
+    font-style: italic;
+    font-size: 18px;
+    color: var(--ink-2);
+    margin: 14px 0;
+    padding: 12px;
+    border-left: 3px solid var(--gold);
+    text-align: left;
+  }
+
+  /* ===== CHAT SCREEN — SCOREBOARD ===== */
+  .scoreboard {
+    border: 1px solid var(--rule-strong);
+    background: linear-gradient(180deg, rgba(29, 18, 64, 0.7), rgba(20, 9, 43, 0.5));
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .scoreboard::before {
+    content: '';
+    position: absolute; left: 0; right: 0; top: 0; height: 2px;
+    background: linear-gradient(90deg, var(--cyan), transparent 30%, transparent 70%, var(--hot-pink));
+  }
+  .player { display: flex; flex-direction: column; gap: 4px; }
+  .player.left { text-align: left; }
+  .player.right { text-align: right; align-items: flex-end; }
+  .player .pname {
+    font-family: 'Bowlby One', serif;
+    font-size: 22px;
+    line-height: 1;
+    color: var(--ink);
+  }
+  .player .pstance {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--ink-3);
+  }
+  .player.left .pstance { color: var(--cyan); }
+  .player.right .pstance { color: var(--hot-pink); }
+  .pscore {
+    font-family: 'Bowlby One', serif;
+    font-size: 52px;
+    line-height: 0.9;
+    margin-top: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+  .player.left .pscore { color: var(--cyan); text-shadow: 0 0 16px var(--cyan-glow); }
+  .player.right .pscore { color: var(--hot-pink); text-shadow: 0 0 16px var(--hot-pink-glow); }
+  .vs-divider {
+    font-family: 'Bowlby One', serif;
+    font-size: 36px;
+    color: var(--gold);
+    text-shadow: 0 0 22px rgba(255, 211, 77, 0.7);
+    transform: rotate(-4deg);
+  }
+
+  .topic-strip {
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--void-3);
+    border: 1px solid var(--rule-strong);
+    padding: 12px 20px;
+    margin-bottom: 16px;
+    gap: 16px;
+  }
+  .topic-strip .topic {
+    font-style: italic;
+    font-size: 16px;
+    color: var(--ink);
+  }
+  .mode-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    background: var(--gold);
+    color: var(--void);
+    padding: 4px 10px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* HUD strip — turn + timer */
+  .hud {
+    display: flex; align-items: center; justify-content: space-between;
+    border: 1px solid var(--rule-strong);
+    background: rgba(10, 6, 18, 0.5);
+    padding: 12px 18px;
+    margin-bottom: 18px;
+  }
+  .turn-indicator {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--ink-2);
+  }
+  .turn-indicator .who { color: var(--gold); font-weight: 700; }
+  .turn-indicator .arrow {
+    color: var(--hot-pink); margin: 0 6px;
+    animation: blink 1.6s infinite;
+  }
+  @keyframes blink { 50% { opacity: 0.3; } }
+  .timer {
+    font-family: 'Bowlby One', serif;
+    font-size: 28px;
+    color: var(--cyan);
+    text-shadow: 0 0 14px var(--cyan-glow);
+  }
+  .timer.warn {
+    color: var(--hot-pink);
+    text-shadow: 0 0 14px var(--hot-pink-glow);
+    animation: warn-pulse 0.8s infinite;
+  }
+  @keyframes warn-pulse { 50% { opacity: 0.5; transform: scale(0.96); } }
+
+  /* MESSAGES */
+  .messages { display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px; min-height: 240px; }
+  .msg { display: flex; gap: 12px; max-width: 80%; animation: msg-in 0.3s ease-out; }
+  @keyframes msg-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  .msg.left { align-self: flex-start; }
+  .msg.right { align-self: flex-end; flex-direction: row-reverse; }
+
+  .avatar {
+    width: 38px; height: 38px;
+    display: grid; place-items: center;
+    font-family: 'Bowlby One', serif;
+    font-size: 16px;
+    flex-shrink: 0;
+    border: 1px solid;
+    background: var(--void);
+  }
+  .msg.left .avatar { color: var(--cyan); border-color: var(--cyan); box-shadow: 0 0 10px var(--cyan-glow); }
+  .msg.right .avatar { color: var(--hot-pink); border-color: var(--hot-pink); box-shadow: 0 0 10px var(--hot-pink-glow); }
+
+  .msg-body {
+    background: rgba(29, 18, 64, 0.55);
+    border: 1px solid var(--rule-strong);
+    padding: 14px 18px;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--ink);
+  }
+  .msg.left .msg-body { border-left: 3px solid var(--cyan); }
+  .msg.right .msg-body { border-right: 3px solid var(--hot-pink); }
+
+  .msg-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-3);
+    margin-top: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    display: flex; gap: 10px; align-items: center;
+  }
+  .msg.right .msg-meta { justify-content: flex-end; }
+  .concede-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-3);
+    border: 1px solid var(--rule-strong);
+    padding: 3px 9px;
+    background: transparent;
+    transition: all .15s;
+  }
+  .concede-btn:hover { background: var(--cyan-dim); color: var(--cyan); border-color: var(--cyan); }
+  .concede-btn.conceded {
+    background: var(--cyan);
+    color: var(--void);
+    border-color: var(--cyan);
+    cursor: default;
+    box-shadow: 0 0 10px var(--cyan-glow);
+  }
+
+  /* highlights — the stars of the show */
+  .hl {
+    padding: 2px 4px;
+    margin: 0 1px;
+    cursor: help;
+    position: relative;
+    font-weight: 500;
+    border-radius: 2px;
+    transition: all .15s;
+  }
+  .hl-red {
+    background: var(--hot-pink-dim);
+    color: #ffb8d6;
+    text-shadow: 0 0 8px var(--hot-pink-glow);
+    border-bottom: 2px solid var(--hot-pink);
+  }
+  .hl-green {
+    background: var(--cyan-dim);
+    color: #b3fce7;
+    text-shadow: 0 0 8px var(--cyan-glow);
+    border-bottom: 2px solid var(--cyan);
+  }
+  .hl-amber {
+    background: var(--amber-dim);
+    color: #ffe1ad;
+    text-shadow: 0 0 8px var(--amber-glow);
+    border-bottom: 2px dashed var(--amber);
+  }
+  .hl:hover { transform: translateY(-1px); }
+  .hl-red:hover { box-shadow: 0 0 16px var(--hot-pink-glow); }
+  .hl-green:hover { box-shadow: 0 0 16px var(--cyan-glow); }
+  .hl-amber:hover { box-shadow: 0 0 16px var(--amber-glow); }
+
+  .hl-tooltip {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--void);
+    border: 1px solid;
+    padding: 12px 14px;
+    width: 280px;
+    font-size: 12px;
+    line-height: 1.5;
+    z-index: 50;
+    display: none;
+    text-shadow: none;
+    font-weight: 400;
+  }
+  .hl-tooltip.red { border-color: var(--hot-pink); box-shadow: 0 0 24px var(--hot-pink-glow); color: var(--ink); }
+  .hl-tooltip.green { border-color: var(--cyan); box-shadow: 0 0 24px var(--cyan-glow); color: var(--ink); }
+  .hl-tooltip.amber { border-color: var(--amber); box-shadow: 0 0 24px var(--amber-glow); color: var(--ink); }
+  .hl:hover .hl-tooltip { display: block; }
+  .hl-tooltip .tt-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 6px;
+    font-weight: 700;
+  }
+  .hl-tooltip.red .tt-label { color: var(--hot-pink); }
+  .hl-tooltip.green .tt-label { color: var(--cyan); }
+  .hl-tooltip.amber .tt-label { color: var(--amber); }
+
+  /* composer */
+  .composer {
+    border: 1.5px solid var(--rule-strong);
+    background: linear-gradient(180deg, rgba(29, 18, 64, 0.6), rgba(20, 9, 43, 0.5));
+    padding: 16px;
+    position: relative;
+  }
+  .composer.your-turn { border-color: var(--hot-pink); box-shadow: 0 0 28px var(--hot-pink-dim); }
+  .composer.locked { opacity: 0.5; pointer-events: none; }
+  .composer-tag {
+    position: absolute; top: -10px; left: 14px;
+    background: var(--void); padding: 0 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.2em;
+    color: var(--hot-pink);
+    text-transform: uppercase;
+  }
+  .composer.locked .composer-tag { color: var(--ink-3); }
+  .composer textarea {
+    width: 100%; min-height: 88px;
+    font-size: 15px; line-height: 1.55;
+    color: var(--ink);
+  }
+  .composer textarea::placeholder { color: var(--ink-3); }
+  .composer-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; gap: 12px; }
+  .composer-hint { font-size: 11px; color: var(--ink-3); font-family: 'JetBrains Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; }
+  .composer .btn { padding: 10px 22px; font-size: 12px; }
+
+  .preview-box {
+    border-top: 1px dashed var(--rule-strong);
+    padding-top: 12px;
+    margin-top: 12px;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--ink-2);
+  }
+  .preview-box .ttl {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--ink-3);
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  /* mediator thinking */
+  .mediator-thinking {
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--violet); text-transform: uppercase; letter-spacing: 0.2em;
+    padding: 10px 0;
+  }
+  .dots { display: inline-flex; gap: 5px; }
+  .dots span {
+    width: 7px; height: 7px;
+    background: var(--violet);
+    border-radius: 50%;
+    animation: bounce 1.2s infinite;
+    box-shadow: 0 0 8px rgba(179, 136, 255, 0.6);
+  }
+  .dots span:nth-child(2) { animation-delay: .15s; }
+  .dots span:nth-child(3) { animation-delay: .3s; }
+  @keyframes bounce { 0%,80%,100% { transform: translateY(0); opacity: 0.4; } 40% { transform: translateY(-5px); opacity: 1; } }
+
+  .end-debate { margin-top: 14px; text-align: center; }
+  .end-debate button {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--ink-3);
+    padding: 6px 16px;
+    border: 1px solid var(--rule);
+  }
+  .end-debate button:hover { color: var(--ink); border-color: var(--ink-3); }
+
+  /* ===== SUMMARY ===== */
+  .summary-wrap { max-width: 720px; margin: 0 auto; }
+  .summary-card {
+    background: linear-gradient(180deg, rgba(29, 18, 64, 0.95), rgba(10, 6, 18, 0.95));
+    border: 2px solid var(--gold);
+    padding: 40px;
+    position: relative;
+    box-shadow: 0 0 60px rgba(255, 211, 77, 0.25), 12px 12px 0 var(--hot-pink), 12px 12px 0 1px var(--hot-pink);
+  }
+  .summary-card::before {
+    content: '';
+    position: absolute; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 3px);
+  }
+  .stamp {
+    position: absolute;
+    top: -16px; right: 24px;
+    background: var(--hot-pink);
+    color: var(--void);
+    padding: 6px 18px;
+    font-family: 'Bowlby One', serif;
+    font-size: 14px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    transform: rotate(3deg);
+    box-shadow: 0 0 20px var(--hot-pink-glow);
+  }
+  .sum-mast { text-align: center; padding-bottom: 18px; margin-bottom: 22px; border-bottom: 1px solid var(--rule-strong); }
+  .sum-mast .pub {
+    font-family: 'Bowlby One', serif;
+    font-size: 36px;
+    letter-spacing: 0.05em;
+  }
+  .sum-mast .pub .slash { color: var(--hot-pink); }
+  .sum-mast .dateline {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: var(--ink-3);
+    margin-top: 8px;
+  }
+  .sum-topic {
+    font-family: 'Bowlby One', serif;
+    font-size: 26px;
+    line-height: 1.15;
+    margin: 14px 0 22px;
+    text-align: center;
+    color: var(--ink);
+  }
+  .verdict { text-align: center; padding: 22px 0; margin-bottom: 22px; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+  .verdict .lbl {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.25em;
+    color: var(--ink-3); margin-bottom: 10px;
+  }
+  .verdict .winner {
+    font-family: 'Bowlby One', serif;
+    font-size: 44px;
+    background: linear-gradient(135deg, var(--gold), var(--hot-pink));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 16px rgba(255, 211, 77, 0.6));
+  }
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--rule-strong); margin-bottom: 20px; }
+  .stat-col { padding: 20px; position: relative; }
+  .stat-col + .stat-col { border-left: 1px solid var(--rule-strong); }
+  .stat-col .name {
+    font-family: 'Bowlby One', serif;
+    font-size: 22px;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--rule-strong);
+  }
+  .stat-col:first-child .name { color: var(--cyan); }
+  .stat-col:last-child .name { color: var(--hot-pink); }
+  .stat-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; color: var(--ink-2); }
+  .stat-row .v { font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+  .stat-row .v.red { color: var(--hot-pink); }
+  .stat-row .v.green { color: var(--cyan); }
+  .stat-row .v.amber { color: var(--amber); }
+
+  .strongest {
+    padding: 18px;
+    border: 1px solid var(--gold);
+    background: rgba(255, 211, 77, 0.06);
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .strongest .lbl {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.25em;
+    color: var(--gold); margin-bottom: 8px;
+  }
+  .strongest .quote {
+    font-style: italic;
+    font-size: 17px;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+  .strongest .attr { text-align: right; font-size: 12px; color: var(--ink-3); margin-top: 8px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.1em; }
+
+  .sum-footer {
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: var(--ink-3);
+    padding-top: 16px;
+    border-top: 1px solid var(--rule);
+  }
+
+  /* loading state */
+  .loading-screen {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 60vh;
+    flex-direction: column; gap: 16px;
+  }
+  .loading-screen .dots { transform: scale(1.5); }
+  .loading-screen .text {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    font-size: 12px;
+  }
+
+  /* toast */
+  .toast {
+    position: fixed;
+    bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--void);
+    border: 1px solid var(--hot-pink);
+    color: var(--ink);
+    padding: 12px 22px;
+    font-size: 13px;
+    z-index: 200;
+    opacity: 0;
+    transition: all .25s;
+    box-shadow: 0 0 24px var(--hot-pink-glow);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.cyan { border-color: var(--cyan); box-shadow: 0 0 24px var(--cyan-glow); }
+
+  .footnote { text-align: center; color: var(--ink-3); font-size: 12px; margin-top: 36px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.1em; }
+
+  /* config-missing banner */
+  .config-banner {
+    background: var(--amber-dim);
+    border: 1px solid var(--amber);
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    font-size: 13px;
+    color: var(--ink);
+  }
+  .config-banner strong { color: var(--amber); }
+  .config-banner code { background: var(--void); padding: 2px 6px; border: 1px solid var(--rule-strong); font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--cyan); }
+
+  .danger { color: var(--hot-pink); }
+  .success { color: var(--cyan); }
+
+  .summary-actions { display: flex; justify-content: center; gap: 12px; margin-top: 28px; flex-wrap: wrap; }
+
+  /* dashboard / debate list */
+  .debate-list { display: flex; flex-direction: column; gap: 12px; }
+  .debate-item {
+    border: 1px solid var(--rule-strong);
+    background: rgba(29, 18, 64, 0.4);
+    padding: 16px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px;
+    transition: all .15s;
+    cursor: pointer;
+  }
+  .debate-item:hover { border-color: var(--cyan); transform: translateX(4px); }
+  .debate-item .di-main { flex: 1; min-width: 0; }
+  .debate-item .di-topic { font-size: 15px; font-weight: 600; color: var(--ink); margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .debate-item .di-meta { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-3); letter-spacing: 0.08em; }
+  .debate-item .di-status {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    padding: 4px 10px;
+    border: 1px solid;
+    flex-shrink: 0;
+  }
+  .di-status.pending { color: var(--amber); border-color: var(--amber); }
+  .di-status.active { color: var(--cyan); border-color: var(--cyan); }
+  .di-status.finished { color: var(--ink-3); border-color: var(--rule-strong); }
+</style>
 </head>
+<body>
 
-<body class="bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 font-body bg-mesh">
-  <!-- Header -->
-  <header class="sticky top-0 z-50 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:supports-[backdrop-filter]:bg-zinc-900/60 border-b border-zinc-200 dark:border-zinc-800">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-4">
-      <a href="#top" class="flex items-center gap-3">
-        <div class="h-9 w-9 rounded-full overflow-hidden ring-2 ring-zinc-300 dark:ring-zinc-700">
-          <img src="images/avatar.jpg" alt="Joseph Via" class="h-full w-full object-cover" />
-        </div>
-        <span class="font-display font-semibold tracking-tight text-lg">Joseph Via</span>
-      </a>
-      <nav class="ml-auto flex flex-wrap items-center gap-3 text-sm">
-        <a href="#now" class="hover:opacity-80">Now</a>
-        <a href="#blog" class="hover:opacity-80">Blog</a>
-        <a href="#podcasts" class="hover:opacity-80">Podcasts</a>
-        <a href="#albums" class="hover:opacity-80">Photo Albums</a>
-        <button id="themeToggle" class="ml-1 px-2 py-1 rounded-xl border border-zinc-300 dark:border-zinc-700 text-xs">Toggle</button>
-      </nav>
-    </div>
+<div class="app">
+
+  <header class="masthead">
+    <div class="brand">DISCOURSE<span class="slash">//</span><span class="sub" id="mast-sub">PROTO</span></div>
+    <div class="user" id="mast-user"></div>
   </header>
 
-  <!-- Hero -->
-  <section id="top" class="relative">
-    <div class="absolute inset-0 -z-10 bg-gradient-to-b from-zinc-100/70 to-transparent dark:from-zinc-900/70"></div>
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
-      <div class="grid md:grid-cols-[auto,1fr] gap-6 items-center">
-        <img src="images/avatar.jpg" alt="Joseph Via" class="md:h-36 md:w-36 h-24 w-24 rounded-2xl object-cover ring-4 ring-white dark:ring-zinc-900 shadow-xl" />
-        <div>
-          <h1 class="font-display text-3xl sm:text-4xl font-extrabold leading-tight">Hi, I’m Joseph.</h1>
-          <p class="mt-3 text-zinc-600 dark:text-zinc-300 max-w-2xl">
-            Youth & community in DC. Podcasts, film club bits, D&D one-shots, and small experiments.
-          </p>
-          <div class="mt-5 flex flex-wrap items-center gap-3">
-            <a href="#blog" class="px-4 py-2 rounded-2xl bg-zinc-900 text-white dark:bg-white dark:text-zinc-900">Latest posts</a>
-            <a href="#podcasts" class="px-4 py-2 rounded-2xl border border-zinc-300 dark:border-zinc-700">Listen</a>
+  <div id="config-warn"></div>
+
+  <!-- ============ SCREEN: LOADING ============ -->
+  <section id="screen-loading" class="screen active">
+    <div class="loading-screen">
+      <div class="dots"><span></span><span></span><span></span></div>
+      <div class="text">Connecting</div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN: AUTH ============ -->
+  <section id="screen-auth" class="screen">
+    <div class="auth-wrap">
+      <div class="auth-card">
+        <div class="hero" style="padding: 0; text-align: center;">
+          <div class="kicker">Mediated Argument · In Good Faith</div>
+          <h1 style="font-size: clamp(48px, 8vw, 76px);">Disagree<br><em>better.</em></h1>
+          <p class="lede" style="font-size: 15px; margin-bottom: 24px;">Two people. One topic. A neutral AI referee. Sign in with your email — we'll send you a magic link.</p>
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="auth-email" placeholder="you@email.com" autocomplete="email">
+        </div>
+        <button class="btn btn-primary" id="auth-send" style="width: 100%;" onclick="sendMagicLink()">Send Magic Link</button>
+        <p id="auth-status" style="margin-top: 16px; font-size: 13px; color: var(--ink-3); text-align: center; min-height: 20px;"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN: ACCESS DENIED ============ -->
+  <section id="screen-no-access" class="screen">
+    <div class="auth-wrap">
+      <div class="auth-card">
+        <h1 class="display" style="font-size: 36px; margin-bottom: 16px;">Closed Beta.</h1>
+        <p style="color: var(--ink-2); margin-bottom: 20px;">Discourse is invite-only right now. Your email isn't on the list yet. If you think this is a mistake, ping Joseph.</p>
+        <button class="btn btn-ghost" onclick="signOut()">Sign out</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN: DASHBOARD ============ -->
+  <section id="screen-dashboard" class="screen">
+    <div class="hero" style="padding: 24px 0 32px; text-align: left;">
+      <h1 style="font-size: clamp(48px, 8vw, 92px); text-align: left;">Pick a <em>fight.</em></h1>
+      <p class="lede" style="margin: 16px 0 24px; text-align: left;">Start a new debate or jump back into one you've got going.</p>
+      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <button class="btn btn-primary" onclick="goToContract()">+ New Debate</button>
+        <button class="btn btn-ghost" onclick="signOut()">Sign out</button>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top: 32px;">
+      <div class="panel-tag">Your Debates</div>
+      <div id="debate-list" class="debate-list">
+        <p style="color: var(--ink-3); font-style: italic; padding: 12px 0;">Loading…</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN: CONTRACT ============ -->
+  <section id="screen-contract" class="screen">
+    <div class="contract">
+      <div class="panel contract-main">
+        <div class="panel-tag">The Contract</div>
+        <h2>Set the terms.</h2>
+        <p class="sub">Lock the topic, the rules, the opponent. They'll get an email with a link.</p>
+
+        <div class="field">
+          <label>The Topic</label>
+          <input type="text" id="topic" placeholder="e.g. Is a hot dog a sandwich?" value="">
+        </div>
+
+        <div class="field">
+          <label>Opponent's Email</label>
+          <input type="email" id="opp-email" placeholder="them@email.com">
+        </div>
+
+        <div class="field">
+          <label>Your Stance (Affirmative)</label>
+          <input type="text" id="stance-a" placeholder="What you'll argue (1 line)">
+        </div>
+
+        <div class="field">
+          <label>Their Stance (Negative)</label>
+          <input type="text" id="stance-b" placeholder="What they'll argue (1 line)">
+        </div>
+
+        <div class="field">
+          <label>Mode</label>
+          <div class="mode-grid">
+            <button class="mode-card active" data-mode="competitive" onclick="selectMode(this)">
+              <div class="mtitle">COMPETITIVE</div>
+              <div class="mdesc">Winner declared. Full scoring. Clinical referee.</div>
+            </button>
+            <button class="mode-card" data-mode="collaborative" onclick="selectMode(this)">
+              <div class="mtitle">COLLABORATIVE</div>
+              <div class="mdesc">Find common ground. Warmer tone. No winner.</div>
+            </button>
+            <button class="mode-card" data-mode="exploratory" onclick="selectMode(this)">
+              <div class="mtitle">EXPLORATORY</div>
+              <div class="mdesc">Think out loud, rigorously. No verdict.</div>
+            </button>
+            <button class="mode-card" data-mode="relationship" onclick="selectMode(this)">
+              <div class="mtitle">RELATIONSHIP</div>
+              <div class="mdesc">Soft tone. Empathy first. Never a winner.</div>
+            </button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Turn Timer</label>
+          <div class="chip-row" id="timer-chips">
+            <button class="chip" data-val="120">2 min</button>
+            <button class="chip active" data-val="300">5 min</button>
+            <button class="chip" data-val="600">10 min</button>
+            <button class="chip" data-val="900">15 min</button>
+            <button class="chip" data-val="1800">30 min</button>
+            <button class="chip" data-val="3600">1 hr</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Message Cap (Per Side)</label>
+          <div class="chip-row" id="cap-chips">
+            <button class="chip" data-val="2">2</button>
+            <button class="chip active" data-val="3">3</button>
+            <button class="chip" data-val="4">4</button>
+            <button class="chip" data-val="6">6</button>
+            <button class="chip" data-val="8">8</button>
+            <button class="chip" data-val="9999">∞</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Rules</label>
+          <div class="toggle-row">
+            <div>
+              <div class="tlabel">Guided mode</div>
+              <div class="thint">Preview flags before sending</div>
+            </div>
+            <div class="switch on" id="t-guided" onclick="toggle(this)"></div>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="tlabel">Auto-concede on timeout</div>
+              <div class="thint">No response in time = forfeit</div>
+            </div>
+            <div class="switch on" id="t-autoconcede" onclick="toggle(this)"></div>
+          </div>
+        </div>
+      </div>
+
+      <aside class="panel contract-side">
+        <div class="panel-tag">Summary</div>
+        <h3>📋 At a Glance</h3>
+        <div class="summary-row"><span class="k">Topic</span><span class="v" id="s-topic">—</span></div>
+        <div class="summary-row"><span class="k">Opponent</span><span class="v" id="s-opp">—</span></div>
+        <div class="summary-row"><span class="k">Mode</span><span class="v" id="s-mode">Competitive</span></div>
+        <div class="summary-row"><span class="k">Turn</span><span class="v" id="s-timer">5 min</span></div>
+        <div class="summary-row"><span class="k">Cap</span><span class="v" id="s-cap">3 each</span></div>
+        <div class="summary-row"><span class="k">Guided</span><span class="v" id="s-guided">On</span></div>
+        <div style="margin-top: 22px; display: flex; flex-direction: column; gap: 8px;">
+          <button class="btn btn-primary" style="width: 100%;" onclick="createDebate()" id="create-debate-btn">⚡ Send Invite</button>
+          <button class="btn btn-ghost" style="width: 100%;" onclick="showScreen('dashboard')">Cancel</button>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN: INVITE LANDING ============ -->
+  <section id="screen-invite" class="screen">
+    <div class="auth-wrap">
+      <div class="panel">
+        <div class="panel-tag">Incoming Challenge</div>
+        <div class="invite-pending">
+          <div class="from">You've been invited by</div>
+          <div class="vs-block"><span id="inv-from">—</span> <span class="vs">VS</span> <span style="color: var(--cyan);">YOU</span></div>
+          <div class="topic" id="inv-topic">—</div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink-3); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 16px;">
+            Mode: <span id="inv-mode" style="color: var(--gold);">—</span> · Turn: <span id="inv-turn" style="color: var(--ink-2);">—</span> · Cap: <span id="inv-cap" style="color: var(--ink-2);">—</span>
+          </div>
+        </div>
+        <div style="text-align: center; padding: 12px;">
+          <p style="margin-bottom: 16px; color: var(--ink-2); font-size: 14px;">By accepting, you agree to abide by the rules of structured discourse.<br>The AI mediator will flag fallacies and highlight strong arguments in real-time.</p>
+          <div style="display: flex; gap: 12px; justify-content: center;">
+            <button class="btn btn-primary" onclick="acceptInvite()">⚔ Accept & Begin</button>
+            <button class="btn btn-ghost" onclick="declineInvite()">Decline</button>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- NOW -->
-  <section id="now" class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
-    <h2 class="font-display text-2xl font-bold">Now</h2>
-    <p class="text-sm text-zinc-500 dark:text-zinc-400">Updated <span id="nowDate">—</span></p>
-    <div class="mt-4 grid md:grid-cols-3 gap-4">
-      <div class="p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800">
-        <h3 class="font-semibold">Projects</h3>
-        <ul class="mt-2 space-y-1 list-disc list-inside text-zinc-700 dark:text-zinc-200">
-          <li>🎙️ <strong>Ethically Sourced</strong> — podcast experiments.</li>
-          <li>🎬 WES film club picks.</li>
-          <li>🎲 D&D one-shots + maps.</li>
-        </ul>
-      </div>
-      <div class="p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800">
-        <h3 class="font-semibold">Learning</h3>
-        <ul class="mt-2 space-y-1 list-disc list-inside text-zinc-700 dark:text-zinc-200">
-          <li>Audio cleanup chains.</li>
-          <li>Photo workflow.</li>
-          <li>Little web automations.</li>
-        </ul>
-      </div>
-      <div class="p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800">
-        <h3 class="font-semibold">Elsewhere</h3>
-        <ul class="mt-2 space-y-1 list-disc list-inside text-zinc-700 dark:text-zinc-200">
-          <li>DC hikes & scooters.</li>
-          <li>Working with youth in DC.</li>
-          <li>Snack runs at Asian markets.</li>
-        </ul>
+  <!-- ============ SCREEN: WAITING (creator after sending) ============ -->
+  <section id="screen-waiting" class="screen">
+    <div class="auth-wrap">
+      <div class="panel">
+        <div class="panel-tag">Invite Sent</div>
+        <div style="text-align: center; padding: 24px;">
+          <div style="font-family: 'Bowlby One', serif; font-size: 72px; margin-bottom: 16px;">⏳</div>
+          <h2 class="display" style="font-size: 32px; margin-bottom: 12px; color: var(--gold);">Waiting on <span id="wait-name">your opponent</span>…</h2>
+          <p style="color: var(--ink-2); margin-bottom: 8px;">They'll get a magic-link email at <span id="wait-email" style="color: var(--cyan); font-family: 'JetBrains Mono', monospace;">—</span></p>
+          <p style="color: var(--ink-3); font-size: 13px; margin-bottom: 28px;">Once they accept, the debate begins. You'll get an email too.</p>
+          <button class="btn btn-ghost" onclick="showScreen('dashboard')">← Back to Dashboard</button>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- BLOG (short entries) -->
-  <section id="blog" class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
-    <h2 class="font-display text-2xl font-bold">Blog</h2>
-    <p class="text-sm text-zinc-500 dark:text-zinc-400">Quick notes & tiny updates.</p>
-    <div id="blogList" class="mt-4 grid gap-3"></div>
-  </section>
-
-  <!-- PODCASTS -->
-  <section id="podcasts" class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
-    <h2 class="font-display text-2xl font-bold">Podcasts</h2>
-    <p class="text-sm text-zinc-500 dark:text-zinc-400">Drop in embeds from Buzzsprout, Spotify, Apple, etc.</p>
-    <div id="podcastEmbeds" class="mt-4 grid gap-4"></div>
-    <details class="mt-3 text-sm text-zinc-500 dark:text-zinc-400">
-      <summary class="cursor-pointer">How to add an embed</summary>
-      <div class="mt-2 prose dark:prose-invert">
-        <ul>
-          <li><strong>Buzzsprout:</strong> copy the “Embed Player” code and paste it into the <code>podcasts</code> array below.</li>
-          <li><strong>Spotify:</strong> right-click an episode → <em>Share → Embed episode</em> → copy iframe.</li>
-          <li><strong>Apple Podcasts:</strong> use the “Embed” button on the episode page → copy iframe.</li>
-        </ul>
+  <!-- ============ SCREEN: CHAT ============ -->
+  <section id="screen-chat" class="screen">
+    <div class="scoreboard">
+      <div class="player left">
+        <div class="pname" id="player-a-name">—</div>
+        <div class="pstance" id="player-a-stance">Affirmative</div>
+        <div class="pscore" id="player-a-score">0</div>
       </div>
-    </details>
-  </section>
-
-  <!-- PHOTO ALBUM LINKS (OneDrive) -->
-  <section id="albums" class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
-    <h2 class="font-display text-2xl font-bold">Photo Albums</h2>
-    <p class="text-sm text-zinc-500 dark:text-zinc-400">Links to OneDrive folders.</p>
-    <div id="albumList" class="mt-4 grid sm:grid-cols-2 gap-3"></div>
-  </section>
-
-  <!-- Footer -->
-  <footer class="border-t border-zinc-200 dark:border-zinc-800">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-8 text-sm text-zinc-500 dark:text-zinc-400">
-      <p>© <span id="year"></span> Joseph Via • Built with a single HTML file ✨ • <a class="underline" href="mailto:joseph.via@josephvia.com">Email me</a></p>
+      <div class="vs-divider">VS</div>
+      <div class="player right">
+        <div class="pname" id="player-b-name">—</div>
+        <div class="pstance" id="player-b-stance">Negative</div>
+        <div class="pscore" id="player-b-score">0</div>
+      </div>
     </div>
-  </footer>
 
-  <script>
-    // --- Theme + dates ---
-    const $ = (s)=>document.querySelector(s);
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const saved = localStorage.getItem('theme');
-    if ((saved === 'dark') || (!saved && prefersDark)) document.documentElement.classList.add('dark');
-    $('#themeToggle').addEventListener('click', () => {
-      document.documentElement.classList.toggle('dark');
-      localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    <div class="topic-strip">
+      <div class="topic" id="chat-topic">—</div>
+      <div class="mode-badge" id="chat-mode-badge">COMPETITIVE</div>
+    </div>
+
+    <div class="hud">
+      <div class="turn-indicator">
+        <span class="who" id="turn-name">—</span><span class="arrow">▸</span>TURN · <span id="turn-count">0</span> / <span id="turn-cap">3</span>
+      </div>
+      <div class="timer mono" id="timer">5:00</div>
+    </div>
+
+    <div class="messages" id="messages"></div>
+
+    <div class="composer" id="composer">
+      <div class="composer-tag" id="composer-tag">YOUR MOVE</div>
+      <textarea id="composer-input" placeholder="Make your point. The mediator is watching."></textarea>
+      <div id="preview-area"></div>
+      <div class="composer-bar">
+        <div class="composer-hint" id="composer-hint">Guided mode on · preview before sending</div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-secondary" id="btn-preview" onclick="runPreview()">Preview</button>
+          <button class="btn btn-primary" id="btn-send" onclick="sendMessage()">Send ▸</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="end-debate">
+      <button onclick="endDebate('mutual')">End debate now</button>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN: SUMMARY ============ -->
+  <section id="screen-summary" class="screen">
+    <div class="summary-wrap">
+      <div class="summary-card" id="summary-card">
+        <div class="stamp" id="sum-stamp">GG</div>
+        <div class="sum-mast">
+          <div class="pub">DISCOURSE<span class="slash">//</span></div>
+          <div class="dateline" id="sum-dateline">—</div>
+        </div>
+        <div class="sum-topic" id="sum-topic">—</div>
+        <div class="verdict" id="sum-verdict">
+          <div class="lbl">Winner</div>
+          <div class="winner" id="sum-winner">—</div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-col">
+            <div class="name" id="sum-nameA">—</div>
+            <div class="stat-row"><span>Red flags</span><span class="v red" id="sum-redA">0</span></div>
+            <div class="stat-row"><span>Constructive moments</span><span class="v green" id="sum-greenA">0</span></div>
+            <div class="stat-row"><span>Concessions made</span><span class="v" id="sum-concA">0</span></div>
+            <div class="stat-row"><span>Unsourced claims</span><span class="v amber" id="sum-amberA">0</span></div>
+          </div>
+          <div class="stat-col">
+            <div class="name" id="sum-nameB">—</div>
+            <div class="stat-row"><span>Red flags</span><span class="v red" id="sum-redB">0</span></div>
+            <div class="stat-row"><span>Constructive moments</span><span class="v green" id="sum-greenB">0</span></div>
+            <div class="stat-row"><span>Concessions made</span><span class="v" id="sum-concB">0</span></div>
+            <div class="stat-row"><span>Unsourced claims</span><span class="v amber" id="sum-amberB">0</span></div>
+          </div>
+        </div>
+        <div class="strongest">
+          <div class="lbl">★ Strongest Argument</div>
+          <div class="quote" id="sum-strongest-quote">—</div>
+          <div class="attr" id="sum-strongest-attr">—</div>
+        </div>
+        <div class="sum-footer">Mediated · No fact-checking · Burden of evidence rests with the debaters</div>
+      </div>
+      <div class="summary-actions">
+        <button class="btn btn-primary" onclick="screenshotHint()">📸 Screenshot This</button>
+        <button class="btn btn-secondary" onclick="showScreen('dashboard')">← Dashboard</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Supabase JS SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ============================================================================
+// CONFIG — fill these in after Supabase setup. See README.md.
+// ============================================================================
+const SUPABASE_URL = 'https://kxbopuwmpvohgjevwiww.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_flkVZjZgDxbofEGjvP6B1A_fSJlQjwf';
+
+// ============================================================================
+// STATE
+// ============================================================================
+var sb = null;
+let currentUser = null;
+let currentDebate = null;     // {id, topic, mode, ...}
+let currentMessages = [];     // ordered list
+let timerInterval = null;
+let timerRemaining = 0;
+let messagesChannel = null;
+let debateChannel = null;
+
+const state = {
+  // contract form
+  topic: '',
+  mode: 'competitive',
+  oppEmail: '',
+  stanceA: '',
+  stanceB: '',
+  turnSeconds: 300,
+  messageCap: 3,
+  guidedMode: true,
+  autoConcede: true,
+};
+
+// ============================================================================
+// INIT
+// ============================================================================
+window.addEventListener('DOMContentLoaded', init);
+
+async function init() {
+  // Check config
+  if (SUPABASE_URL === 'YOUR_SUPABASE_URL_HERE' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY_HERE') {
+    showConfigBanner();
+    showScreen('auth');
+    return;
+  }
+
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // Handle auth state changes
+  sb.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' && session) {
+      onSignedIn(session.user);
+    } else if (event === 'SIGNED_OUT') {
+      currentUser = null;
+      updateMastUser();
+      showScreen('auth');
+    }
+  });
+
+  // Check current session
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    await onSignedIn(session.user);
+  } else {
+    showScreen('auth');
+  }
+}
+
+function showConfigBanner() {
+  document.getElementById('config-warn').innerHTML = `
+    <div class="config-banner">
+      <strong>⚙ Not configured yet.</strong>
+      Open <code>index.html</code> and fill in <code>SUPABASE_URL</code> and <code>SUPABASE_ANON_KEY</code> at the top of the script. See <code>README.md</code> for the full setup walkthrough.
+    </div>
+  `;
+}
+
+async function onSignedIn(user) {
+  currentUser = user;
+  updateMastUser();
+
+  // Check allowlist
+  const { data: allowed, error } = await supabase
+    .from('allowed_emails')
+    .select('email')
+    .eq('email', user.email.toLowerCase())
+    .maybeSingle();
+
+  if (error) console.warn('Allowlist check error:', error);
+  if (!allowed) { showScreen('no-access'); return; }
+
+  // Check URL for debate invite (?debate=xyz)
+  const params = new URLSearchParams(window.location.search);
+  const debateId = params.get('debate');
+  if (debateId) {
+    await loadDebateFromUrl(debateId);
+  } else {
+    await loadDashboard();
+  }
+}
+
+function updateMastUser() {
+  const el = document.getElementById('mast-user');
+  if (currentUser) {
+    el.innerHTML = `<span class="pill">● ${escapeHtml(currentUser.email)}</span>`;
+  } else {
+    el.innerHTML = '';
+  }
+}
+
+// ============================================================================
+// AUTH
+// ============================================================================
+async function sendMagicLink() {
+  const email = document.getElementById('auth-email').value.trim().toLowerCase();
+  if (!email || !email.includes('@')) {
+    document.getElementById('auth-status').innerHTML = '<span class="danger">Enter a valid email.</span>';
+    return;
+  }
+  const btn = document.getElementById('auth-send');
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+  try {
+    const { error } = await sb.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: window.location.origin + window.location.pathname }
     });
-    $('#year').textContent = new Date().getFullYear();
-    $('#nowDate').textContent = new Date().toLocaleDateString();
+    if (error) throw error;
+    document.getElementById('auth-status').innerHTML = `<span class="success">✓ Check ${escapeHtml(email)} for the link.</span>`;
+  } catch (e) {
+    document.getElementById('auth-status').innerHTML = `<span class="danger">${escapeHtml(e.message || 'Failed to send.')}</span>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Send Magic Link';
+  }
+}
 
-    // --- BLOG DATA: edit here ---
-    // Use simple HTML in "body" if you want (links, <em>, <strong>, etc.)
-    const blog = [
-      { date: '2025-08-27', title: 'Site launched!', body: 'Spun up this little vibe site. Keeping it simple and cozy.' },
-      { date: '2025-08-20', title: 'Scooter day', body: 'Protected lanes FTW. Added a few pics to the albums.' }
-    ];
+async function signOut() {
+  if (messagesChannel) sb.removeChannel(messagesChannel);
+  if (debateChannel) sb.removeChannel(debateChannel);
+  await sb.auth.signOut();
+  // Clear URL params
+  window.history.replaceState({}, '', window.location.pathname);
+}
 
-    function renderBlog() {
-      const c = $('#blogList');
-      c.innerHTML = '';
-      blog.sort((a,b)=>b.date.localeCompare(a.date));
-      for (const post of blog) {
-        const el = document.createElement('article');
-        el.className = 'p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800';
-        el.innerHTML = `
-          <div class="text-xs text-zinc-500 dark:text-zinc-400">${new Date(post.date).toLocaleDateString()}</div>
-          <h3 class="mt-1 font-semibold">${post.title}</h3>
-          <div class="mt-1 text-zinc-700 dark:text-zinc-200">${post.body}</div>
-        `;
-        c.appendChild(el);
-      }
+// ============================================================================
+// DASHBOARD
+// ============================================================================
+async function loadDashboard() {
+  showScreen('dashboard');
+  const list = document.getElementById('debate-list');
+  list.innerHTML = '<p style="color: var(--ink-3); font-style: italic;">Loading…</p>';
+
+  const email = currentUser.email.toLowerCase();
+  const { data: debates, error } = await supabase
+    .from('debates')
+    .select('*')
+    .or(`creator_email.eq.${email},opponent_email.eq.${email}`)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    list.innerHTML = `<p class="danger">Error loading debates: ${escapeHtml(error.message)}</p>`;
+    return;
+  }
+  if (!debates || debates.length === 0) {
+    list.innerHTML = '<p style="color: var(--ink-3); font-style: italic; padding: 12px 0;">No debates yet. Start one above ⬆</p>';
+    return;
+  }
+
+  list.innerHTML = '';
+  for (const d of debates) {
+    const isCreator = d.creator_email === email;
+    const opponent = isCreator ? d.opponent_email : d.creator_email;
+    const statusLabel = d.status === 'pending' ? (isCreator ? 'Waiting on them' : 'Your move') :
+                        d.status === 'active' ? 'Active' : 'Finished';
+    const statusClass = d.status;
+    const item = document.createElement('div');
+    item.className = 'debate-item';
+    item.innerHTML = `
+      <div class="di-main">
+        <div class="di-topic">${escapeHtml(d.topic)}</div>
+        <div class="di-meta">vs. ${escapeHtml(opponent)} · ${d.mode.toUpperCase()}</div>
+      </div>
+      <div class="di-status ${statusClass}">${statusLabel}</div>
+    `;
+    item.onclick = () => openDebate(d.id);
+    list.appendChild(item);
+  }
+}
+
+// ============================================================================
+// CONTRACT
+// ============================================================================
+function goToContract() {
+  // reset form
+  document.getElementById('topic').value = '';
+  document.getElementById('opp-email').value = '';
+  document.getElementById('stance-a').value = '';
+  document.getElementById('stance-b').value = '';
+  state.topic = '';
+  state.oppEmail = '';
+  state.stanceA = '';
+  state.stanceB = '';
+  state.mode = 'competitive';
+  state.turnSeconds = 300;
+  state.messageCap = 3;
+  state.guidedMode = true;
+  state.autoConcede = true;
+  document.querySelectorAll('.mode-card').forEach(c => c.classList.toggle('active', c.dataset.mode === 'competitive'));
+  document.querySelectorAll('#timer-chips .chip').forEach(c => c.classList.toggle('active', c.dataset.val === '300'));
+  document.querySelectorAll('#cap-chips .chip').forEach(c => c.classList.toggle('active', c.dataset.val === '3'));
+  document.getElementById('t-guided').classList.add('on');
+  document.getElementById('t-autoconcede').classList.add('on');
+  refreshContractSummary();
+  showScreen('contract');
+}
+
+function selectMode(el) {
+  document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  state.mode = el.dataset.mode;
+  refreshContractSummary();
+}
+function toggle(el) {
+  el.classList.toggle('on');
+  if (el.id === 't-guided') state.guidedMode = el.classList.contains('on');
+  if (el.id === 't-autoconcede') state.autoConcede = el.classList.contains('on');
+  refreshContractSummary();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('timer-chips').addEventListener('click', e => {
+    if (!e.target.classList.contains('chip')) return;
+    document.querySelectorAll('#timer-chips .chip').forEach(c => c.classList.remove('active'));
+    e.target.classList.add('active');
+    state.turnSeconds = +e.target.dataset.val;
+    refreshContractSummary();
+  });
+  document.getElementById('cap-chips').addEventListener('click', e => {
+    if (!e.target.classList.contains('chip')) return;
+    document.querySelectorAll('#cap-chips .chip').forEach(c => c.classList.remove('active'));
+    e.target.classList.add('active');
+    state.messageCap = +e.target.dataset.val;
+    refreshContractSummary();
+  });
+  ['topic', 'opp-email', 'stance-a', 'stance-b'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', e => {
+      if (id === 'topic') state.topic = e.target.value;
+      if (id === 'opp-email') state.oppEmail = e.target.value.trim().toLowerCase();
+      if (id === 'stance-a') state.stanceA = e.target.value;
+      if (id === 'stance-b') state.stanceB = e.target.value;
+      refreshContractSummary();
+    });
+  });
+});
+
+function refreshContractSummary() {
+  document.getElementById('s-topic').textContent = state.topic || '—';
+  document.getElementById('s-opp').textContent = state.oppEmail || '—';
+  document.getElementById('s-mode').textContent = state.mode[0].toUpperCase() + state.mode.slice(1);
+  document.getElementById('s-timer').textContent = fmtTime(state.turnSeconds);
+  document.getElementById('s-cap').textContent = state.messageCap >= 9999 ? '∞' : `${state.messageCap} each`;
+  document.getElementById('s-guided').textContent = state.guidedMode ? 'On' : 'Off';
+}
+function fmtTime(s) {
+  if (s >= 3600) return (s / 3600) + ' hr';
+  if (s >= 60) return (s / 60) + ' min';
+  return s + 's';
+}
+
+// ============================================================================
+// CREATE DEBATE
+// ============================================================================
+async function createDebate() {
+  if (!state.topic.trim()) { showToast('Pick a topic first.'); return; }
+  if (!state.oppEmail || !state.oppEmail.includes('@')) { showToast('Need a valid opponent email.'); return; }
+  if (state.oppEmail === currentUser.email.toLowerCase()) { showToast('You can\'t debate yourself.'); return; }
+
+  const btn = document.getElementById('create-debate-btn');
+  btn.disabled = true;
+  btn.textContent = 'Creating…';
+
+  try {
+    // Check opponent is on allowlist
+    const { data: oppAllowed } = await supabase
+      .from('allowed_emails')
+      .select('email')
+      .eq('email', state.oppEmail)
+      .maybeSingle();
+    if (!oppAllowed) {
+      showToast(`${state.oppEmail} isn't on the allowlist yet — add them in Supabase first.`);
+      btn.disabled = false;
+      btn.textContent = '⚡ Send Invite';
+      return;
     }
 
-    // --- PODCAST EMBEDS: paste iframes here ---
-    // Example placeholders below. Replace with your real embed codes.
-    const podcasts = [<iframe id="player_iframe" src="https://www.buzzsprout.com/2418287?client_source=large_player&iframe=true&referrer=https%3A%2F%2Fwww.buzzsprout.com%2Fadmin%2F2418287%2Fpodcast%2Fembed" loading="lazy" width="100%" height="375" frameborder="0" scrolling="no" title="Ethically Sourced"></iframe>]
+    // Create debate row
+    const { data: debate, error } = await sb.from('debates').insert({
+      creator_email: currentUser.email.toLowerCase(),
+      opponent_email: state.oppEmail,
+      topic: state.topic.trim(),
+      stance_a: state.stanceA.trim() || 'Affirmative',
+      stance_b: state.stanceB.trim() || 'Negative',
+      mode: state.mode,
+      turn_seconds: state.turnSeconds,
+      message_cap: state.messageCap,
+      guided_mode: state.guidedMode,
+      auto_concede: state.autoConcede,
+      status: 'pending',
+      current_turn: 'a',  // creator goes first
+    }).select().single();
 
+    if (error) throw error;
 
-    function renderPodcasts(){
-      const c = $('#podcastEmbeds');
-      c.innerHTML = '';
-      if (podcasts.length === 0) {
-        c.innerHTML = '<p class="text-zinc-600 dark:text-zinc-300">Add an embed in the <code>podcasts</code> array in your HTML.</p>';
-        return;
+    // Send invite email via Supabase magic link, with redirect to the debate
+    const redirectUrl = `${window.location.origin}${window.location.pathname}?debate=${debate.id}`;
+    const { error: inviteErr } = await sb.auth.signInWithOtp({
+      email: state.oppEmail,
+      options: { emailRedirectTo: redirectUrl }
+    });
+    if (inviteErr) console.warn('Invite email send failed:', inviteErr);
+
+    // Show waiting screen
+    document.getElementById('wait-email').textContent = state.oppEmail;
+    document.getElementById('wait-name').textContent = state.oppEmail.split('@')[0];
+    showScreen('waiting');
+    showToast('Invite sent ✓', 'cyan');
+  } catch (e) {
+    console.error(e);
+    showToast('Error: ' + (e.message || 'failed to create debate'));
+    btn.disabled = false;
+    btn.textContent = '⚡ Send Invite';
+  }
+}
+
+// ============================================================================
+// OPEN / LOAD DEBATE
+// ============================================================================
+async function loadDebateFromUrl(debateId) {
+  const { data: debate, error } = await supabase
+    .from('debates')
+    .select('*')
+    .eq('id', debateId)
+    .maybeSingle();
+  if (error || !debate) {
+    showToast('Debate not found or you don\'t have access.');
+    await loadDashboard();
+    return;
+  }
+  await openDebate(debateId);
+}
+
+async function openDebate(debateId) {
+  const { data: debate, error } = await supabase
+    .from('debates')
+    .select('*')
+    .eq('id', debateId)
+    .single();
+  if (error || !debate) { showToast('Could not load debate.'); return; }
+  currentDebate = debate;
+
+  const email = currentUser.email.toLowerCase();
+  const isCreator = debate.creator_email === email;
+  const isOpponent = debate.opponent_email === email;
+  if (!isCreator && !isOpponent) {
+    showToast('This debate isn\'t yours.');
+    await loadDashboard();
+    return;
+  }
+
+  // Pending: if I'm the opponent, show invite screen. If creator, show waiting.
+  if (debate.status === 'pending') {
+    if (isOpponent) showInviteLanding();
+    else showCreatorWaiting();
+    subscribeToDebate(debateId);
+    return;
+  }
+
+  // Active or finished: load messages and show chat
+  await loadMessages(debateId);
+  if (debate.status === 'finished') {
+    showSummary();
+  } else {
+    showChat();
+    subscribeToMessages(debateId);
+    subscribeToDebate(debateId);
+  }
+}
+
+function showInviteLanding() {
+  document.getElementById('inv-from').textContent = currentDebate.creator_email.split('@')[0];
+  document.getElementById('inv-topic').textContent = `"${currentDebate.topic}"`;
+  document.getElementById('inv-mode').textContent = currentDebate.mode.toUpperCase();
+  document.getElementById('inv-turn').textContent = fmtTime(currentDebate.turn_seconds);
+  document.getElementById('inv-cap').textContent = currentDebate.message_cap >= 9999 ? '∞' : `${currentDebate.message_cap} each`;
+  showScreen('invite');
+}
+
+function showCreatorWaiting() {
+  document.getElementById('wait-email').textContent = currentDebate.opponent_email;
+  document.getElementById('wait-name').textContent = currentDebate.opponent_email.split('@')[0];
+  showScreen('waiting');
+}
+
+async function acceptInvite() {
+  const { error } = await supabase
+    .from('debates')
+    .update({ status: 'active', accepted_at: new Date().toISOString() })
+    .eq('id', currentDebate.id);
+  if (error) { showToast('Failed to accept: ' + error.message); return; }
+  // realtime will reload us into chat; force it for snappiness
+  await openDebate(currentDebate.id);
+}
+
+async function declineInvite() {
+  if (!confirm('Decline this debate? It will be marked as finished without being played.')) return;
+  await sb.from('debates').update({ status: 'finished', declined: true }).eq('id', currentDebate.id);
+  await loadDashboard();
+}
+
+// ============================================================================
+// CHAT — show
+// ============================================================================
+function showChat() {
+  const email = currentUser.email.toLowerCase();
+  const isCreator = currentDebate.creator_email === email;
+
+  // creator is always "A" (left side / affirmative), opponent is "B"
+  document.getElementById('player-a-name').textContent = currentDebate.creator_email.split('@')[0];
+  document.getElementById('player-a-stance').textContent = currentDebate.stance_a || 'Affirmative';
+  document.getElementById('player-b-name').textContent = currentDebate.opponent_email.split('@')[0];
+  document.getElementById('player-b-stance').textContent = currentDebate.stance_b || 'Negative';
+  document.getElementById('chat-topic').textContent = `"${currentDebate.topic}"`;
+  document.getElementById('chat-mode-badge').textContent = currentDebate.mode.toUpperCase();
+  document.getElementById('turn-cap').textContent = currentDebate.message_cap >= 9999 ? '∞' : currentDebate.message_cap;
+  document.getElementById('composer-hint').textContent = currentDebate.guided_mode
+    ? 'Guided mode on · preview before sending'
+    : 'Direct mode · flags appear after sending';
+  document.getElementById('btn-preview').style.display = currentDebate.guided_mode ? '' : 'none';
+
+  refreshTurnUI();
+  renderMessages();
+  startTimer();
+  showScreen('chat');
+}
+
+function refreshTurnUI() {
+  // count messages per side
+  const aMsgs = currentMessages.filter(m => m.role === 'a').length;
+  const bMsgs = currentMessages.filter(m => m.role === 'b').length;
+  const currentTurn = currentDebate.current_turn;
+  const turnName = currentTurn === 'a'
+    ? currentDebate.creator_email.split('@')[0]
+    : currentDebate.opponent_email.split('@')[0];
+  const turnCount = currentTurn === 'a' ? aMsgs : bMsgs;
+  document.getElementById('turn-name').textContent = turnName;
+  document.getElementById('turn-count').textContent = turnCount;
+
+  // scores
+  const scoreA = computeScore('a');
+  const scoreB = computeScore('b');
+  document.getElementById('player-a-score').textContent = scoreA;
+  document.getElementById('player-b-score').textContent = scoreB;
+
+  // composer lock
+  const myRole = currentDebate.creator_email === currentUser.email.toLowerCase() ? 'a' : 'b';
+  const composer = document.getElementById('composer');
+  const tag = document.getElementById('composer-tag');
+  if (myRole === currentTurn) {
+    composer.classList.remove('locked');
+    composer.classList.add('your-turn');
+    tag.textContent = 'YOUR MOVE';
+    document.getElementById('composer-input').placeholder = 'Make your point. The mediator is watching.';
+  } else {
+    composer.classList.add('locked');
+    composer.classList.remove('your-turn');
+    tag.textContent = 'WAITING ON THEM';
+    document.getElementById('composer-input').placeholder = `Waiting on ${turnName}…`;
+  }
+}
+
+function computeScore(role) {
+  let score = 0;
+  for (const m of currentMessages) {
+    if (m.role !== role) continue;
+    for (const f of (m.flags || [])) {
+      if (f.kind === 'red') score -= 2;
+      else if (f.kind === 'green') score += 3;
+      else if (f.kind === 'amber') score -= 1;
+    }
+  }
+  // add concessions: a concession on opponent's message means I scored
+  for (const m of currentMessages) {
+    if (m.conceded_by && m.conceded_by !== role && m.role !== role) {
+      score += 3;
+    }
+  }
+  return score;
+}
+
+// ============================================================================
+// MESSAGES — load, render, subscribe
+// ============================================================================
+async function loadMessages(debateId) {
+  const { data: msgs, error } = await supabase
+    .from('messages')
+    .select('*')
+    .eq('debate_id', debateId)
+    .order('created_at', { ascending: true });
+  if (error) { console.error(error); return; }
+  currentMessages = msgs || [];
+}
+
+function renderMessages() {
+  const container = document.getElementById('messages');
+  container.innerHTML = '';
+  for (const m of currentMessages) {
+    const side = m.role === 'a' ? 'left' : 'right';
+    const name = m.role === 'a'
+      ? currentDebate.creator_email.split('@')[0]
+      : currentDebate.opponent_email.split('@')[0];
+    const div = document.createElement('div');
+    div.className = `msg ${side}`;
+    const stamp = new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const myRole = currentDebate.creator_email === currentUser.email.toLowerCase() ? 'a' : 'b';
+    // can I concede this? Only if it's not mine and I haven't already
+    const canConcede = m.role !== myRole && !m.conceded_by;
+    const concedeBtn = canConcede
+      ? `<button class="concede-btn" onclick="concede('${m.id}')">Concede ✓</button>`
+      : (m.conceded_by ? `<span class="concede-btn conceded">✓ Conceded</span>` : '');
+    div.innerHTML = `
+      <div class="avatar">${escapeHtml(name[0].toUpperCase())}</div>
+      <div>
+        <div class="msg-body">${renderTextWithFlags(m.text, m.flags || [])}</div>
+        <div class="msg-meta">
+          <span>${escapeHtml(name)}</span>
+          <span>· ${stamp}</span>
+          ${concedeBtn}
+        </div>
+      </div>
+    `;
+    container.appendChild(div);
+  }
+  container.scrollIntoView({ behavior: 'smooth', block: 'end' });
+}
+
+function renderTextWithFlags(text, flags) {
+  if (!flags || !flags.length) return escapeHtml(text);
+  const sorted = [...flags].sort((a, b) => a.start - b.start);
+  let out = '';
+  let cursor = 0;
+  for (const f of sorted) {
+    if (f.start < cursor) continue;
+    out += escapeHtml(text.slice(cursor, f.start));
+    const span = text.slice(f.start, f.end);
+    const kindClass = f.kind === 'red' ? 'hl-red' : f.kind === 'green' ? 'hl-green' : 'hl-amber';
+    out += `<span class="hl ${kindClass}">${escapeHtml(span)}<span class="hl-tooltip ${f.kind}"><span class="tt-label">${escapeHtml(f.label || f.kind.toUpperCase())}</span>${escapeHtml(f.reason || '')}</span></span>`;
+    cursor = f.end;
+  }
+  out += escapeHtml(text.slice(cursor));
+  return out;
+}
+
+function escapeHtml(s) {
+  return (s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function subscribeToMessages(debateId) {
+  if (messagesChannel) sb.removeChannel(messagesChannel);
+  messagesChannel = supabase
+    .channel(`messages-${debateId}`)
+    .on('postgres_changes',
+      { event: '*', schema: 'public', table: 'messages', filter: `debate_id=eq.${debateId}` },
+      async (payload) => {
+        if (payload.eventType === 'INSERT') {
+          // avoid duplicates if it's our own
+          if (!currentMessages.find(m => m.id === payload.new.id)) {
+            currentMessages.push(payload.new);
+            renderMessages();
+            refreshTurnUI();
+          }
+        } else if (payload.eventType === 'UPDATE') {
+          const idx = currentMessages.findIndex(m => m.id === payload.new.id);
+          if (idx >= 0) {
+            currentMessages[idx] = payload.new;
+            renderMessages();
+            refreshTurnUI();
+          }
+        }
       }
-      for (const code of podcasts) {
-        const card = document.createElement('div');
-        card.className = 'p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/60 backdrop-blur';
-        card.innerHTML = code;
-        c.appendChild(card);
+    )
+    .subscribe();
+}
+
+function subscribeToDebate(debateId) {
+  if (debateChannel) sb.removeChannel(debateChannel);
+  debateChannel = supabase
+    .channel(`debate-${debateId}`)
+    .on('postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'debates', filter: `id=eq.${debateId}` },
+      async (payload) => {
+        const old = currentDebate;
+        currentDebate = payload.new;
+
+        // status changed pending -> active: jump into chat
+        if (old.status === 'pending' && currentDebate.status === 'active') {
+          await loadMessages(debateId);
+          showChat();
+          subscribeToMessages(debateId);
+          return;
+        }
+        // status -> finished
+        if (currentDebate.status === 'finished') {
+          showSummary();
+          return;
+        }
+        // turn changed
+        refreshTurnUI();
+        // reset timer if turn flipped
+        if (old.current_turn !== currentDebate.current_turn) {
+          startTimer();
+        }
       }
+    )
+    .subscribe();
+}
+
+// ============================================================================
+// TIMER
+// ============================================================================
+function startTimer() {
+  if (timerInterval) clearInterval(timerInterval);
+  timerRemaining = currentDebate.turn_seconds;
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    timerRemaining--;
+    if (timerRemaining <= 0) {
+      clearInterval(timerInterval);
+      // we don't auto-flip the turn — just show timeout. Real auto-concede
+      // would need a server cron; leaving as a UI signal for now.
+    }
+    updateTimerDisplay();
+  }, 1000);
+}
+function updateTimerDisplay() {
+  const m = Math.floor(Math.max(0, timerRemaining) / 60);
+  const s = Math.max(0, timerRemaining) % 60;
+  const el = document.getElementById('timer');
+  el.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+  el.classList.toggle('warn', timerRemaining <= 30 && timerRemaining > 0);
+}
+
+// ============================================================================
+// SEND MESSAGE + MEDIATOR CALL
+// ============================================================================
+async function sendMessage() {
+  const text = document.getElementById('composer-input').value.trim();
+  if (!text) return;
+  const myRole = currentDebate.creator_email === currentUser.email.toLowerCase() ? 'a' : 'b';
+  if (myRole !== currentDebate.current_turn) {
+    showToast('Not your turn yet.');
+    return;
+  }
+
+  document.getElementById('btn-send').disabled = true;
+  document.getElementById('btn-preview').disabled = true;
+  appendThinkingIndicator();
+
+  try {
+    const flags = await callMediator(text);
+    // insert message
+    const { data: inserted, error } = await sb.from('messages').insert({
+      debate_id: currentDebate.id,
+      role: myRole,
+      author_email: currentUser.email.toLowerCase(),
+      text,
+      flags,
+    }).select().single();
+    if (error) throw error;
+
+    // optimistic update (realtime will dedupe)
+    if (!currentMessages.find(m => m.id === inserted.id)) {
+      currentMessages.push(inserted);
     }
 
-    // --- ALBUM LINKS: OneDrive folders here ---
-    const albums = [
-      // { title: 'Rock Creek Park walk', url: 'https://1drv.ms/f/...' , note: 'Morning hike + lunch.' },
-      // { title: 'Family weekend', url: 'https://1drv.ms/f/...' , note: 'A few fav shots.' },
-    ];
-
-    function renderAlbums(){
-      const c = $('#albumList');
-      c.innerHTML = '';
-      for (const a of albums) {
-        const el = document.createElement('a');
-        el.href = a.url;
-        el.target = '_blank';
-        el.rel = 'noopener';
-        el.className = 'p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100/60 dark:hover:bg-zinc-900/60';
-        el.innerHTML = `<div class="font-semibold">${a.title}</div><div class="text-sm text-zinc-600 dark:text-zinc-400">${a.note??''}</div>`;
-        c.appendChild(el);
-      }
-      if (albums.length === 0) {
-        c.innerHTML = '<p class="text-zinc-600 dark:text-zinc-300">Add your OneDrive folder links in the <code>albums</code> array.</p>';
-      }
+    // flip turn
+    const nextTurn = myRole === 'a' ? 'b' : 'a';
+    // check if cap reached
+    const aMsgs = currentMessages.filter(m => m.role === 'a').length;
+    const bMsgs = currentMessages.filter(m => m.role === 'b').length;
+    const capReached = aMsgs >= currentDebate.message_cap && bMsgs >= currentDebate.message_cap;
+    if (capReached) {
+      await sb.from('debates').update({ status: 'finished' }).eq('id', currentDebate.id);
+    } else {
+      await sb.from('debates').update({ current_turn: nextTurn }).eq('id', currentDebate.id);
     }
 
-    // Kick it all off
-    renderBlog();
-    renderPodcasts();
-    renderAlbums();
-  </script>
+    document.getElementById('composer-input').value = '';
+    document.getElementById('preview-area').innerHTML = '';
+    renderMessages();
+  } catch (e) {
+    console.error(e);
+    showToast('Send failed: ' + (e.message || ''));
+  } finally {
+    document.getElementById('btn-send').disabled = false;
+    document.getElementById('btn-preview').disabled = false;
+    removeThinkingIndicator();
+  }
+}
+
+async function runPreview() {
+  const text = document.getElementById('composer-input').value.trim();
+  if (!text) return;
+  const previewArea = document.getElementById('preview-area');
+  previewArea.innerHTML = `<div class="mediator-thinking"><div class="dots"><span></span><span></span><span></span></div>Mediator reading your draft</div>`;
+  try {
+    const flags = await callMediator(text);
+    previewArea.innerHTML = `
+      <div class="preview-box">
+        <span class="ttl">↳ Pre-send Preview</span>
+        ${renderTextWithFlags(text, flags)}
+        ${flags.length === 0 ? '<div style="margin-top: 10px; color: var(--cyan); font-family: \'JetBrains Mono\', monospace; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;">✓ Clean · no flags</div>' : ''}
+      </div>
+    `;
+  } catch (e) {
+    previewArea.innerHTML = `<div class="preview-box" style="color: var(--hot-pink);"><span class="ttl">Preview failed</span>${escapeHtml(e.message || 'Mediator unavailable')}</div>`;
+  }
+}
+
+async function callMediator(text) {
+  // Call the Supabase Edge Function
+  const myRole = currentDebate.creator_email === currentUser.email.toLowerCase() ? 'a' : 'b';
+  const recentMessages = currentMessages.slice(-6).map(m => ({
+    role: m.role,
+    name: m.role === 'a'
+      ? currentDebate.creator_email.split('@')[0]
+      : currentDebate.opponent_email.split('@')[0],
+    text: m.text,
+  }));
+
+  const { data: { session } } = await sb.auth.getSession();
+  const response = await fetch(`${SUPABASE_URL}/functions/v1/mediator`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify({
+      text,
+      role: myRole,
+      authorName: myRole === 'a'
+        ? currentDebate.creator_email.split('@')[0]
+        : currentDebate.opponent_email.split('@')[0],
+      topic: currentDebate.topic,
+      mode: currentDebate.mode,
+      priorMessages: recentMessages,
+    }),
+  });
+
+  if (!response.ok) {
+    const errText = await response.text().catch(() => 'unknown');
+    throw new Error(`Mediator error ${response.status}: ${errText}`);
+  }
+  const data = await response.json();
+  return mapSpansToFlags(text, data.flags || []);
+}
+
+function mapSpansToFlags(text, rawFlags) {
+  const flags = [];
+  for (const f of rawFlags) {
+    if (!f.span || !f.kind) continue;
+    const start = text.indexOf(f.span);
+    if (start === -1) continue;
+    flags.push({
+      kind: f.kind,
+      label: f.label || f.kind.toUpperCase(),
+      reason: f.reason || '',
+      start,
+      end: start + f.span.length,
+    });
+  }
+  return flags;
+}
+
+function appendThinkingIndicator() {
+  const container = document.getElementById('messages');
+  if (document.getElementById('mediator-thinking-indicator')) return;
+  const div = document.createElement('div');
+  div.id = 'mediator-thinking-indicator';
+  div.className = 'mediator-thinking';
+  div.style.alignSelf = 'center';
+  div.innerHTML = `<div class="dots"><span></span><span></span><span></span></div>Mediator reviewing`;
+  container.appendChild(div);
+}
+function removeThinkingIndicator() {
+  const el = document.getElementById('mediator-thinking-indicator');
+  if (el) el.remove();
+}
+
+// ============================================================================
+// CONCEDE
+// ============================================================================
+async function concede(msgId) {
+  const m = currentMessages.find(x => x.id === msgId);
+  if (!m) return;
+  const myRole = currentDebate.creator_email === currentUser.email.toLowerCase() ? 'a' : 'b';
+  if (m.role === myRole) { showToast('You can only concede points to the other side.'); return; }
+  const { error } = await sb.from('messages').update({ conceded_by: myRole }).eq('id', msgId);
+  if (error) { showToast('Concession failed: ' + error.message); return; }
+  showToast('Concession recorded ✓', 'cyan');
+}
+
+// ============================================================================
+// END / SUMMARY
+// ============================================================================
+async function endDebate(reason) {
+  if (!confirm('End the debate now? Both sides will see the summary.')) return;
+  await sb.from('debates').update({ status: 'finished' }).eq('id', currentDebate.id);
+  // realtime triggers summary
+}
+
+function showSummary() {
+  if (timerInterval) clearInterval(timerInterval);
+
+  // aggregate stats
+  const stats = { a: { red: 0, green: 0, amber: 0, conc: 0 }, b: { red: 0, green: 0, amber: 0, conc: 0 } };
+  for (const m of currentMessages) {
+    for (const f of (m.flags || [])) {
+      if (f.kind === 'red') stats[m.role].red++;
+      if (f.kind === 'green') stats[m.role].green++;
+      if (f.kind === 'amber') stats[m.role].amber++;
+    }
+    if (m.conceded_by) {
+      // the conceder is m.conceded_by, gaining points = made a concession
+      stats[m.conceded_by].conc++;
+    }
+  }
+
+  const nameA = currentDebate.creator_email.split('@')[0];
+  const nameB = currentDebate.opponent_email.split('@')[0];
+  const scoreA = computeScore('a');
+  const scoreB = computeScore('b');
+
+  document.getElementById('sum-topic').textContent = `"${currentDebate.topic}"`;
+  document.getElementById('sum-dateline').textContent =
+    `${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} · ${currentDebate.mode[0].toUpperCase() + currentDebate.mode.slice(1)} Mode`;
+
+  const showWinner = currentDebate.mode === 'competitive';
+  document.getElementById('sum-verdict').style.display = showWinner ? '' : 'none';
+  if (showWinner) {
+    let winner;
+    if (scoreA > scoreB) winner = nameA;
+    else if (scoreB > scoreA) winner = nameB;
+    else winner = 'DRAW';
+    document.getElementById('sum-winner').textContent = winner;
+  }
+
+  document.getElementById('sum-nameA').textContent = nameA;
+  document.getElementById('sum-nameB').textContent = nameB;
+  document.getElementById('sum-redA').textContent = stats.a.red;
+  document.getElementById('sum-redB').textContent = stats.b.red;
+  document.getElementById('sum-greenA').textContent = stats.a.green;
+  document.getElementById('sum-greenB').textContent = stats.b.green;
+  document.getElementById('sum-concA').textContent = stats.a.conc;
+  document.getElementById('sum-concB').textContent = stats.b.conc;
+  document.getElementById('sum-amberA').textContent = stats.a.amber;
+  document.getElementById('sum-amberB').textContent = stats.b.amber;
+
+  // strongest argument
+  let strongest = null;
+  let maxGreen = -1;
+  for (const m of currentMessages) {
+    const greens = (m.flags || []).filter(f => f.kind === 'green').length;
+    if (greens > maxGreen) { maxGreen = greens; strongest = m; }
+  }
+  if (strongest && maxGreen > 0) {
+    const truncated = strongest.text.length > 180 ? strongest.text.slice(0, 180) + '…' : strongest.text;
+    document.getElementById('sum-strongest-quote').textContent = `"${truncated}"`;
+    const sname = strongest.role === 'a' ? nameA : nameB;
+    document.getElementById('sum-strongest-attr').textContent = `— ${sname}`;
+  } else {
+    document.getElementById('sum-strongest-quote').textContent = '(No standout argument identified.)';
+    document.getElementById('sum-strongest-attr').textContent = '';
+  }
+
+  // mode stamp
+  const stamp = document.getElementById('sum-stamp');
+  if (currentDebate.mode === 'relationship') stamp.textContent = 'WELL DONE';
+  else if (currentDebate.mode === 'collaborative') stamp.textContent = 'COMMON GROUND';
+  else if (currentDebate.mode === 'exploratory') stamp.textContent = 'EXPLORED';
+  else stamp.textContent = 'GG';
+
+  showScreen('summary');
+}
+
+function screenshotHint() {
+  showToast('Screenshot the card above. That\'s the share asset.', 'cyan');
+}
+
+// ============================================================================
+// UI HELPERS
+// ============================================================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById('screen-' + id);
+  if (el) el.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showToast(msg, variant) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (variant === 'cyan' ? ' cyan' : '');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => t.classList.remove('show'), 3200);
+}
+</script>
 </body>
 </html>
