@@ -340,6 +340,67 @@
     box-shadow: 0 0 18px var(--cyan-glow);
   }
 
+  /* sliders */
+  .slider-row { display: flex; align-items: center; gap: 14px; }
+  .slider-row .slider { flex: 1; }
+  .slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    background: rgba(10, 6, 18, 0.6);
+    border: 1px solid var(--rule-strong);
+    outline: none;
+    cursor: pointer;
+    padding: 0;
+  }
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    background: var(--cyan);
+    border: 2px solid var(--void);
+    box-shadow: 0 0 14px var(--cyan-glow);
+    cursor: grab;
+    transition: transform .1s;
+  }
+  .slider::-webkit-slider-thumb:hover { transform: scale(1.1); }
+  .slider::-webkit-slider-thumb:active { cursor: grabbing; }
+  .slider::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    background: var(--cyan);
+    border: 2px solid var(--void);
+    box-shadow: 0 0 14px var(--cyan-glow);
+    cursor: grab;
+  }
+  .slider:disabled { opacity: 0.35; cursor: not-allowed; }
+  .slider:disabled::-webkit-slider-thumb { background: var(--ink-3); box-shadow: none; cursor: not-allowed; }
+  .slider:disabled::-moz-range-thumb { background: var(--ink-3); box-shadow: none; cursor: not-allowed; }
+  .slider-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--cyan);
+    letter-spacing: 0.1em;
+    margin-left: 10px;
+    text-shadow: 0 0 10px var(--cyan-glow);
+    font-weight: 700;
+  }
+  .slider-value.muted { color: var(--ink-3); text-shadow: none; }
+  .chip.infinity {
+    flex-shrink: 0;
+    font-size: 16px;
+    padding: 6px 14px;
+    line-height: 1;
+  }
+  .chip.infinity.active {
+    background: var(--gold);
+    color: var(--void);
+    border-color: var(--gold);
+    box-shadow: 0 0 18px rgba(255, 211, 77, 0.5);
+  }
+
   .mode-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .mode-card {
     border: 1px solid var(--rule-strong);
@@ -1075,26 +1136,17 @@
         </div>
 
         <div class="field">
-          <label>Turn Timer</label>
-          <div class="chip-row" id="timer-chips">
-            <button class="chip" data-val="120">2 min</button>
-            <button class="chip active" data-val="300">5 min</button>
-            <button class="chip" data-val="600">10 min</button>
-            <button class="chip" data-val="900">15 min</button>
-            <button class="chip" data-val="1800">30 min</button>
-            <button class="chip" data-val="3600">1 hr</button>
+          <label>Turn Timer <span class="slider-value" id="timer-value">5 min</span></label>
+          <div class="slider-row">
+            <input type="range" class="slider" id="timer-slider" min="0" max="12" step="1" value="1">
           </div>
         </div>
 
         <div class="field">
-          <label>Message Cap (Per Side)</label>
-          <div class="chip-row" id="cap-chips">
-            <button class="chip" data-val="2">2</button>
-            <button class="chip active" data-val="3">3</button>
-            <button class="chip" data-val="4">4</button>
-            <button class="chip" data-val="6">6</button>
-            <button class="chip" data-val="8">8</button>
-            <button class="chip" data-val="9999">∞</button>
+          <label>Message Cap (Per Side) <span class="slider-value" id="cap-value">3</span></label>
+          <div class="slider-row">
+            <input type="range" class="slider" id="cap-slider" min="3" max="30" step="1" value="3">
+            <button class="chip infinity" id="cap-infinity" type="button" onclick="toggleInfinity()" title="No cap — debate runs until someone concedes">∞</button>
           </div>
         </div>
 
@@ -1128,8 +1180,9 @@
         <div class="summary-row"><span class="k">Guided</span><span class="v" id="s-guided">On</span></div>
         <div style="margin-top: 22px; display: flex; flex-direction: column; gap: 8px;">
           <button class="btn btn-primary" style="width: 100%;" onclick="createDebate()" id="create-debate-btn">⚡ Send Invite</button>
-          <button class="btn btn-ghost" style="width: 100%;" onclick="showScreen('dashboard')">Cancel</button>
+          <button class="btn btn-ghost" style="width: 100%;" onclick="goToDashboard()">Cancel</button>
         </div>
+        <p id="create-debate-error" style="margin-top: 12px; font-size: 12px; color: var(--hot-pink); font-family: 'JetBrains Mono', monospace; line-height: 1.5; min-height: 16px;"></p>
       </aside>
     </div>
   </section>
@@ -1168,7 +1221,7 @@
           <h2 class="display" style="font-size: 32px; margin-bottom: 12px; color: var(--gold);">Waiting on <span id="wait-name">your opponent</span>…</h2>
           <p style="color: var(--ink-2); margin-bottom: 8px;">They'll get a magic-link email at <span id="wait-email" style="color: var(--cyan); font-family: 'JetBrains Mono', monospace;">—</span></p>
           <p style="color: var(--ink-3); font-size: 13px; margin-bottom: 28px;">Once they accept, the debate begins. You'll get an email too.</p>
-          <button class="btn btn-ghost" onclick="showScreen('dashboard')">← Back to Dashboard</button>
+          <button class="btn btn-ghost" onclick="goToDashboard()">← Back to Dashboard</button>
         </div>
       </div>
     </div>
@@ -1261,7 +1314,7 @@
       </div>
       <div class="summary-actions">
         <button class="btn btn-primary" onclick="screenshotHint()">📸 Screenshot This</button>
-        <button class="btn btn-secondary" onclick="showScreen('dashboard')">← Dashboard</button>
+        <button class="btn btn-secondary" onclick="goToDashboard()">← Dashboard</button>
       </div>
     </div>
   </section>
@@ -1304,6 +1357,25 @@ const state = {
   autoConcede: true,
 };
 
+// Stepped values for the turn-timer slider. The slider's integer position
+// indexes into this array so the user gets useful stops instead of a useless
+// linear sweep from 120s to 259200s.
+const TIMER_STEPS = [
+  120,    // 2 min
+  300,    // 5 min
+  600,    // 10 min
+  900,    // 15 min
+  1800,   // 30 min
+  3600,   // 1 hr
+  7200,   // 2 hr
+  10800,  // 3 hr
+  21600,  // 6 hr
+  43200,  // 12 hr
+  86400,  // 1 day
+  172800, // 2 days
+  259200, // 3 days
+];
+
 // ============================================================================
 // INIT
 // ============================================================================
@@ -1321,12 +1393,19 @@ async function init() {
 
   // Handle auth state changes
   sb.auth.onAuthStateChange((event, session) => {
-    if (event === 'SIGNED_IN' && session) {
-      onSignedIn(session.user);
-    } else if (event === 'SIGNED_OUT') {
+    if (event === 'SIGNED_OUT') {
       currentUser = null;
       updateMastUser();
       showScreen('auth');
+      return;
+    }
+    if (event === 'SIGNED_IN' && session) {
+      // Supabase re-emits SIGNED_IN on tab focus / token refresh.
+      // Only run the full sign-in flow if it's actually a new/different user,
+      // otherwise we'd kick the user back to the dashboard every time they
+      // switched tabs.
+      if (currentUser && currentUser.id === session.user.id) return;
+      onSignedIn(session.user);
     }
   });
 
@@ -1419,6 +1498,20 @@ async function signOut() {
 // ============================================================================
 // DASHBOARD
 // ============================================================================
+function goToDashboard() {
+  // drop ?debate=... so a refresh doesn't bounce back into an old debate
+  if (window.location.search) {
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+  // tear down any live channels
+  if (messagesChannel) { sb.removeChannel(messagesChannel); messagesChannel = null; }
+  if (debateChannel) { sb.removeChannel(debateChannel); debateChannel = null; }
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  currentDebate = null;
+  currentMessages = [];
+  loadDashboard();
+}
+
 async function loadDashboard() {
   showScreen('dashboard');
   const list = document.getElementById('debate-list');
@@ -1480,12 +1573,33 @@ function goToContract() {
   state.guidedMode = true;
   state.autoConcede = true;
   document.querySelectorAll('.mode-card').forEach(c => c.classList.toggle('active', c.dataset.mode === 'competitive'));
-  document.querySelectorAll('#timer-chips .chip').forEach(c => c.classList.toggle('active', c.dataset.val === '300'));
-  document.querySelectorAll('#cap-chips .chip').forEach(c => c.classList.toggle('active', c.dataset.val === '3'));
+
+  // reset sliders
+  const timerSlider = document.getElementById('timer-slider');
+  const capSlider = document.getElementById('cap-slider');
+  const infBtn = document.getElementById('cap-infinity');
+  if (timerSlider) timerSlider.value = TIMER_STEPS.indexOf(300); // 5 min
+  if (capSlider) { capSlider.value = 3; capSlider.disabled = false; }
+  if (infBtn) infBtn.classList.remove('active');
+
   document.getElementById('t-guided').classList.add('on');
   document.getElementById('t-autoconcede').classList.add('on');
   refreshContractSummary();
   showScreen('contract');
+}
+
+function toggleInfinity() {
+  const btn = document.getElementById('cap-infinity');
+  const slider = document.getElementById('cap-slider');
+  const isOn = btn.classList.toggle('active');
+  if (isOn) {
+    state.messageCap = 9999;
+    slider.disabled = true;
+  } else {
+    state.messageCap = +slider.value;
+    slider.disabled = false;
+  }
+  refreshContractSummary();
 }
 
 function selectMode(el) {
@@ -1502,20 +1616,23 @@ function toggle(el) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('timer-chips').addEventListener('click', e => {
-    if (!e.target.classList.contains('chip')) return;
-    document.querySelectorAll('#timer-chips .chip').forEach(c => c.classList.remove('active'));
-    e.target.classList.add('active');
-    state.turnSeconds = +e.target.dataset.val;
-    refreshContractSummary();
-  });
-  document.getElementById('cap-chips').addEventListener('click', e => {
-    if (!e.target.classList.contains('chip')) return;
-    document.querySelectorAll('#cap-chips .chip').forEach(c => c.classList.remove('active'));
-    e.target.classList.add('active');
-    state.messageCap = +e.target.dataset.val;
-    refreshContractSummary();
-  });
+  const timerSlider = document.getElementById('timer-slider');
+  if (timerSlider) {
+    timerSlider.addEventListener('input', e => {
+      const idx = Math.max(0, Math.min(TIMER_STEPS.length - 1, +e.target.value));
+      state.turnSeconds = TIMER_STEPS[idx];
+      refreshContractSummary();
+    });
+  }
+  const capSlider = document.getElementById('cap-slider');
+  if (capSlider) {
+    capSlider.addEventListener('input', e => {
+      // ignore if infinity is on (slider is disabled but be defensive)
+      if (document.getElementById('cap-infinity').classList.contains('active')) return;
+      state.messageCap = +e.target.value;
+      refreshContractSummary();
+    });
+  }
   ['topic', 'opp-email', 'stance-a', 'stance-b'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('input', e => {
@@ -1535,20 +1652,70 @@ function refreshContractSummary() {
   document.getElementById('s-timer').textContent = fmtTime(state.turnSeconds);
   document.getElementById('s-cap').textContent = state.messageCap >= 9999 ? '∞' : `${state.messageCap} each`;
   document.getElementById('s-guided').textContent = state.guidedMode ? 'On' : 'Off';
+
+  // inline labels next to the sliders
+  const timerLabel = document.getElementById('timer-value');
+  if (timerLabel) timerLabel.textContent = fmtTime(state.turnSeconds);
+  const capLabel = document.getElementById('cap-value');
+  if (capLabel) {
+    if (state.messageCap >= 9999) {
+      capLabel.textContent = '∞ (concede to end)';
+      capLabel.classList.add('muted');
+    } else {
+      capLabel.textContent = state.messageCap;
+      capLabel.classList.remove('muted');
+    }
+  }
 }
 function fmtTime(s) {
-  if (s >= 3600) return (s / 3600) + ' hr';
-  if (s >= 60) return (s / 60) + ' min';
+  if (s >= 86400) {
+    const d = s / 86400;
+    return d === 1 ? '1 day' : `${d} days`;
+  }
+  if (s >= 3600) {
+    const h = s / 3600;
+    return h === 1 ? '1 hr' : `${h} hr`;
+  }
+  if (s >= 60) {
+    const m = s / 60;
+    return m === 1 ? '1 min' : `${m} min`;
+  }
   return s + 's';
 }
 
 // ============================================================================
 // CREATE DEBATE
 // ============================================================================
+function setCreateError(msg) {
+  const el = document.getElementById('create-debate-error');
+  if (el) el.textContent = msg || '';
+}
+
 async function createDebate() {
-  if (!state.topic.trim()) { showToast('Pick a topic first.'); return; }
-  if (!state.oppEmail || !state.oppEmail.includes('@')) { showToast('Need a valid opponent email.'); return; }
-  if (state.oppEmail === currentUser.email.toLowerCase()) { showToast('You can\'t debate yourself.'); return; }
+  setCreateError('');
+
+  // Read directly from the DOM — autofill / paste can bypass the 'input' event
+  // and leave the in-memory state object empty.
+  const topic = document.getElementById('topic').value.trim();
+  const oppEmail = document.getElementById('opp-email').value.trim().toLowerCase();
+  const stanceA = document.getElementById('stance-a').value.trim();
+  const stanceB = document.getElementById('stance-b').value.trim();
+  state.topic = topic;
+  state.oppEmail = oppEmail;
+  state.stanceA = stanceA;
+  state.stanceB = stanceB;
+
+  if (!topic) { setCreateError('Pick a topic first.'); showToast('Pick a topic first.'); return; }
+  if (!oppEmail || !oppEmail.includes('@') || !oppEmail.includes('.')) {
+    setCreateError('Need a valid opponent email.');
+    showToast('Need a valid opponent email.');
+    return;
+  }
+  if (oppEmail === currentUser.email.toLowerCase()) {
+    setCreateError("You can't debate yourself.");
+    showToast("You can't debate yourself.");
+    return;
+  }
 
   const btn = document.getElementById('create-debate-btn');
   btn.disabled = true;
@@ -1556,13 +1723,18 @@ async function createDebate() {
 
   try {
     // Check opponent is on allowlist
-    const { data: oppAllowed } = await sb
+    const { data: oppAllowed, error: allowErr } = await sb
       .from('allowed_emails')
       .select('email')
-      .eq('email', state.oppEmail)
+      .eq('email', oppEmail)
       .maybeSingle();
-    if (!oppAllowed) {
-      showToast(`${state.oppEmail} isn't on the allowlist yet — add them in Supabase first.`);
+    if (allowErr) {
+      console.warn('Allowlist lookup error:', allowErr);
+      // Non-fatal: continue. RLS may hide rows from this user; the insert
+      // below is the real source of truth.
+    }
+    if (allowErr === null && oppAllowed === null) {
+      setCreateError(`${oppEmail} isn't on the allowlist. Add them to the allowed_emails table in Supabase, then try again.`);
       btn.disabled = false;
       btn.textContent = '⚡ Send Invite';
       return;
@@ -1571,10 +1743,10 @@ async function createDebate() {
     // Create debate row
     const { data: debate, error } = await sb.from('debates').insert({
       creator_email: currentUser.email.toLowerCase(),
-      opponent_email: state.oppEmail,
-      topic: state.topic.trim(),
-      stance_a: state.stanceA.trim() || 'Affirmative',
-      stance_b: state.stanceB.trim() || 'Negative',
+      opponent_email: oppEmail,
+      topic,
+      stance_a: stanceA || 'Affirmative',
+      stance_b: stanceB || 'Negative',
       mode: state.mode,
       turn_seconds: state.turnSeconds,
       message_cap: state.messageCap,
@@ -1589,19 +1761,21 @@ async function createDebate() {
     // Send invite email via Supabase magic link, with redirect to the debate
     const redirectUrl = `${window.location.origin}${window.location.pathname}?debate=${debate.id}`;
     const { error: inviteErr } = await sb.auth.signInWithOtp({
-      email: state.oppEmail,
+      email: oppEmail,
       options: { emailRedirectTo: redirectUrl }
     });
     if (inviteErr) console.warn('Invite email send failed:', inviteErr);
 
     // Show waiting screen
-    document.getElementById('wait-email').textContent = state.oppEmail;
-    document.getElementById('wait-name').textContent = state.oppEmail.split('@')[0];
+    document.getElementById('wait-email').textContent = oppEmail;
+    document.getElementById('wait-name').textContent = oppEmail.split('@')[0];
     showScreen('waiting');
     showToast('Invite sent ✓', 'cyan');
   } catch (e) {
-    console.error(e);
-    showToast('Error: ' + (e.message || 'failed to create debate'));
+    console.error('createDebate failed:', e);
+    const msg = e.message || JSON.stringify(e);
+    setCreateError('Failed: ' + msg);
+    showToast('Error: ' + msg);
     btn.disabled = false;
     btn.textContent = '⚡ Send Invite';
   }
@@ -1841,7 +2015,7 @@ function escapeHtml(s) {
 
 function subscribeToMessages(debateId) {
   if (messagesChannel) sb.removeChannel(messagesChannel);
-  messagesChannel = supabase
+  messagesChannel = sb
     .channel(`messages-${debateId}`)
     .on('postgres_changes',
       { event: '*', schema: 'public', table: 'messages', filter: `debate_id=eq.${debateId}` },
@@ -1868,7 +2042,7 @@ function subscribeToMessages(debateId) {
 
 function subscribeToDebate(debateId) {
   if (debateChannel) sb.removeChannel(debateChannel);
-  debateChannel = supabase
+  debateChannel = sb
     .channel(`debate-${debateId}`)
     .on('postgres_changes',
       { event: 'UPDATE', schema: 'public', table: 'debates', filter: `id=eq.${debateId}` },
