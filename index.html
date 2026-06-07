@@ -35,6 +35,14 @@
     --gold: #ffd34d;
     --violet: #b388ff;
 
+    /* solid, opaque mediator-flag fills (inverted readable text) */
+    --flag-green: #2ee6a0;
+    --flag-green-glow: rgba(46, 230, 160, 0.55);
+    --flag-red: #ff3366;
+    --flag-red-glow: rgba(255, 51, 102, 0.55);
+    --flag-amber: #ffce3a;
+    --flag-amber-glow: rgba(255, 206, 58, 0.55);
+
     --rule: rgba(236, 227, 255, 0.12);
     --rule-strong: rgba(236, 227, 255, 0.25);
   }
@@ -340,67 +348,6 @@
     box-shadow: 0 0 18px var(--cyan-glow);
   }
 
-  /* sliders */
-  .slider-row { display: flex; align-items: center; gap: 14px; }
-  .slider-row .slider { flex: 1; }
-  .slider {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 100%;
-    height: 6px;
-    background: rgba(10, 6, 18, 0.6);
-    border: 1px solid var(--rule-strong);
-    outline: none;
-    cursor: pointer;
-    padding: 0;
-  }
-  .slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 22px;
-    height: 22px;
-    background: var(--cyan);
-    border: 2px solid var(--void);
-    box-shadow: 0 0 14px var(--cyan-glow);
-    cursor: grab;
-    transition: transform .1s;
-  }
-  .slider::-webkit-slider-thumb:hover { transform: scale(1.1); }
-  .slider::-webkit-slider-thumb:active { cursor: grabbing; }
-  .slider::-moz-range-thumb {
-    width: 22px;
-    height: 22px;
-    background: var(--cyan);
-    border: 2px solid var(--void);
-    box-shadow: 0 0 14px var(--cyan-glow);
-    cursor: grab;
-  }
-  .slider:disabled { opacity: 0.35; cursor: not-allowed; }
-  .slider:disabled::-webkit-slider-thumb { background: var(--ink-3); box-shadow: none; cursor: not-allowed; }
-  .slider:disabled::-moz-range-thumb { background: var(--ink-3); box-shadow: none; cursor: not-allowed; }
-  .slider-value {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    color: var(--cyan);
-    letter-spacing: 0.1em;
-    margin-left: 10px;
-    text-shadow: 0 0 10px var(--cyan-glow);
-    font-weight: 700;
-  }
-  .slider-value.muted { color: var(--ink-3); text-shadow: none; }
-  .chip.infinity {
-    flex-shrink: 0;
-    font-size: 16px;
-    padding: 6px 14px;
-    line-height: 1;
-  }
-  .chip.infinity.active {
-    background: var(--gold);
-    color: var(--void);
-    border-color: var(--gold);
-    box-shadow: 0 0 18px rgba(255, 211, 77, 0.5);
-  }
-
   .mode-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .mode-card {
     border: 1px solid var(--rule-strong);
@@ -688,28 +635,30 @@
     border-radius: 2px;
     transition: all .15s;
   }
+  /* opaque, solid fills — text stays crisp and readable (inverted on bright) */
+  .hl { font-weight: 600; }
   .hl-red {
-    background: var(--hot-pink-dim);
-    color: #ffb8d6;
-    text-shadow: 0 0 8px var(--hot-pink-glow);
-    border-bottom: 2px solid var(--hot-pink);
+    background: var(--flag-red);
+    color: #ffffff;
+    border-bottom: 2px solid #c2003e;
+    box-shadow: 0 0 10px var(--flag-red-glow);
   }
   .hl-green {
-    background: var(--cyan-dim);
-    color: #b3fce7;
-    text-shadow: 0 0 8px var(--cyan-glow);
-    border-bottom: 2px solid var(--cyan);
+    background: var(--flag-green);
+    color: #04231a;
+    border-bottom: 2px solid #15a06f;
+    box-shadow: 0 0 10px var(--flag-green-glow);
   }
   .hl-amber {
-    background: var(--amber-dim);
-    color: #ffe1ad;
-    text-shadow: 0 0 8px var(--amber-glow);
-    border-bottom: 2px dashed var(--amber);
+    background: var(--flag-amber);
+    color: #2c1c00;
+    border-bottom: 2px solid #d99a00;
+    box-shadow: 0 0 10px var(--flag-amber-glow);
   }
   .hl:hover { transform: translateY(-1px); }
-  .hl-red:hover { box-shadow: 0 0 16px var(--hot-pink-glow); }
-  .hl-green:hover { box-shadow: 0 0 16px var(--cyan-glow); }
-  .hl-amber:hover { box-shadow: 0 0 16px var(--amber-glow); }
+  .hl-red:hover { box-shadow: 0 0 20px var(--flag-red-glow); }
+  .hl-green:hover { box-shadow: 0 0 20px var(--flag-green-glow); }
+  .hl-amber:hover { box-shadow: 0 0 20px var(--flag-amber-glow); }
 
   .hl-tooltip {
     position: absolute;
@@ -727,9 +676,9 @@
     text-shadow: none;
     font-weight: 400;
   }
-  .hl-tooltip.red { border-color: var(--hot-pink); box-shadow: 0 0 24px var(--hot-pink-glow); color: var(--ink); }
-  .hl-tooltip.green { border-color: var(--cyan); box-shadow: 0 0 24px var(--cyan-glow); color: var(--ink); }
-  .hl-tooltip.amber { border-color: var(--amber); box-shadow: 0 0 24px var(--amber-glow); color: var(--ink); }
+  .hl-tooltip.red { border-color: var(--flag-red); box-shadow: 0 0 24px var(--flag-red-glow); color: var(--ink); }
+  .hl-tooltip.green { border-color: var(--flag-green); box-shadow: 0 0 24px var(--flag-green-glow); color: var(--ink); }
+  .hl-tooltip.amber { border-color: var(--flag-amber); box-shadow: 0 0 24px var(--flag-amber-glow); color: var(--ink); }
   .hl:hover .hl-tooltip { display: block; }
   .hl-tooltip .tt-label {
     font-family: 'JetBrains Mono', monospace;
@@ -739,9 +688,9 @@
     margin-bottom: 6px;
     font-weight: 700;
   }
-  .hl-tooltip.red .tt-label { color: var(--hot-pink); }
-  .hl-tooltip.green .tt-label { color: var(--cyan); }
-  .hl-tooltip.amber .tt-label { color: var(--amber); }
+  .hl-tooltip.red .tt-label { color: var(--flag-red); }
+  .hl-tooltip.green .tt-label { color: var(--flag-green); }
+  .hl-tooltip.amber .tt-label { color: var(--flag-amber); }
 
   /* composer */
   .composer {
@@ -1015,6 +964,133 @@
   .di-status.pending { color: var(--amber); border-color: var(--amber); }
   .di-status.active { color: var(--cyan); border-color: var(--cyan); }
   .di-status.finished { color: var(--ink-3); border-color: var(--rule-strong); }
+
+  /* ===== PROFILE CARD (dashboard) ===== */
+  .profile-card {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 22px;
+    align-items: start;
+    border: 1px solid var(--rule-strong);
+    background: linear-gradient(135deg, rgba(42, 24, 88, 0.55), rgba(20, 9, 43, 0.4));
+    padding: 24px 26px;
+    position: relative;
+    overflow: hidden;
+  }
+  .profile-card::before {
+    content: '';
+    position: absolute; left: 0; right: 0; top: 0; height: 2px;
+    background: linear-gradient(90deg, var(--cyan), var(--violet), var(--hot-pink));
+  }
+  .profile-ava {
+    width: 84px; height: 84px;
+    display: grid; place-items: center;
+    font-size: 46px; line-height: 1;
+    border: 1.5px solid var(--violet);
+    background: var(--void);
+    box-shadow: 0 0 22px rgba(179, 136, 255, 0.35);
+    flex-shrink: 0;
+    border-radius: 4px;
+  }
+  .profile-main { min-width: 0; }
+  .profile-name {
+    font-family: 'Bowlby One', serif;
+    font-size: 30px; line-height: 1;
+    color: var(--ink);
+    margin-bottom: 6px;
+    word-break: break-word;
+  }
+  .profile-email {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.08em;
+    color: var(--cyan);
+    margin-bottom: 14px;
+  }
+  .profile-bio { font-size: 14px; color: var(--ink-2); line-height: 1.5; margin-bottom: 14px; max-width: 640px; }
+  .profile-bio.empty { color: var(--ink-3); font-style: italic; }
+  .profile-topics { display: flex; flex-wrap: wrap; gap: 6px; }
+  .topic-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 5px 11px;
+    border: 1px solid var(--violet);
+    background: rgba(179, 136, 255, 0.12);
+    color: var(--violet);
+  }
+  .profile-actions { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .profile-actions .btn { padding: 9px 18px; font-size: 11px; }
+
+  /* stat tiles */
+  .stat-tiles {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 18px;
+  }
+  @media (max-width: 640px) { .stat-tiles { grid-template-columns: repeat(2, 1fr); } }
+  .stat-tile {
+    border: 1px solid var(--rule-strong);
+    background: rgba(10, 6, 18, 0.45);
+    padding: 14px 16px;
+    text-align: center;
+    transition: all .15s;
+  }
+  .stat-tile:hover { border-color: var(--rule-strong); transform: translateY(-2px); }
+  .stat-tile .num {
+    font-family: 'Bowlby One', serif;
+    font-size: 32px; line-height: 1;
+    color: var(--cyan);
+    text-shadow: 0 0 14px var(--cyan-glow);
+  }
+  .stat-tile.v2 .num { color: var(--gold); text-shadow: 0 0 14px rgba(255, 211, 77, 0.5); }
+  .stat-tile.v3 .num { color: var(--violet); text-shadow: 0 0 14px rgba(179, 136, 255, 0.5); }
+  .stat-tile.v4 .num { color: var(--hot-pink); text-shadow: 0 0 14px var(--hot-pink-glow); }
+  .stat-tile .lbl {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; text-transform: uppercase; letter-spacing: 0.16em;
+    color: var(--ink-3); margin-top: 8px;
+  }
+
+  /* ===== AVATAR PICKER (profile editor) ===== */
+  .avatar-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 8px;
+  }
+  @media (max-width: 640px) { .avatar-grid { grid-template-columns: repeat(6, 1fr); } }
+  .ava-pick {
+    aspect-ratio: 1 / 1;
+    display: grid; place-items: center;
+    font-size: 26px;
+    border: 1px solid var(--rule-strong);
+    background: rgba(10, 6, 18, 0.4);
+    transition: all .12s;
+    border-radius: 4px;
+  }
+  .ava-pick:hover { border-color: var(--cyan); transform: translateY(-2px); background: rgba(94, 249, 212, 0.08); }
+  .ava-pick.active {
+    border-color: var(--violet);
+    background: rgba(179, 136, 255, 0.18);
+    box-shadow: 0 0 16px rgba(179, 136, 255, 0.45);
+    transform: translateY(-2px);
+  }
+
+  /* topic toggle chips in editor reuse .chip; selected uses .active */
+  .topic-pool { display: flex; flex-wrap: wrap; gap: 7px; }
+
+  /* masthead avatar */
+  .masthead .user .mast-ava {
+    font-size: 18px;
+    line-height: 1;
+    margin-right: 2px;
+  }
+  .masthead .user .pill { display: inline-flex; align-items: center; gap: 7px; cursor: pointer; }
+  .masthead .user .pill:hover { background: rgba(94, 249, 212, 0.16); }
+
+  /* message + scoreboard avatars can hold an emoji */
+  .avatar.emoji { font-family: inherit; font-size: 20px; }
+  .player .pava { font-size: 26px; line-height: 1; margin-bottom: 2px; }
 </style>
 </head>
 <body>
@@ -1068,19 +1144,77 @@
 
   <!-- ============ SCREEN: DASHBOARD ============ -->
   <section id="screen-dashboard" class="screen">
-    <div class="hero" style="padding: 24px 0 32px; text-align: left;">
-      <h1 style="font-size: clamp(48px, 8vw, 92px); text-align: left;">Pick a <em>fight.</em></h1>
-      <p class="lede" style="margin: 16px 0 24px; text-align: left;">Start a new debate or jump back into one you've got going.</p>
+    <div class="hero" style="padding: 18px 0 26px; text-align: left;">
+      <h1 style="font-size: clamp(44px, 7.5vw, 84px); text-align: left;">Talk about <em>it!</em></h1>
+      <p class="lede" style="margin: 14px 0 22px; text-align: left;">Start a new debate or jump back into one you've got going.</p>
       <div style="display: flex; gap: 12px; flex-wrap: wrap;">
         <button class="btn btn-primary" onclick="goToContract()">+ New Debate</button>
+        <button class="btn btn-secondary" onclick="openProfileEditor()">Edit Profile</button>
         <button class="btn btn-ghost" onclick="signOut()">Sign out</button>
       </div>
     </div>
 
-    <div class="panel" style="margin-top: 32px;">
+    <!-- profile card -->
+    <div class="profile-card" id="profile-card">
+      <div class="profile-ava" id="dash-ava">👤</div>
+      <div class="profile-main">
+        <div class="profile-name" id="dash-name">—</div>
+        <div class="profile-email" id="dash-email">—</div>
+        <div class="profile-bio empty" id="dash-bio">No bio yet — tap “Edit Profile” to add one.</div>
+        <div class="profile-topics" id="dash-topics"></div>
+      </div>
+    </div>
+
+    <!-- stat tiles -->
+    <div class="stat-tiles">
+      <div class="stat-tile"><div class="num" id="stat-total">0</div><div class="lbl">Debates</div></div>
+      <div class="stat-tile v2"><div class="num" id="stat-active">0</div><div class="lbl">Active Now</div></div>
+      <div class="stat-tile v3"><div class="num" id="stat-pending">0</div><div class="lbl">Pending</div></div>
+      <div class="stat-tile v4"><div class="num" id="stat-done">0</div><div class="lbl">Completed</div></div>
+    </div>
+
+    <div class="panel" style="margin-top: 24px;">
       <div class="panel-tag">Your Debates</div>
       <div id="debate-list" class="debate-list">
         <p style="color: var(--ink-3); font-style: italic; padding: 12px 0;">Loading…</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN: PROFILE EDITOR ============ -->
+  <section id="screen-profile" class="screen">
+    <div class="auth-wrap" style="max-width: 640px;">
+      <div class="panel">
+        <div class="panel-tag">Your Profile</div>
+        <h2 style="font-family:'Bowlby One',serif;font-size:32px;margin-bottom:4px;background:linear-gradient(135deg,var(--ink),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Make it yours.</h2>
+        <p class="sub" style="color:var(--ink-3);margin-bottom:24px;font-size:13px;">Pick a fighter, write a line about yourself, and tag what you love to argue about.</p>
+
+        <div class="field">
+          <label>Avatar</label>
+          <div class="avatar-grid" id="avatar-grid"></div>
+        </div>
+
+        <div class="field">
+          <label>Display Name</label>
+          <input type="text" id="prof-name" placeholder="What should people call you?" maxlength="24">
+        </div>
+
+        <div class="field">
+          <label>Bio</label>
+          <textarea id="prof-bio" placeholder="One or two lines. Who are you in the arena?" maxlength="160" style="width:100%;min-height:70px;background:rgba(10,6,18,0.6);border:1px solid var(--rule-strong);padding:12px 14px;font-size:15px;color:var(--ink);"></textarea>
+          <div style="text-align:right;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-3);margin-top:4px;"><span id="bio-count">0</span>/160</div>
+        </div>
+
+        <div class="field">
+          <label>Topics You Like Discussing</label>
+          <div class="topic-pool" id="topic-pool"></div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:8px;">
+          <button class="btn btn-primary" id="prof-save-btn" onclick="saveProfile()">Save Profile</button>
+          <button class="btn btn-ghost" onclick="showScreen('dashboard')">Cancel</button>
+        </div>
+        <p id="prof-status" style="margin-top:12px;font-size:13px;min-height:18px;"></p>
       </div>
     </div>
   </section>
@@ -1136,17 +1270,26 @@
         </div>
 
         <div class="field">
-          <label>Turn Timer <span class="slider-value" id="timer-value">5 min</span></label>
-          <div class="slider-row">
-            <input type="range" class="slider" id="timer-slider" min="0" max="12" step="1" value="1">
+          <label>Turn Timer</label>
+          <div class="chip-row" id="timer-chips">
+            <button class="chip" data-val="120">2 min</button>
+            <button class="chip active" data-val="300">5 min</button>
+            <button class="chip" data-val="600">10 min</button>
+            <button class="chip" data-val="900">15 min</button>
+            <button class="chip" data-val="1800">30 min</button>
+            <button class="chip" data-val="3600">1 hr</button>
           </div>
         </div>
 
         <div class="field">
-          <label>Message Cap (Per Side) <span class="slider-value" id="cap-value">3</span></label>
-          <div class="slider-row">
-            <input type="range" class="slider" id="cap-slider" min="3" max="30" step="1" value="3">
-            <button class="chip infinity" id="cap-infinity" type="button" onclick="toggleInfinity()" title="No cap — debate runs until someone concedes">∞</button>
+          <label>Message Cap (Per Side)</label>
+          <div class="chip-row" id="cap-chips">
+            <button class="chip" data-val="2">2</button>
+            <button class="chip active" data-val="3">3</button>
+            <button class="chip" data-val="4">4</button>
+            <button class="chip" data-val="6">6</button>
+            <button class="chip" data-val="8">8</button>
+            <button class="chip" data-val="9999">∞</button>
           </div>
         </div>
 
@@ -1180,9 +1323,8 @@
         <div class="summary-row"><span class="k">Guided</span><span class="v" id="s-guided">On</span></div>
         <div style="margin-top: 22px; display: flex; flex-direction: column; gap: 8px;">
           <button class="btn btn-primary" style="width: 100%;" onclick="createDebate()" id="create-debate-btn">⚡ Send Invite</button>
-          <button class="btn btn-ghost" style="width: 100%;" onclick="goToDashboard()">Cancel</button>
+          <button class="btn btn-ghost" style="width: 100%;" onclick="showScreen('dashboard')">Cancel</button>
         </div>
-        <p id="create-debate-error" style="margin-top: 12px; font-size: 12px; color: var(--hot-pink); font-family: 'JetBrains Mono', monospace; line-height: 1.5; min-height: 16px;"></p>
       </aside>
     </div>
   </section>
@@ -1221,7 +1363,7 @@
           <h2 class="display" style="font-size: 32px; margin-bottom: 12px; color: var(--gold);">Waiting on <span id="wait-name">your opponent</span>…</h2>
           <p style="color: var(--ink-2); margin-bottom: 8px;">They'll get a magic-link email at <span id="wait-email" style="color: var(--cyan); font-family: 'JetBrains Mono', monospace;">—</span></p>
           <p style="color: var(--ink-3); font-size: 13px; margin-bottom: 28px;">Once they accept, the debate begins. You'll get an email too.</p>
-          <button class="btn btn-ghost" onclick="goToDashboard()">← Back to Dashboard</button>
+          <button class="btn btn-ghost" onclick="showScreen('dashboard')">← Back to Dashboard</button>
         </div>
       </div>
     </div>
@@ -1231,12 +1373,14 @@
   <section id="screen-chat" class="screen">
     <div class="scoreboard">
       <div class="player left">
+        <div class="pava" id="player-a-ava">🦊</div>
         <div class="pname" id="player-a-name">—</div>
         <div class="pstance" id="player-a-stance">Affirmative</div>
         <div class="pscore" id="player-a-score">0</div>
       </div>
       <div class="vs-divider">VS</div>
       <div class="player right">
+        <div class="pava" id="player-b-ava">🐙</div>
         <div class="pname" id="player-b-name">—</div>
         <div class="pstance" id="player-b-stance">Negative</div>
         <div class="pscore" id="player-b-score">0</div>
@@ -1314,7 +1458,7 @@
       </div>
       <div class="summary-actions">
         <button class="btn btn-primary" onclick="screenshotHint()">📸 Screenshot This</button>
-        <button class="btn btn-secondary" onclick="goToDashboard()">← Dashboard</button>
+        <button class="btn btn-secondary" onclick="showScreen('dashboard')">← Dashboard</button>
       </div>
     </div>
   </section>
@@ -1337,12 +1481,20 @@ const SUPABASE_ANON_KEY = 'sb_publishable_flkVZjZgDxbofEGjvP6B1A_fSJlQjwf';
 // ============================================================================
 var sb = null;
 let currentUser = null;
+let currentProfile = null;    // this user's profile row
+const profileCache = {};      // email -> profile (for opponents)
 let currentDebate = null;     // {id, topic, mode, ...}
 let currentMessages = [];     // ordered list
 let timerInterval = null;
 let timerRemaining = 0;
 let messagesChannel = null;
 let debateChannel = null;
+
+// preset avatars (no uploads needed — fast, reliable, on-brand)
+const AVATARS = ['🦊','🐙','👾','🤖','🐉','🦄','🔥','⚡','🎭','🃏','🐺','🦅','🦉','🐝','🦁','🐯','🦖','🪐','💎','🌶️','🧠','👑','🎯','🦂'];
+// topic suggestions players can tag on their profile
+const TOPIC_POOL = ['Politics','Philosophy','Movies','Tech','Sports','Food','Science','Music','Gaming','Ethics','History','Books','Economics','Relationships','Art','Space','Religion','Health','Travel','Pop Culture'];
+let editorDraft = { avatar: '🦊', topics: [] };
 
 const state = {
   // contract form
@@ -1356,25 +1508,6 @@ const state = {
   guidedMode: true,
   autoConcede: true,
 };
-
-// Stepped values for the turn-timer slider. The slider's integer position
-// indexes into this array so the user gets useful stops instead of a useless
-// linear sweep from 120s to 259200s.
-const TIMER_STEPS = [
-  120,    // 2 min
-  300,    // 5 min
-  600,    // 10 min
-  900,    // 15 min
-  1800,   // 30 min
-  3600,   // 1 hr
-  7200,   // 2 hr
-  10800,  // 3 hr
-  21600,  // 6 hr
-  43200,  // 12 hr
-  86400,  // 1 day
-  172800, // 2 days
-  259200, // 3 days
-];
 
 // ============================================================================
 // INIT
@@ -1393,19 +1526,12 @@ async function init() {
 
   // Handle auth state changes
   sb.auth.onAuthStateChange((event, session) => {
-    if (event === 'SIGNED_OUT') {
+    if (event === 'SIGNED_IN' && session) {
+      onSignedIn(session.user);
+    } else if (event === 'SIGNED_OUT') {
       currentUser = null;
       updateMastUser();
       showScreen('auth');
-      return;
-    }
-    if (event === 'SIGNED_IN' && session) {
-      // Supabase re-emits SIGNED_IN on tab focus / token refresh.
-      // Only run the full sign-in flow if it's actually a new/different user,
-      // otherwise we'd kick the user back to the dashboard every time they
-      // switched tabs.
-      if (currentUser && currentUser.id === session.user.id) return;
-      onSignedIn(session.user);
     }
   });
 
@@ -1441,6 +1567,10 @@ async function onSignedIn(user) {
   if (error) console.warn('Allowlist check error:', error);
   if (!allowed) { showScreen('no-access'); return; }
 
+  // Load (or create) this user's profile, then refresh the masthead with it
+  await loadOrCreateProfile();
+  updateMastUser();
+
   // Check URL for debate invite (?debate=xyz)
   const params = new URLSearchParams(window.location.search);
   const debateId = params.get('debate');
@@ -1454,7 +1584,9 @@ async function onSignedIn(user) {
 function updateMastUser() {
   const el = document.getElementById('mast-user');
   if (currentUser) {
-    el.innerHTML = `<span class="pill">● ${escapeHtml(currentUser.email)}</span>`;
+    const ava = (currentProfile && currentProfile.avatar) || '👤';
+    const name = (currentProfile && currentProfile.display_name) || currentUser.email.split('@')[0];
+    el.innerHTML = `<span class="pill" onclick="openProfileEditor()" title="Edit your profile"><span class="mast-ava">${escapeHtml(ava)}</span>${escapeHtml(name)}</span>`;
   } else {
     el.innerHTML = '';
   }
@@ -1496,24 +1628,151 @@ async function signOut() {
 }
 
 // ============================================================================
-// DASHBOARD
+// PROFILES
 // ============================================================================
-function goToDashboard() {
-  // drop ?debate=... so a refresh doesn't bounce back into an old debate
-  if (window.location.search) {
-    window.history.replaceState({}, '', window.location.pathname);
+async function loadOrCreateProfile() {
+  const email = currentUser.email.toLowerCase();
+  const fallback = { email, display_name: email.split('@')[0], avatar: '🦊', bio: '', topics: [] };
+  try {
+    const { data, error } = await sb.from('profiles').select('*').eq('email', email).maybeSingle();
+    if (error) throw error;
+    if (data) { currentProfile = normalizeProfile(data); profileCache[email] = currentProfile; return; }
+    // none yet — create a default row
+    const def = { ...fallback, avatar: AVATARS[Math.floor(Math.random() * AVATARS.length)] };
+    const { data: created, error: insErr } = await sb.from('profiles').insert(def).select().single();
+    if (insErr) throw insErr;
+    currentProfile = normalizeProfile(created);
+  } catch (e) {
+    // Table may not exist yet (user hasn't run the profiles SQL) — degrade gracefully.
+    console.warn('Profiles unavailable; using local default.', e.message || e);
+    currentProfile = fallback;
   }
-  // tear down any live channels
-  if (messagesChannel) { sb.removeChannel(messagesChannel); messagesChannel = null; }
-  if (debateChannel) { sb.removeChannel(debateChannel); debateChannel = null; }
-  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-  currentDebate = null;
-  currentMessages = [];
-  loadDashboard();
+  profileCache[email] = currentProfile;
 }
 
+function normalizeProfile(p) {
+  return {
+    email: p.email,
+    display_name: p.display_name || p.email.split('@')[0],
+    avatar: p.avatar || '🦊',
+    bio: p.bio || '',
+    topics: Array.isArray(p.topics) ? p.topics : [],
+  };
+}
+
+async function getProfile(email) {
+  email = (email || '').toLowerCase();
+  if (profileCache[email]) return profileCache[email];
+  try {
+    const { data } = await sb.from('profiles').select('*').eq('email', email).maybeSingle();
+    if (data) { profileCache[email] = normalizeProfile(data); return profileCache[email]; }
+  } catch (e) { /* table missing or no access — fall through */ }
+  const fb = { email, display_name: email.split('@')[0], avatar: '👤', bio: '', topics: [] };
+  profileCache[email] = fb;
+  return fb;
+}
+
+function renderDashboardProfile(stats) {
+  const p = currentProfile || { avatar: '👤', display_name: currentUser.email.split('@')[0], bio: '', topics: [] };
+  document.getElementById('dash-ava').textContent = p.avatar || '👤';
+  document.getElementById('dash-name').textContent = p.display_name;
+  document.getElementById('dash-email').textContent = currentUser.email;
+  const bioEl = document.getElementById('dash-bio');
+  if (p.bio && p.bio.trim()) { bioEl.textContent = p.bio; bioEl.classList.remove('empty'); }
+  else { bioEl.textContent = 'No bio yet — tap “Edit Profile” to add one.'; bioEl.classList.add('empty'); }
+  const topicsEl = document.getElementById('dash-topics');
+  topicsEl.innerHTML = (p.topics && p.topics.length)
+    ? p.topics.map(t => `<span class="topic-tag">${escapeHtml(t)}</span>`).join('')
+    : '<span style="color:var(--ink-3);font-style:italic;font-size:13px;">No favorite topics tagged yet.</span>';
+  if (stats) {
+    document.getElementById('stat-total').textContent = stats.total;
+    document.getElementById('stat-active').textContent = stats.active;
+    document.getElementById('stat-pending').textContent = stats.pending;
+    document.getElementById('stat-done').textContent = stats.done;
+  }
+}
+
+function openProfileEditor() {
+  const p = currentProfile || { avatar: '🦊', display_name: currentUser.email.split('@')[0], bio: '', topics: [] };
+  editorDraft = { avatar: p.avatar || '🦊', topics: [...(p.topics || [])] };
+  document.getElementById('prof-name').value = p.display_name || '';
+  document.getElementById('prof-bio').value = p.bio || '';
+  document.getElementById('bio-count').textContent = (p.bio || '').length;
+  renderAvatarGrid();
+  renderTopicPool();
+  document.getElementById('prof-status').textContent = '';
+  showScreen('profile');
+}
+
+function renderAvatarGrid() {
+  const grid = document.getElementById('avatar-grid');
+  grid.innerHTML = '';
+  for (const a of AVATARS) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'ava-pick' + (a === editorDraft.avatar ? ' active' : '');
+    b.textContent = a;
+    b.onclick = () => { editorDraft.avatar = a; renderAvatarGrid(); };
+    grid.appendChild(b);
+  }
+}
+
+function renderTopicPool() {
+  const pool = document.getElementById('topic-pool');
+  pool.innerHTML = '';
+  for (const t of TOPIC_POOL) {
+    const on = editorDraft.topics.includes(t);
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip' + (on ? ' active' : '');
+    b.textContent = t;
+    b.onclick = () => {
+      if (editorDraft.topics.includes(t)) editorDraft.topics = editorDraft.topics.filter(x => x !== t);
+      else if (editorDraft.topics.length < 8) editorDraft.topics.push(t);
+      else { showToast('Up to 8 topics.'); return; }
+      renderTopicPool();
+    };
+    pool.appendChild(b);
+  }
+}
+
+async function saveProfile() {
+  const btn = document.getElementById('prof-save-btn');
+  const status = document.getElementById('prof-status');
+  const name = document.getElementById('prof-name').value.trim() || currentUser.email.split('@')[0];
+  const bio = document.getElementById('prof-bio').value.trim();
+  const row = {
+    email: currentUser.email.toLowerCase(),
+    display_name: name,
+    avatar: editorDraft.avatar,
+    bio,
+    topics: editorDraft.topics,
+    updated_at: new Date().toISOString(),
+  };
+  btn.disabled = true; btn.textContent = 'Saving…';
+  status.textContent = '';
+  try {
+    const { data, error } = await sb.from('profiles').upsert(row, { onConflict: 'email' }).select().single();
+    if (error) throw error;
+    currentProfile = normalizeProfile(data);
+    profileCache[currentProfile.email] = currentProfile;
+    updateMastUser();
+    showToast('Profile saved ✓', 'cyan');
+    await loadDashboard();
+  } catch (e) {
+    console.error(e);
+    status.innerHTML = `<span class="danger">Couldn't save: ${escapeHtml(e.message || 'profiles table missing — run the profiles SQL once.')}</span>`;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Save Profile';
+  }
+}
+
+// ============================================================================
+// DASHBOARD
+// ============================================================================
 async function loadDashboard() {
   showScreen('dashboard');
+  renderDashboardProfile(null); // paint profile immediately
   const list = document.getElementById('debate-list');
   list.innerHTML = '<p style="color: var(--ink-3); font-style: italic;">Loading…</p>';
 
@@ -1525,9 +1784,20 @@ async function loadDashboard() {
     .order('created_at', { ascending: false });
 
   if (error) {
+    renderDashboardProfile({ total: 0, active: 0, pending: 0, done: 0 });
     list.innerHTML = `<p class="danger">Error loading debates: ${escapeHtml(error.message)}</p>`;
     return;
   }
+
+  // compute stats from the debate list
+  const stats = {
+    total: debates.length,
+    active: debates.filter(d => d.status === 'active').length,
+    pending: debates.filter(d => d.status === 'pending').length,
+    done: debates.filter(d => d.status === 'finished').length,
+  };
+  renderDashboardProfile(stats);
+
   if (!debates || debates.length === 0) {
     list.innerHTML = '<p style="color: var(--ink-3); font-style: italic; padding: 12px 0;">No debates yet. Start one above ⬆</p>';
     return;
@@ -1573,33 +1843,12 @@ function goToContract() {
   state.guidedMode = true;
   state.autoConcede = true;
   document.querySelectorAll('.mode-card').forEach(c => c.classList.toggle('active', c.dataset.mode === 'competitive'));
-
-  // reset sliders
-  const timerSlider = document.getElementById('timer-slider');
-  const capSlider = document.getElementById('cap-slider');
-  const infBtn = document.getElementById('cap-infinity');
-  if (timerSlider) timerSlider.value = TIMER_STEPS.indexOf(300); // 5 min
-  if (capSlider) { capSlider.value = 3; capSlider.disabled = false; }
-  if (infBtn) infBtn.classList.remove('active');
-
+  document.querySelectorAll('#timer-chips .chip').forEach(c => c.classList.toggle('active', c.dataset.val === '300'));
+  document.querySelectorAll('#cap-chips .chip').forEach(c => c.classList.toggle('active', c.dataset.val === '3'));
   document.getElementById('t-guided').classList.add('on');
   document.getElementById('t-autoconcede').classList.add('on');
   refreshContractSummary();
   showScreen('contract');
-}
-
-function toggleInfinity() {
-  const btn = document.getElementById('cap-infinity');
-  const slider = document.getElementById('cap-slider');
-  const isOn = btn.classList.toggle('active');
-  if (isOn) {
-    state.messageCap = 9999;
-    slider.disabled = true;
-  } else {
-    state.messageCap = +slider.value;
-    slider.disabled = false;
-  }
-  refreshContractSummary();
 }
 
 function selectMode(el) {
@@ -1616,23 +1865,20 @@ function toggle(el) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  const timerSlider = document.getElementById('timer-slider');
-  if (timerSlider) {
-    timerSlider.addEventListener('input', e => {
-      const idx = Math.max(0, Math.min(TIMER_STEPS.length - 1, +e.target.value));
-      state.turnSeconds = TIMER_STEPS[idx];
-      refreshContractSummary();
-    });
-  }
-  const capSlider = document.getElementById('cap-slider');
-  if (capSlider) {
-    capSlider.addEventListener('input', e => {
-      // ignore if infinity is on (slider is disabled but be defensive)
-      if (document.getElementById('cap-infinity').classList.contains('active')) return;
-      state.messageCap = +e.target.value;
-      refreshContractSummary();
-    });
-  }
+  document.getElementById('timer-chips').addEventListener('click', e => {
+    if (!e.target.classList.contains('chip')) return;
+    document.querySelectorAll('#timer-chips .chip').forEach(c => c.classList.remove('active'));
+    e.target.classList.add('active');
+    state.turnSeconds = +e.target.dataset.val;
+    refreshContractSummary();
+  });
+  document.getElementById('cap-chips').addEventListener('click', e => {
+    if (!e.target.classList.contains('chip')) return;
+    document.querySelectorAll('#cap-chips .chip').forEach(c => c.classList.remove('active'));
+    e.target.classList.add('active');
+    state.messageCap = +e.target.dataset.val;
+    refreshContractSummary();
+  });
   ['topic', 'opp-email', 'stance-a', 'stance-b'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('input', e => {
@@ -1643,6 +1889,11 @@ document.addEventListener('DOMContentLoaded', () => {
       refreshContractSummary();
     });
   });
+  const bioEl = document.getElementById('prof-bio');
+  if (bioEl) bioEl.addEventListener('input', e => {
+    const c = document.getElementById('bio-count');
+    if (c) c.textContent = e.target.value.length;
+  });
 });
 
 function refreshContractSummary() {
@@ -1652,70 +1903,20 @@ function refreshContractSummary() {
   document.getElementById('s-timer').textContent = fmtTime(state.turnSeconds);
   document.getElementById('s-cap').textContent = state.messageCap >= 9999 ? '∞' : `${state.messageCap} each`;
   document.getElementById('s-guided').textContent = state.guidedMode ? 'On' : 'Off';
-
-  // inline labels next to the sliders
-  const timerLabel = document.getElementById('timer-value');
-  if (timerLabel) timerLabel.textContent = fmtTime(state.turnSeconds);
-  const capLabel = document.getElementById('cap-value');
-  if (capLabel) {
-    if (state.messageCap >= 9999) {
-      capLabel.textContent = '∞ (concede to end)';
-      capLabel.classList.add('muted');
-    } else {
-      capLabel.textContent = state.messageCap;
-      capLabel.classList.remove('muted');
-    }
-  }
 }
 function fmtTime(s) {
-  if (s >= 86400) {
-    const d = s / 86400;
-    return d === 1 ? '1 day' : `${d} days`;
-  }
-  if (s >= 3600) {
-    const h = s / 3600;
-    return h === 1 ? '1 hr' : `${h} hr`;
-  }
-  if (s >= 60) {
-    const m = s / 60;
-    return m === 1 ? '1 min' : `${m} min`;
-  }
+  if (s >= 3600) return (s / 3600) + ' hr';
+  if (s >= 60) return (s / 60) + ' min';
   return s + 's';
 }
 
 // ============================================================================
 // CREATE DEBATE
 // ============================================================================
-function setCreateError(msg) {
-  const el = document.getElementById('create-debate-error');
-  if (el) el.textContent = msg || '';
-}
-
 async function createDebate() {
-  setCreateError('');
-
-  // Read directly from the DOM — autofill / paste can bypass the 'input' event
-  // and leave the in-memory state object empty.
-  const topic = document.getElementById('topic').value.trim();
-  const oppEmail = document.getElementById('opp-email').value.trim().toLowerCase();
-  const stanceA = document.getElementById('stance-a').value.trim();
-  const stanceB = document.getElementById('stance-b').value.trim();
-  state.topic = topic;
-  state.oppEmail = oppEmail;
-  state.stanceA = stanceA;
-  state.stanceB = stanceB;
-
-  if (!topic) { setCreateError('Pick a topic first.'); showToast('Pick a topic first.'); return; }
-  if (!oppEmail || !oppEmail.includes('@') || !oppEmail.includes('.')) {
-    setCreateError('Need a valid opponent email.');
-    showToast('Need a valid opponent email.');
-    return;
-  }
-  if (oppEmail === currentUser.email.toLowerCase()) {
-    setCreateError("You can't debate yourself.");
-    showToast("You can't debate yourself.");
-    return;
-  }
+  if (!state.topic.trim()) { showToast('Pick a topic first.'); return; }
+  if (!state.oppEmail || !state.oppEmail.includes('@')) { showToast('Need a valid opponent email.'); return; }
+  if (state.oppEmail === currentUser.email.toLowerCase()) { showToast('You can\'t debate yourself.'); return; }
 
   const btn = document.getElementById('create-debate-btn');
   btn.disabled = true;
@@ -1723,18 +1924,13 @@ async function createDebate() {
 
   try {
     // Check opponent is on allowlist
-    const { data: oppAllowed, error: allowErr } = await sb
+    const { data: oppAllowed } = await sb
       .from('allowed_emails')
       .select('email')
-      .eq('email', oppEmail)
+      .eq('email', state.oppEmail)
       .maybeSingle();
-    if (allowErr) {
-      console.warn('Allowlist lookup error:', allowErr);
-      // Non-fatal: continue. RLS may hide rows from this user; the insert
-      // below is the real source of truth.
-    }
-    if (allowErr === null && oppAllowed === null) {
-      setCreateError(`${oppEmail} isn't on the allowlist. Add them to the allowed_emails table in Supabase, then try again.`);
+    if (!oppAllowed) {
+      showToast(`${state.oppEmail} isn't on the allowlist yet — add them in Supabase first.`);
       btn.disabled = false;
       btn.textContent = '⚡ Send Invite';
       return;
@@ -1743,10 +1939,10 @@ async function createDebate() {
     // Create debate row
     const { data: debate, error } = await sb.from('debates').insert({
       creator_email: currentUser.email.toLowerCase(),
-      opponent_email: oppEmail,
-      topic,
-      stance_a: stanceA || 'Affirmative',
-      stance_b: stanceB || 'Negative',
+      opponent_email: state.oppEmail,
+      topic: state.topic.trim(),
+      stance_a: state.stanceA.trim() || 'Affirmative',
+      stance_b: state.stanceB.trim() || 'Negative',
       mode: state.mode,
       turn_seconds: state.turnSeconds,
       message_cap: state.messageCap,
@@ -1761,21 +1957,19 @@ async function createDebate() {
     // Send invite email via Supabase magic link, with redirect to the debate
     const redirectUrl = `${window.location.origin}${window.location.pathname}?debate=${debate.id}`;
     const { error: inviteErr } = await sb.auth.signInWithOtp({
-      email: oppEmail,
+      email: state.oppEmail,
       options: { emailRedirectTo: redirectUrl }
     });
     if (inviteErr) console.warn('Invite email send failed:', inviteErr);
 
     // Show waiting screen
-    document.getElementById('wait-email').textContent = oppEmail;
-    document.getElementById('wait-name').textContent = oppEmail.split('@')[0];
+    document.getElementById('wait-email').textContent = state.oppEmail;
+    document.getElementById('wait-name').textContent = state.oppEmail.split('@')[0];
     showScreen('waiting');
     showToast('Invite sent ✓', 'cyan');
   } catch (e) {
-    console.error('createDebate failed:', e);
-    const msg = e.message || JSON.stringify(e);
-    setCreateError('Failed: ' + msg);
-    showToast('Error: ' + msg);
+    console.error(e);
+    showToast('Error: ' + (e.message || 'failed to create debate'));
     btn.disabled = false;
     btn.textContent = '⚡ Send Invite';
   }
@@ -1886,6 +2080,16 @@ function showChat() {
     : 'Direct mode · flags appear after sending';
   document.getElementById('btn-preview').style.display = currentDebate.guided_mode ? '' : 'none';
 
+  // load both players' avatars, then repaint
+  Promise.all([
+    getProfile(currentDebate.creator_email),
+    getProfile(currentDebate.opponent_email),
+  ]).then(([pa, pb]) => {
+    const ea = document.getElementById('player-a-ava'); if (ea) ea.textContent = pa.avatar || '🦊';
+    const eb = document.getElementById('player-b-ava'); if (eb) eb.textContent = pb.avatar || '🐙';
+    renderMessages();
+  });
+
   refreshTurnUI();
   renderMessages();
   startTimer();
@@ -1945,7 +2149,6 @@ function computeScore(role) {
   }
   return score;
 }
-
 // ============================================================================
 // MESSAGES — load, render, subscribe
 // ============================================================================
@@ -1976,8 +2179,12 @@ function renderMessages() {
     const concedeBtn = canConcede
       ? `<button class="concede-btn" onclick="concede('${m.id}')">Concede ✓</button>`
       : (m.conceded_by ? `<span class="concede-btn conceded">✓ Conceded</span>` : '');
+    const authEmail = (m.role === 'a' ? currentDebate.creator_email : currentDebate.opponent_email || '').toLowerCase();
+    const prof = profileCache[authEmail];
+    const avaInner = prof && prof.avatar ? escapeHtml(prof.avatar) : escapeHtml(name[0].toUpperCase());
+    const avaClass = prof && prof.avatar ? 'avatar emoji' : 'avatar';
     div.innerHTML = `
-      <div class="avatar">${escapeHtml(name[0].toUpperCase())}</div>
+      <div class="${avaClass}">${avaInner}</div>
       <div>
         <div class="msg-body">${renderTextWithFlags(m.text, m.flags || [])}</div>
         <div class="msg-meta">
