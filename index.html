@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>DISCOURSE // Mediated Debate</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1091,6 +1091,112 @@
   /* message + scoreboard avatars can hold an emoji */
   .avatar.emoji { font-family: inherit; font-size: 20px; }
   .player .pava { font-size: 26px; line-height: 1; margin-bottom: 2px; }
+
+  /* ===== RANGE SLIDERS (timer + cap) ===== */
+  .slider-row { display: flex; align-items: center; gap: 14px; }
+  .slider-row input[type="range"] {
+    -webkit-appearance: none; appearance: none;
+    flex: 1; height: 6px; border-radius: 999px;
+    background: rgba(10, 6, 18, 0.7);
+    border: 1px solid var(--rule-strong);
+    cursor: pointer;
+    outline: none;
+  }
+  .slider-row input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--hot-pink);
+    border: 2px solid var(--void);
+    box-shadow: 0 0 12px var(--hot-pink-glow);
+    cursor: pointer;
+  }
+  .slider-row input[type="range"]::-moz-range-thumb {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--hot-pink);
+    border: 2px solid var(--void);
+    box-shadow: 0 0 12px var(--hot-pink-glow);
+    cursor: pointer;
+  }
+  .slider-row input[type="range"]:disabled { opacity: 0.35; cursor: not-allowed; }
+  .slider-val {
+    font-family: 'Bowlby One', serif;
+    font-size: 18px;
+    color: var(--cyan);
+    min-width: 96px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 0 12px var(--cyan-glow);
+  }
+  .slider-hint {
+    font-size: 11px; color: var(--ink-3);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.04em; margin-top: 10px;
+  }
+  .inf-btn {
+    font-family: 'Bowlby One', serif;
+    font-size: 22px; line-height: 1;
+    width: 48px; height: 40px;
+    flex-shrink: 0;
+    display: grid; place-items: center;
+    border: 1.5px solid var(--rule-strong);
+    background: rgba(10, 6, 18, 0.4);
+    color: var(--ink-2);
+    transition: all .15s;
+  }
+  .inf-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .inf-btn.active {
+    background: var(--gold); color: var(--void);
+    border-color: var(--gold);
+    box-shadow: 0 0 16px rgba(255, 211, 77, 0.5);
+  }
+
+  /* ============================================
+     📱 MOBILE — phones are the primary test surface
+     ============================================ */
+  @media (max-width: 600px) {
+    /* breathing room at the very top so the notch / status bar never clips the HUD */
+    .app {
+      padding-left: 12px;
+      padding-right: 12px;
+      padding-top: max(18px, env(safe-area-inset-top));
+      padding-bottom: calc(56px + env(safe-area-inset-bottom));
+    }
+    .masthead {
+      padding: 10px 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 8px;
+      row-gap: 6px;
+    }
+    .masthead .brand { font-size: 17px; }
+    .masthead .brand .sub { display: none; }
+
+    /* CHAT: wider bubbles = more words per line */
+    .messages { gap: 12px; }
+    .msg { max-width: 94%; gap: 9px; }
+    .msg-body { padding: 12px 14px; font-size: 15px; }
+    .avatar { width: 32px; height: 32px; font-size: 14px; }
+    .avatar.emoji { font-size: 17px; }
+
+    /* scoreboard scales down so it fits one row */
+    .scoreboard { padding: 14px 12px; gap: 8px; }
+    .player .pava { font-size: 22px; }
+    .player .pname { font-size: 16px; }
+    .pscore { font-size: 38px; }
+    .vs-divider { font-size: 24px; }
+    .topic-strip { padding: 10px 14px; }
+    .topic-strip .topic { font-size: 14px; }
+
+    /* composer + sliders */
+    .composer textarea { font-size: 16px; } /* 16px stops iOS auto-zoom */
+    .slider-val { min-width: 74px; font-size: 16px; }
+
+    /* dashboard profile card stacks on narrow screens */
+    .profile-card { grid-template-columns: 1fr; gap: 16px; padding: 20px 18px; }
+    .profile-ava { width: 72px; height: 72px; font-size: 40px; }
+    .summary-card { padding: 24px 18px; }
+    .panel { padding: 22px 16px; }
+  }
 </style>
 </head>
 <body>
@@ -1271,26 +1377,21 @@
 
         <div class="field">
           <label>Turn Timer</label>
-          <div class="chip-row" id="timer-chips">
-            <button class="chip" data-val="120">2 min</button>
-            <button class="chip active" data-val="300">5 min</button>
-            <button class="chip" data-val="600">10 min</button>
-            <button class="chip" data-val="900">15 min</button>
-            <button class="chip" data-val="1800">30 min</button>
-            <button class="chip" data-val="3600">1 hr</button>
+          <div class="slider-row">
+            <input type="range" id="timer-slider" min="0" max="11" step="1" value="9">
+            <div class="slider-val" id="timer-val">1 day</div>
           </div>
+          <div class="slider-hint">5 minutes &rarr; 3 days. Give people time to think and build a case.</div>
         </div>
 
         <div class="field">
           <label>Message Cap (Per Side)</label>
-          <div class="chip-row" id="cap-chips">
-            <button class="chip" data-val="2">2</button>
-            <button class="chip active" data-val="3">3</button>
-            <button class="chip" data-val="4">4</button>
-            <button class="chip" data-val="6">6</button>
-            <button class="chip" data-val="8">8</button>
-            <button class="chip" data-val="9999">∞</button>
+          <div class="slider-row">
+            <input type="range" id="cap-slider" min="2" max="30" step="1" value="5">
+            <div class="slider-val" id="cap-val">5</div>
+            <button type="button" class="inf-btn" id="cap-inf" onclick="toggleInfinityCap()" title="Unlimited messages">&infin;</button>
           </div>
+          <div class="slider-hint">2 &rarr; 30 messages per side. Tap &infin; for unlimited.</div>
         </div>
 
         <div class="field">
@@ -1503,8 +1604,8 @@ const state = {
   oppEmail: '',
   stanceA: '',
   stanceB: '',
-  turnSeconds: 300,
-  messageCap: 3,
+  turnSeconds: 86400,
+  messageCap: 5,
   guidedMode: true,
   autoConcede: true,
 };
@@ -1838,13 +1939,23 @@ function goToContract() {
   state.stanceA = '';
   state.stanceB = '';
   state.mode = 'competitive';
-  state.turnSeconds = 300;
-  state.messageCap = 3;
+  state.turnSeconds = 86400;   // default: 1 day
+  state.messageCap = 5;
   state.guidedMode = true;
   state.autoConcede = true;
   document.querySelectorAll('.mode-card').forEach(c => c.classList.toggle('active', c.dataset.mode === 'competitive'));
-  document.querySelectorAll('#timer-chips .chip').forEach(c => c.classList.toggle('active', c.dataset.val === '300'));
-  document.querySelectorAll('#cap-chips .chip').forEach(c => c.classList.toggle('active', c.dataset.val === '3'));
+  // reset timer slider to the 1-day stop
+  const tSlider = document.getElementById('timer-slider');
+  if (tSlider) tSlider.value = TIMER_STOPS.indexOf(86400);
+  const tVal = document.getElementById('timer-val');
+  if (tVal) tVal.textContent = fmtTime(86400);
+  // reset cap slider + infinity button
+  const cSlider = document.getElementById('cap-slider');
+  if (cSlider) { cSlider.disabled = false; cSlider.value = 5; }
+  const cInf = document.getElementById('cap-inf');
+  if (cInf) cInf.classList.remove('active');
+  const cVal = document.getElementById('cap-val');
+  if (cVal) cVal.textContent = '5';
   document.getElementById('t-guided').classList.add('on');
   document.getElementById('t-autoconcede').classList.add('on');
   refreshContractSummary();
@@ -1865,18 +1976,17 @@ function toggle(el) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('timer-chips').addEventListener('click', e => {
-    if (!e.target.classList.contains('chip')) return;
-    document.querySelectorAll('#timer-chips .chip').forEach(c => c.classList.remove('active'));
-    e.target.classList.add('active');
-    state.turnSeconds = +e.target.dataset.val;
+  const tSlider = document.getElementById('timer-slider');
+  if (tSlider) tSlider.addEventListener('input', e => {
+    state.turnSeconds = TIMER_STOPS[+e.target.value] || 300;
+    document.getElementById('timer-val').textContent = fmtTime(state.turnSeconds);
     refreshContractSummary();
   });
-  document.getElementById('cap-chips').addEventListener('click', e => {
-    if (!e.target.classList.contains('chip')) return;
-    document.querySelectorAll('#cap-chips .chip').forEach(c => c.classList.remove('active'));
-    e.target.classList.add('active');
-    state.messageCap = +e.target.dataset.val;
+  const cSlider = document.getElementById('cap-slider');
+  if (cSlider) cSlider.addEventListener('input', e => {
+    if (state.messageCap >= 9999) return; // infinity active — ignore
+    state.messageCap = +e.target.value;
+    document.getElementById('cap-val').textContent = e.target.value;
     refreshContractSummary();
   });
   ['topic', 'opp-email', 'stance-a', 'stance-b'].forEach(id => {
@@ -1904,8 +2014,32 @@ function refreshContractSummary() {
   document.getElementById('s-cap').textContent = state.messageCap >= 9999 ? '∞' : `${state.messageCap} each`;
   document.getElementById('s-guided').textContent = state.guidedMode ? 'On' : 'Off';
 }
+// Turn-timer slider stops (seconds): 5 min up to 3 days
+const TIMER_STOPS = [300, 600, 900, 1800, 3600, 7200, 14400, 28800, 43200, 86400, 172800, 259200];
+
+function toggleInfinityCap() {
+  const btn = document.getElementById('cap-inf');
+  const slider = document.getElementById('cap-slider');
+  const valEl = document.getElementById('cap-val');
+  if (state.messageCap >= 9999) {
+    // turn infinity OFF — restore the slider's value
+    btn.classList.remove('active');
+    slider.disabled = false;
+    state.messageCap = +slider.value;
+    valEl.textContent = slider.value;
+  } else {
+    // turn infinity ON — lock the slider
+    btn.classList.add('active');
+    slider.disabled = true;
+    state.messageCap = 9999;
+    valEl.textContent = '∞';
+  }
+  refreshContractSummary();
+}
+
 function fmtTime(s) {
-  if (s >= 3600) return (s / 3600) + ' hr';
+  if (s >= 86400) { const d = s / 86400; return d + (d === 1 ? ' day' : ' days'); }
+  if (s >= 3600) { const h = s / 3600; return h + (h === 1 ? ' hr' : ' hrs'); }
   if (s >= 60) return (s / 60) + ' min';
   return s + 's';
 }
@@ -2298,10 +2432,15 @@ function startTimer() {
   }, 1000);
 }
 function updateTimerDisplay() {
-  const m = Math.floor(Math.max(0, timerRemaining) / 60);
-  const s = Math.max(0, timerRemaining) % 60;
+  const rem = Math.max(0, timerRemaining);
   const el = document.getElementById('timer');
-  el.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+  const d = Math.floor(rem / 86400);
+  const h = Math.floor((rem % 86400) / 3600);
+  const m = Math.floor((rem % 3600) / 60);
+  const s = rem % 60;
+  if (d > 0) el.textContent = `${d}d ${h}h`;
+  else if (h > 0) el.textContent = `${h}h ${m.toString().padStart(2, '0')}m`;
+  else el.textContent = `${m}:${s.toString().padStart(2, '0')}`;
   el.classList.toggle('warn', timerRemaining <= 30 && timerRemaining > 0);
 }
 
