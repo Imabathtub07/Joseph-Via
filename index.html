@@ -1882,6 +1882,12 @@ async function sendMagicLink() {
 async function signOut() {
   if (messagesChannel) sb.removeChannel(messagesChannel);
   if (debateChannel) sb.removeChannel(debateChannel);
+  closeNego();
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  hideForfeitModal();
+  currentDebate = null;
+  currentMessages = [];
+  timeoutShownForTurn = null;
   await sb.auth.signOut();
   // Clear URL params
   window.history.replaceState({}, '', window.location.pathname);
@@ -2650,7 +2656,11 @@ function updateTimerDisplay() {
 // raised the forfeit question, the player whose device notices it flags it in
 // the DB; both clients then show the modal via realtime + here.
 function maybeHandleTimeout() {
+  // Only ever relevant when signed in and actually viewing an active debate's
+  // chat screen. Guards against a stray timer tick firing on the auth screen.
+  if (!currentUser || !currentUser.email) return;
   if (!currentDebate || currentDebate.status !== 'active') return;
+  if (!document.getElementById('screen-chat').classList.contains('active')) return;
   const rem = remainingSeconds();
   if (rem > 0) return;
   // a unique key for THIS expired turn so we don't re-fire on every tick
@@ -2658,12 +2668,10 @@ function maybeHandleTimeout() {
   if (timeoutShownForTurn === turnKey && !document.getElementById('forfeit-modal').hidden) return;
 
   const me = currentUser.email.toLowerCase();
-  const isCreator = currentDebate.creator_email === me;
-  const myRole = isCreator ? 'a' : 'b';
   const lateRole = currentDebate.current_turn; // whoever's turn it is, is late
 
   // If nobody has raised it yet, the FIRST device to notice records it so both
-  // sides converge on the same prompt. Auto-concede setting decides default.
+  // sides converge on the same prompt.
   if (!currentDebate.forfeit_offered_by && !currentDebate.forfeit_decision) {
     sb.from('debates').update({ forfeit_offered_by: lateRole })
       .eq('id', currentDebate.id)
@@ -2677,7 +2685,9 @@ function maybeHandleTimeout() {
 // FORFEIT / TIMEOUT MODAL
 // ============================================================================
 function showForfeitModal() {
-  if (!currentDebate) return;
+  // Never render without a signed-in user and a real debate behind it —
+  // otherwise the modal draws with no buttons and traps the screen.
+  if (!currentUser || !currentUser.email || !currentDebate) { hideForfeitModal(); return; }
   const modal = document.getElementById('forfeit-modal');
   const me = currentUser.email.toLowerCase();
   const myRole = currentDebate.creator_email === me ? 'a' : 'b';
@@ -3031,6 +3041,15 @@ function showScreen(id) {
   const el = document.getElementById('screen-' + id);
   if (el) el.classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // The timer + forfeit modal belong to the chat screen only. Leaving it must
+  // stop the countdown and dismiss any timeout prompt, so neither can fire on
+  // the auth/dashboard screens.
+  if (id !== 'chat') {
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+    hideForfeitModal();
+  }
+
   // The negotiation bubble only makes sense pre-match, when a debate row
   // exists to attach the thread to: the creator's "waiting" screen and the
   // opponent's "invite" landing. Tear it down everywhere else.
