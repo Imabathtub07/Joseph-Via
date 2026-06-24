@@ -742,23 +742,6 @@
   .composer-hint { font-size: 11px; color: var(--ink-3); font-family: 'JetBrains Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; }
   .composer .btn { padding: 10px 22px; font-size: 12px; }
 
-  .preview-box {
-    border-top: 1px dashed var(--rule-strong);
-    padding-top: 12px;
-    margin-top: 12px;
-    font-size: 14px;
-    line-height: 1.55;
-    color: var(--ink-2);
-  }
-  .preview-box .ttl {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-    color: var(--ink-3);
-    margin-bottom: 8px;
-    display: block;
-  }
 
   /* mediator thinking */
   .mediator-thinking {
@@ -1546,13 +1529,6 @@
           <label>Rules</label>
           <div class="toggle-row">
             <div>
-              <div class="tlabel">Guided mode</div>
-              <div class="thint">Preview flags before sending</div>
-            </div>
-            <div class="switch on" id="t-guided" onclick="toggle(this)"></div>
-          </div>
-          <div class="toggle-row">
-            <div>
               <div class="tlabel">Auto-concede on timeout</div>
               <div class="thint">No response in time = forfeit</div>
             </div>
@@ -1569,7 +1545,6 @@
         <div class="summary-row"><span class="k">Mode</span><span class="v" id="s-mode">Competitive</span></div>
         <div class="summary-row"><span class="k">Turn</span><span class="v" id="s-timer">5 min</span></div>
         <div class="summary-row"><span class="k">Cap</span><span class="v" id="s-cap">3 each</span></div>
-        <div class="summary-row"><span class="k">Guided</span><span class="v" id="s-guided">On</span></div>
         <div style="margin-top: 22px; display: flex; flex-direction: column; gap: 8px;">
           <button class="btn btn-primary" style="width: 100%;" onclick="createDebate()" id="create-debate-btn">⚡ Send Invite</button>
           <button class="btn btn-ghost" style="width: 100%;" onclick="showScreen('dashboard')">Cancel</button>
@@ -1653,11 +1628,9 @@
     <div class="composer" id="composer">
       <div class="composer-tag" id="composer-tag">YOUR MOVE</div>
       <textarea id="composer-input" placeholder="Make your point. The mediator is watching."></textarea>
-      <div id="preview-area"></div>
       <div class="composer-bar">
-        <div class="composer-hint" id="composer-hint">Guided mode on · preview before sending</div>
+        <div class="composer-hint" id="composer-hint">The mediator flags your message after you send.</div>
         <div style="display: flex; gap: 8px;">
-          <button class="btn btn-secondary" id="btn-preview" onclick="runPreview()">Preview</button>
           <button class="btn btn-primary" id="btn-send" onclick="sendMessage()">Send ▸</button>
         </div>
       </div>
@@ -1795,7 +1768,6 @@ const state = {
   stanceB: '',
   turnSeconds: 86400,
   messageCap: 5,
-  guidedMode: true,
   autoConcede: true,
 };
 
@@ -1847,15 +1819,9 @@ async function onSignedIn(user) {
   currentUser = user;
   updateMastUser();
 
-  // Check allowlist
-  const { data: allowed, error } = await sb
-    .from('allowed_emails')
-    .select('email')
-    .eq('email', user.email.toLowerCase())
-    .maybeSingle();
-
-  if (error) console.warn('Allowlist check error:', error);
-  if (!allowed) { showScreen('no-access'); return; }
+  // Open beta: anyone who can complete a magic-link sign-in is in. No
+  // allowlist gate. (The allowed_emails table is left in place but unused, so
+  // you can re-enable gating later by restoring a check here.)
 
   // Load (or create) this user's profile, then refresh the masthead with it
   await loadOrCreateProfile();
@@ -2136,7 +2102,6 @@ function goToContract() {
   state.mode = 'competitive';
   state.turnSeconds = 86400;   // default: 1 day
   state.messageCap = 5;
-  state.guidedMode = true;
   state.autoConcede = true;
   document.querySelectorAll('.mode-card').forEach(c => c.classList.toggle('active', c.dataset.mode === 'competitive'));
   // reset timer slider to the 1-day stop
@@ -2151,7 +2116,6 @@ function goToContract() {
   if (cInf) cInf.classList.remove('active');
   const cVal = document.getElementById('cap-val');
   if (cVal) cVal.textContent = '5';
-  document.getElementById('t-guided').classList.add('on');
   document.getElementById('t-autoconcede').classList.add('on');
   refreshContractSummary();
   showScreen('contract');
@@ -2165,7 +2129,6 @@ function selectMode(el) {
 }
 function toggle(el) {
   el.classList.toggle('on');
-  if (el.id === 't-guided') state.guidedMode = el.classList.contains('on');
   if (el.id === 't-autoconcede') state.autoConcede = el.classList.contains('on');
   refreshContractSummary();
 }
@@ -2207,7 +2170,6 @@ function refreshContractSummary() {
   document.getElementById('s-mode').textContent = state.mode[0].toUpperCase() + state.mode.slice(1);
   document.getElementById('s-timer').textContent = fmtTime(state.turnSeconds);
   document.getElementById('s-cap').textContent = state.messageCap >= 9999 ? '∞' : `${state.messageCap} each`;
-  document.getElementById('s-guided').textContent = state.guidedMode ? 'On' : 'Off';
 }
 // Turn-timer slider stops (seconds): 5 min up to 3 days
 const TIMER_STOPS = [300, 600, 900, 1800, 3600, 7200, 14400, 28800, 43200, 86400, 172800, 259200];
@@ -2252,18 +2214,8 @@ async function createDebate() {
   btn.textContent = 'Creating…';
 
   try {
-    // Check opponent is on allowlist
-    const { data: oppAllowed } = await sb
-      .from('allowed_emails')
-      .select('email')
-      .eq('email', state.oppEmail)
-      .maybeSingle();
-    if (!oppAllowed) {
-      showToast(`${state.oppEmail} isn't on the allowlist yet — add them in Supabase first.`);
-      btn.disabled = false;
-      btn.textContent = '⚡ Send Invite';
-      return;
-    }
+    // Open beta: you can challenge any email, even one that's never signed in.
+    // They'll get the magic-link invite and land straight into the debate.
 
     // Create debate row
     const { data: debate, error } = await sb.from('debates').insert({
@@ -2275,7 +2227,7 @@ async function createDebate() {
       mode: state.mode,
       turn_seconds: state.turnSeconds,
       message_cap: state.messageCap,
-      guided_mode: state.guidedMode,
+      guided_mode: true,
       auto_concede: state.autoConcede,
       status: 'pending',
       current_turn: 'a',  // creator goes first
@@ -2409,10 +2361,7 @@ function showChat() {
   document.getElementById('chat-topic').textContent = `"${currentDebate.topic}"`;
   document.getElementById('chat-mode-badge').textContent = currentDebate.mode.toUpperCase();
   document.getElementById('turn-cap').textContent = currentDebate.message_cap >= 9999 ? '∞' : currentDebate.message_cap;
-  document.getElementById('composer-hint').textContent = currentDebate.guided_mode
-    ? 'Guided mode on · preview before sending'
-    : 'Direct mode · flags appear after sending';
-  document.getElementById('btn-preview').style.display = currentDebate.guided_mode ? '' : 'none';
+  document.getElementById('composer-hint').textContent = 'The mediator flags your message after you send.';
 
   // load both players' avatars, then repaint
   Promise.all([
@@ -2830,7 +2779,6 @@ async function sendMessage() {
   }
 
   document.getElementById('btn-send').disabled = true;
-  document.getElementById('btn-preview').disabled = true;
   appendThinkingIndicator();
 
   try {
@@ -2868,34 +2816,13 @@ async function sendMessage() {
     }
 
     document.getElementById('composer-input').value = '';
-    document.getElementById('preview-area').innerHTML = '';
     renderMessages();
   } catch (e) {
     console.error(e);
     showToast('Send failed: ' + (e.message || ''));
   } finally {
     document.getElementById('btn-send').disabled = false;
-    document.getElementById('btn-preview').disabled = false;
     removeThinkingIndicator();
-  }
-}
-
-async function runPreview() {
-  const text = document.getElementById('composer-input').value.trim();
-  if (!text) return;
-  const previewArea = document.getElementById('preview-area');
-  previewArea.innerHTML = `<div class="mediator-thinking"><div class="dots"><span></span><span></span><span></span></div>Mediator reading your draft</div>`;
-  try {
-    const flags = await callMediator(text);
-    previewArea.innerHTML = `
-      <div class="preview-box">
-        <span class="ttl">↳ Pre-send Preview</span>
-        ${renderTextWithFlags(text, flags)}
-        ${flags.length === 0 ? '<div style="margin-top: 10px; color: var(--cyan); font-family: \'JetBrains Mono\', monospace; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;">✓ Clean · no flags</div>' : ''}
-      </div>
-    `;
-  } catch (e) {
-    previewArea.innerHTML = `<div class="preview-box" style="color: var(--hot-pink);"><span class="ttl">Preview failed</span>${escapeHtml(e.message || 'Mediator unavailable')}</div>`;
   }
 }
 
