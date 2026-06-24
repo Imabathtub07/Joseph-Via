@@ -81,6 +81,10 @@
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.08 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
   }
   .display { font-family: 'Bowlby One', serif; letter-spacing: 0; line-height: 0.9; }
+  /* Gradient text via background-clip clips to the text box with no trailing
+     bearing, so the last glyph (e.g. the "e" in "Disagree") can get shaved.
+     A hair of inline padding + visible overflow gives the glyph room. */
+  .display, .hero h1 { padding-right: 0.06em; overflow: visible; }
   .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
   button {
     font-family: inherit;
@@ -173,6 +177,9 @@
     line-height: 0.85;
     letter-spacing: -0.01em;
     margin-bottom: 24px;
+    padding: 0 0.08em;
+    overflow: visible;
+    word-break: keep-all;
     background: linear-gradient(180deg, var(--ink) 0%, var(--ink) 50%, var(--violet) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -348,7 +355,7 @@
     box-shadow: 0 0 18px var(--cyan-glow);
   }
 
-  .mode-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .mode-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; align-items: stretch; }
   .mode-card {
     border: 1px solid var(--rule-strong);
     padding: 16px;
@@ -356,7 +363,10 @@
     background: rgba(10, 6, 18, 0.4);
     transition: all .15s;
     position: relative;
+    display: flex;
+    flex-direction: column;
   }
+  .mode-card .mchange { margin-top: auto; padding-top: 9px; }
   .mode-card:hover { transform: translateY(-2px); border-color: var(--violet); }
   .mode-card.active {
     background: linear-gradient(135deg, rgba(179, 136, 255, 0.15), rgba(255, 46, 136, 0.15));
@@ -371,7 +381,19 @@
     letter-spacing: 0.02em;
   }
   .mode-card.active .mtitle { color: var(--gold); }
-  .mode-card .mdesc { font-size: 12px; color: var(--ink-3); line-height: 1.4; }
+  .mode-card .mdesc { font-size: 12px; color: var(--ink-2); line-height: 1.45; }
+  .mode-card .mchange {
+    margin-top: 9px;
+    padding-top: 9px;
+    border-top: 1px dashed var(--rule);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    color: var(--ink-3);
+    text-transform: uppercase;
+  }
+  .mode-card.active .mchange { color: var(--cyan); border-top-color: rgba(94,249,212,0.25); }
 
   .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px dashed var(--rule); }
   .toggle-row:last-child { border-bottom: none; }
@@ -918,6 +940,101 @@
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   .toast.cyan { border-color: var(--cyan); box-shadow: 0 0 24px var(--cyan-glow); }
 
+  /* ===== FLOATING NEGOTIATION BUBBLE ===== */
+  .nego { position: fixed; right: 22px; bottom: 22px; z-index: 180; }
+  .nego-fab {
+    position: relative;
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    border: 1px solid var(--violet);
+    background: linear-gradient(135deg, var(--void-3), var(--void-2));
+    box-shadow: 0 0 24px rgba(179,136,255,0.45), 0 6px 20px rgba(0,0,0,0.5);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform .15s, box-shadow .15s;
+  }
+  .nego-fab:hover { transform: translateY(-2px) scale(1.04); box-shadow: 0 0 32px rgba(179,136,255,0.65), 0 8px 24px rgba(0,0,0,0.5); }
+  .nego-fab-icon { font-size: 26px; line-height: 1; }
+  .nego-fab-badge {
+    position: absolute; top: -4px; right: -4px;
+    min-width: 22px; height: 22px; padding: 0 6px;
+    border-radius: 11px;
+    background: var(--hot-pink);
+    color: #fff;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 12px var(--hot-pink-glow);
+    border: 2px solid var(--void);
+  }
+  .nego-panel {
+    position: absolute; right: 0; bottom: 74px;
+    width: min(380px, calc(100vw - 36px));
+    max-height: min(560px, calc(100vh - 130px));
+    display: flex; flex-direction: column;
+    background: linear-gradient(180deg, rgba(29,18,64,0.96), rgba(13,8,28,0.98));
+    border: 1px solid var(--rule-strong);
+    box-shadow: 0 18px 50px rgba(0,0,0,0.6), 0 0 40px rgba(179,136,255,0.18);
+    backdrop-filter: blur(8px);
+    animation: negoPop .18s cubic-bezier(.2,.7,.3,1);
+    overflow: hidden;
+  }
+  @keyframes negoPop { from { opacity: 0; transform: translateY(10px) scale(.97); } to { opacity: 1; transform: none; } }
+  .nego-head {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--rule);
+    background: linear-gradient(90deg, rgba(179,136,255,0.12), transparent);
+  }
+  .nego-title { font-family: 'Bowlby One', serif; font-size: 15px; letter-spacing: 0.02em; }
+  .nego-sub { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 3px; }
+  .nego-close { background: none; border: none; color: var(--ink-3); font-size: 16px; cursor: pointer; padding: 2px 6px; line-height: 1; }
+  .nego-close:hover { color: var(--ink); }
+  .nego-thread { flex: 1; overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+  .nego-empty { color: var(--ink-3); font-size: 13px; line-height: 1.5; text-align: center; margin: auto 0; padding: 12px; }
+  .nego-msg { max-width: 82%; padding: 9px 12px; font-size: 13.5px; line-height: 1.45; border: 1px solid var(--rule); position: relative; }
+  .nego-msg .nego-who { font-family: 'JetBrains Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-3); margin-bottom: 3px; }
+  .nego-msg.them { align-self: flex-start; background: rgba(94,249,212,0.08); border-color: rgba(94,249,212,0.28); }
+  .nego-msg.me { align-self: flex-end; background: rgba(255,46,136,0.10); border-color: rgba(255,46,136,0.3); }
+  .nego-compose { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--rule); align-items: flex-end; }
+  .nego-compose textarea {
+    flex: 1; resize: none; max-height: 120px;
+    background: rgba(10,6,18,0.6); border: 1px solid var(--rule-strong);
+    color: var(--ink); padding: 9px 11px; font-size: 13.5px;
+    font-family: 'Space Grotesk', sans-serif; line-height: 1.4;
+  }
+  .nego-compose textarea:focus { outline: none; border-color: var(--violet); }
+  .nego-send { padding: 9px 14px; font-size: 12px; white-space: nowrap; }
+
+  /* ===== TIMEOUT / FORFEIT MODAL ===== */
+  .modal-backdrop {
+    position: fixed; inset: 0; z-index: 220;
+    background: rgba(5,3,12,0.8);
+    backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+    animation: fadein .2s ease;
+  }
+  .modal-box {
+    width: min(460px, 100%);
+    background: linear-gradient(180deg, rgba(29,18,64,0.98), rgba(13,8,28,0.99));
+    border: 1px solid var(--hot-pink);
+    box-shadow: 0 0 50px var(--hot-pink-glow), 0 20px 60px rgba(0,0,0,0.7);
+    padding: 30px 28px;
+    position: relative;
+  }
+  .modal-box::before { content: ''; position: absolute; top: -1px; left: -1px; right: -1px; height: 3px; background: linear-gradient(90deg, var(--hot-pink), var(--gold)); }
+  .modal-tag { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.25em; color: var(--hot-pink); text-transform: uppercase; margin-bottom: 14px; text-shadow: 0 0 12px var(--hot-pink-glow); }
+  .modal-title { font-family: 'Bowlby One', serif; font-size: 26px; line-height: 1.05; margin-bottom: 12px; }
+  .modal-body { color: var(--ink-2); font-size: 15px; line-height: 1.55; margin-bottom: 22px; }
+  .modal-actions { display: flex; flex-direction: column; gap: 10px; }
+  .modal-actions .btn { width: 100%; }
+  .modal-note { margin-top: 14px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-3); text-align: center; min-height: 14px; letter-spacing: 0.04em; }
+
+  @media (max-width: 520px) {
+    .nego { right: 14px; bottom: 14px; }
+    .nego-panel { bottom: 70px; }
+  }
+
   .footnote { text-align: center; color: var(--ink-3); font-size: 12px; margin-top: 36px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.1em; }
 
   /* config-missing banner */
@@ -1224,7 +1341,7 @@
       <div class="auth-card">
         <div class="hero" style="padding: 0; text-align: center;">
           <div class="kicker">Mediated Argument · In Good Faith</div>
-          <h1 style="font-size: clamp(48px, 8vw, 76px);">Disagree<br><em>better.</em></h1>
+          <h1 style="font-size: clamp(44px, 7vw, 68px);">Disagree<br><em>better.</em></h1>
           <p class="lede" style="font-size: 15px; margin-bottom: 24px;">Two people. One topic. A neutral AI referee. Sign in with your email — we'll send you a magic link.</p>
         </div>
         <div class="field">
@@ -1358,19 +1475,23 @@
           <div class="mode-grid">
             <button class="mode-card active" data-mode="competitive" onclick="selectMode(this)">
               <div class="mtitle">COMPETITIVE</div>
-              <div class="mdesc">Winner declared. Full scoring. Clinical referee.</div>
+              <div class="mdesc">A scored match. Strict referee, full fallacy set, a winner at the end.</div>
+              <div class="mchange">Winner declared · sharpest scoring · flags hit hardest</div>
             </button>
             <button class="mode-card" data-mode="collaborative" onclick="selectMode(this)">
               <div class="mtitle">COLLABORATIVE</div>
-              <div class="mdesc">Find common ground. Warmer tone. No winner.</div>
+              <div class="mdesc">Build a shared answer together. Warm referee that rewards finding common ground.</div>
+              <div class="mchange">No winner · concessions & reframes score big · gentler red flags</div>
             </button>
             <button class="mode-card" data-mode="exploratory" onclick="selectMode(this)">
               <div class="mtitle">EXPLORATORY</div>
-              <div class="mdesc">Think out loud, rigorously. No verdict.</div>
+              <div class="mdesc">Think out loud, rigorously. Room to wander and test half-formed ideas.</div>
+              <div class="mchange">No verdict · tangents allowed · only real fallacies flagged</div>
             </button>
             <button class="mode-card" data-mode="relationship" onclick="selectMode(this)">
               <div class="mtitle">RELATIONSHIP</div>
-              <div class="mdesc">Soft tone. Empathy first. Never a winner.</div>
+              <div class="mdesc">A hard conversation between people who care. Repair over rhetoric.</div>
+              <div class="mchange">Never a winner · no "gotcha" flags · rewards acknowledgment, watches for "you always / never"</div>
             </button>
           </div>
         </div>
@@ -1566,6 +1687,44 @@
 
 </div>
 
+<!-- ============ FLOATING NEGOTIATION BUBBLE ============ -->
+<!-- Lives over the contract / invite screens. Lets the two parties talk over
+     the proposed ruleset before the match begins. Hidden until a debate row
+     exists to attach the thread to. -->
+<div id="nego" class="nego" hidden>
+  <button class="nego-fab" id="nego-fab" onclick="toggleNego()" aria-label="Open negotiation chat">
+    <span class="nego-fab-icon">💬</span>
+    <span class="nego-fab-badge" id="nego-badge" hidden>0</span>
+  </button>
+  <div class="nego-panel" id="nego-panel" hidden>
+    <div class="nego-head">
+      <div>
+        <div class="nego-title">Negotiate the Terms</div>
+        <div class="nego-sub" id="nego-sub">Talk it over before you begin</div>
+      </div>
+      <button class="nego-close" onclick="toggleNego()" aria-label="Close">✕</button>
+    </div>
+    <div class="nego-thread" id="nego-thread">
+      <div class="nego-empty" id="nego-empty">No messages yet. Propose a tweak, push back on a rule, or just say hi.</div>
+    </div>
+    <div class="nego-compose">
+      <textarea id="nego-input" rows="1" placeholder="Suggest a change to the rules…" maxlength="500"></textarea>
+      <button class="btn btn-primary nego-send" id="nego-send" onclick="sendNego()">Send ▸</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TIMEOUT / FORFEIT MODAL ============ -->
+<div id="forfeit-modal" class="modal-backdrop" hidden>
+  <div class="modal-box">
+    <div class="modal-tag" id="ff-tag">⏱ TIME'S UP</div>
+    <h3 class="modal-title" id="ff-title">The clock ran out.</h3>
+    <p class="modal-body" id="ff-body">Nobody answered in time. How do you want to handle it?</p>
+    <div class="modal-actions" id="ff-actions"></div>
+    <p class="modal-note" id="ff-note"></p>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <!-- Supabase JS SDK -->
@@ -1587,7 +1746,7 @@ const profileCache = {};      // email -> profile (for opponents)
 let currentDebate = null;     // {id, topic, mode, ...}
 let currentMessages = [];     // ordered list
 let timerInterval = null;
-let timerRemaining = 0;
+let timeoutShownForTurn = null; // de-dupes the timeout modal per expired turn
 let messagesChannel = null;
 let debateChannel = null;
 
@@ -2181,9 +2340,14 @@ function showCreatorWaiting() {
 async function acceptInvite() {
   const { error } = await sb
     .from('debates')
-    .update({ status: 'active', accepted_at: new Date().toISOString() })
+    .update({
+      status: 'active',
+      accepted_at: new Date().toISOString(),
+      turn_started_at: new Date().toISOString(), // start the persistent clock
+    })
     .eq('id', currentDebate.id);
   if (error) { showToast('Failed to accept: ' + error.message); return; }
+  closeNego();
   // realtime will reload us into chat; force it for snappiness
   await openDebate(currentDebate.id);
 }
@@ -2393,21 +2557,35 @@ function subscribeToDebate(debateId) {
 
         // status changed pending -> active: jump into chat
         if (old.status === 'pending' && currentDebate.status === 'active') {
+          closeNego();
           await loadMessages(debateId);
           showChat();
           subscribeToMessages(debateId);
           return;
         }
-        // status -> finished
+        // status -> finished (includes win-by-forfeit)
         if (currentDebate.status === 'finished') {
+          hideForfeitModal();
           showSummary();
           return;
         }
-        // turn changed
-        refreshTurnUI();
-        // reset timer if turn flipped
-        if (old.current_turn !== currentDebate.current_turn) {
+        // turn changed OR clock was reset (forfeit "continue") -> restart timer
+        const turnFlipped = old.current_turn !== currentDebate.current_turn;
+        const clockReset = old.turn_started_at !== currentDebate.turn_started_at;
+        if (turnFlipped || clockReset) {
+          timeoutShownForTurn = null;
+          hideForfeitModal();
           startTimer();
+        }
+        refreshTurnUI();
+
+        // a forfeit prompt was raised by the other device -> show it here too
+        if (!old.forfeit_offered_by && currentDebate.forfeit_offered_by) {
+          showForfeitModal();
+        }
+        // the prompt was withdrawn (resolved as continue) -> close it
+        if (old.forfeit_offered_by && !currentDebate.forfeit_offered_by && currentDebate.status === 'active') {
+          hideForfeitModal();
         }
       }
     )
@@ -2415,25 +2593,48 @@ function subscribeToDebate(debateId) {
 }
 
 // ============================================================================
-// TIMER
+// PERSISTENT TIMER
+//
+// The clock is anchored to currentDebate.turn_started_at (a real timestamp in
+// the DB), NOT a local countdown. Every device computes the same remaining
+// time as: turn_seconds - (now - turn_started_at). So reopening a debate shows
+// the TRUE time left — if someone has 2 days and opens it tomorrow, they see
+// ~1 day, not a fresh 2 days. When it crosses zero we surface the timeout.
 // ============================================================================
+function turnDeadlineMs() {
+  // ms timestamp when the current player's turn expires; null if not started.
+  if (!currentDebate || !currentDebate.turn_started_at) return null;
+  const started = new Date(currentDebate.turn_started_at).getTime();
+  return started + currentDebate.turn_seconds * 1000;
+}
+
+function remainingSeconds() {
+  const deadline = turnDeadlineMs();
+  if (deadline == null) return currentDebate ? currentDebate.turn_seconds : 0;
+  return Math.round((deadline - Date.now()) / 1000);
+}
+
 function startTimer() {
   if (timerInterval) clearInterval(timerInterval);
-  timerRemaining = currentDebate.turn_seconds;
+  // If the debate already finished, nothing to count.
+  if (!currentDebate || currentDebate.status !== 'active') { updateTimerDisplay(); return; }
   updateTimerDisplay();
+  maybeHandleTimeout();
   timerInterval = setInterval(() => {
-    timerRemaining--;
-    if (timerRemaining <= 0) {
-      clearInterval(timerInterval);
-      // we don't auto-flip the turn — just show timeout. Real auto-concede
-      // would need a server cron; leaving as a UI signal for now.
-    }
     updateTimerDisplay();
+    maybeHandleTimeout();
   }, 1000);
 }
+
 function updateTimerDisplay() {
-  const rem = Math.max(0, timerRemaining);
   const el = document.getElementById('timer');
+  if (!el) return;
+  const rem = remainingSeconds();
+  if (rem <= 0) {
+    el.textContent = "TIME'S UP";
+    el.classList.add('warn');
+    return;
+  }
   const d = Math.floor(rem / 86400);
   const h = Math.floor((rem % 86400) / 3600);
   const m = Math.floor((rem % 3600) / 60);
@@ -2441,7 +2642,120 @@ function updateTimerDisplay() {
   if (d > 0) el.textContent = `${d}d ${h}h`;
   else if (h > 0) el.textContent = `${h}h ${m.toString().padStart(2, '0')}m`;
   else el.textContent = `${m}:${s.toString().padStart(2, '0')}`;
-  el.classList.toggle('warn', timerRemaining <= 30 && timerRemaining > 0);
+  // pulse warning under 1 minute
+  el.classList.toggle('warn', rem <= 60);
+}
+
+// Fires once per timeout event. If the clock has expired and nobody has yet
+// raised the forfeit question, the player whose device notices it flags it in
+// the DB; both clients then show the modal via realtime + here.
+function maybeHandleTimeout() {
+  if (!currentDebate || currentDebate.status !== 'active') return;
+  const rem = remainingSeconds();
+  if (rem > 0) return;
+  // a unique key for THIS expired turn so we don't re-fire on every tick
+  const turnKey = `${currentDebate.current_turn}:${currentDebate.turn_started_at}`;
+  if (timeoutShownForTurn === turnKey && !document.getElementById('forfeit-modal').hidden) return;
+
+  const me = currentUser.email.toLowerCase();
+  const isCreator = currentDebate.creator_email === me;
+  const myRole = isCreator ? 'a' : 'b';
+  const lateRole = currentDebate.current_turn; // whoever's turn it is, is late
+
+  // If nobody has raised it yet, the FIRST device to notice records it so both
+  // sides converge on the same prompt. Auto-concede setting decides default.
+  if (!currentDebate.forfeit_offered_by && !currentDebate.forfeit_decision) {
+    sb.from('debates').update({ forfeit_offered_by: lateRole })
+      .eq('id', currentDebate.id)
+      .is('forfeit_offered_by', null); // race-safe: only first write wins
+  }
+  timeoutShownForTurn = turnKey;
+  showForfeitModal();
+}
+
+// ============================================================================
+// FORFEIT / TIMEOUT MODAL
+// ============================================================================
+function showForfeitModal() {
+  if (!currentDebate) return;
+  const modal = document.getElementById('forfeit-modal');
+  const me = currentUser.email.toLowerCase();
+  const myRole = currentDebate.creator_email === me ? 'a' : 'b';
+  const lateRole = currentDebate.current_turn;
+  const iAmLate = myRole === lateRole;
+
+  const lateName = lateRole === 'a'
+    ? currentDebate.creator_email.split('@')[0]
+    : currentDebate.opponent_email.split('@')[0];
+
+  const tag = document.getElementById('ff-tag');
+  const title = document.getElementById('ff-title');
+  const body = document.getElementById('ff-body');
+  const actions = document.getElementById('ff-actions');
+  const note = document.getElementById('ff-note');
+  note.textContent = '';
+  actions.innerHTML = '';
+
+  // already resolved while we were away?
+  if (currentDebate.forfeit_decision === 'continue') { hideForfeitModal(); return; }
+  if (currentDebate.forfeit_decision === 'a' || currentDebate.forfeit_decision === 'b') { hideForfeitModal(); return; }
+
+  if (iAmLate) {
+    tag.textContent = "⏱ YOU'RE OUT OF TIME";
+    title.textContent = 'Your clock ran out.';
+    body.innerHTML = `You didn't answer in time. You can pick the thread back up if your opponent's game, or bow out and forfeit this one. <span style="color:var(--ink-3)">Concession is a stat, not a stain.</span>`;
+    const cont = mkBtn('btn btn-primary', '⚡ Ask to keep playing', () => resolveForfeit('continue'));
+    const give = mkBtn('btn btn-ghost', '🏳 Forfeit this debate', () => resolveForfeit(lateRole));
+    actions.append(cont, give);
+  } else {
+    tag.textContent = '⏱ THEY RAN OUT OF TIME';
+    title.textContent = `${lateName} missed the clock.`;
+    body.innerHTML = `${escapeHtml(lateName)} didn't answer in time. You can give them a reprieve and keep the debate alive, or claim the win by timeout.`;
+    const cont = mkBtn('btn btn-primary', '🤝 Let them keep playing', () => resolveForfeit('continue'));
+    const claim = mkBtn('btn btn-ghost', '🏆 Claim win by forfeit', () => resolveForfeit(lateRole));
+    actions.append(cont, claim);
+  }
+  modal.hidden = false;
+}
+
+function mkBtn(cls, label, onClick) {
+  const b = document.createElement('button');
+  b.className = cls;
+  b.textContent = label;
+  b.onclick = onClick;
+  return b;
+}
+
+function hideForfeitModal() {
+  const modal = document.getElementById('forfeit-modal');
+  if (modal) modal.hidden = true;
+}
+
+async function resolveForfeit(decision) {
+  const note = document.getElementById('ff-note');
+  note.textContent = 'Saving…';
+  document.querySelectorAll('#ff-actions .btn').forEach(b => b.disabled = true);
+
+  if (decision === 'continue') {
+    // Reset the clock for the late player and clear the timeout state.
+    const { error } = await sb.from('debates').update({
+      turn_started_at: new Date().toISOString(),
+      forfeit_offered_by: null,
+      forfeit_decision: null,
+    }).eq('id', currentDebate.id);
+    if (error) { note.textContent = error.message; document.querySelectorAll('#ff-actions .btn').forEach(b => b.disabled = false); return; }
+    timeoutShownForTurn = null;
+    hideForfeitModal();
+    showToast('Clock reset — game on.', 'cyan');
+  } else {
+    // decision is 'a' or 'b' — that role forfeits. Mark finished.
+    const { error } = await sb.from('debates').update({
+      forfeit_decision: decision,
+      status: 'finished',
+    }).eq('id', currentDebate.id);
+    if (error) { note.textContent = error.message; document.querySelectorAll('#ff-actions .btn').forEach(b => b.disabled = false); return; }
+    hideForfeitModal();
+  }
 }
 
 // ============================================================================
@@ -2486,7 +2800,12 @@ async function sendMessage() {
     if (capReached) {
       await sb.from('debates').update({ status: 'finished' }).eq('id', currentDebate.id);
     } else {
-      await sb.from('debates').update({ current_turn: nextTurn }).eq('id', currentDebate.id);
+      await sb.from('debates').update({
+        current_turn: nextTurn,
+        turn_started_at: new Date().toISOString(), // restart the clock for them
+        forfeit_offered_by: null, // a fresh turn clears any stale timeout state
+        forfeit_decision: null,
+      }).eq('id', currentDebate.id);
     }
 
     document.getElementById('composer-input').value = '';
@@ -2639,14 +2958,26 @@ function showSummary() {
   document.getElementById('sum-dateline').textContent =
     `${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} · ${currentDebate.mode[0].toUpperCase() + currentDebate.mode.slice(1)} Mode`;
 
-  const showWinner = currentDebate.mode === 'competitive';
+  // A forfeit is a definite outcome — surface it in every mode, since it
+  // overrides the score-based verdict.
+  const forfeitRole = (currentDebate.forfeit_decision === 'a' || currentDebate.forfeit_decision === 'b')
+    ? currentDebate.forfeit_decision
+    : null;
+
+  const showWinner = currentDebate.mode === 'competitive' || forfeitRole;
   document.getElementById('sum-verdict').style.display = showWinner ? '' : 'none';
   if (showWinner) {
     let winner;
-    if (scoreA > scoreB) winner = nameA;
-    else if (scoreB > scoreA) winner = nameB;
-    else winner = 'DRAW';
-    document.getElementById('sum-winner').textContent = winner;
+    if (forfeitRole) {
+      // the forfeiting side loses; the other side wins by timeout
+      winner = forfeitRole === 'a' ? nameB : nameA;
+      document.getElementById('sum-winner').textContent = `${winner} (by forfeit)`;
+    } else {
+      if (scoreA > scoreB) winner = nameA;
+      else if (scoreB > scoreA) winner = nameB;
+      else winner = 'DRAW';
+      document.getElementById('sum-winner').textContent = winner;
+    }
   }
 
   document.getElementById('sum-nameA').textContent = nameA;
@@ -2679,7 +3010,8 @@ function showSummary() {
 
   // mode stamp
   const stamp = document.getElementById('sum-stamp');
-  if (currentDebate.mode === 'relationship') stamp.textContent = 'WELL DONE';
+  if (forfeitRole) stamp.textContent = 'BY FORFEIT';
+  else if (currentDebate.mode === 'relationship') stamp.textContent = 'WELL DONE';
   else if (currentDebate.mode === 'collaborative') stamp.textContent = 'COMMON GROUND';
   else if (currentDebate.mode === 'exploratory') stamp.textContent = 'EXPLORED';
   else stamp.textContent = 'GG';
@@ -2699,6 +3031,14 @@ function showScreen(id) {
   const el = document.getElementById('screen-' + id);
   if (el) el.classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  // The negotiation bubble only makes sense pre-match, when a debate row
+  // exists to attach the thread to: the creator's "waiting" screen and the
+  // opponent's "invite" landing. Tear it down everywhere else.
+  if ((id === 'waiting' || id === 'invite') && currentDebate && currentDebate.status === 'pending') {
+    openNegoFor(currentDebate.id);
+  } else {
+    closeNego();
+  }
 }
 
 function showToast(msg, variant) {
@@ -2707,6 +3047,145 @@ function showToast(msg, variant) {
   t.className = 'toast show' + (variant === 'cyan' ? ' cyan' : '');
   clearTimeout(showToast._t);
   showToast._t = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+// ============================================================================
+// NEGOTIATION BUBBLE — pre-debate ruleset chat
+// ============================================================================
+let negoChannel = null;
+let negoDebateId = null;
+let negoMessages = [];
+let negoOpen = false;
+let negoSeen = 0; // how many messages were on screen last time the panel was open
+
+async function openNegoFor(debateId) {
+  const wrap = document.getElementById('nego');
+  wrap.hidden = false;
+  if (negoDebateId === debateId) return; // already wired
+  negoDebateId = debateId;
+  negoMessages = [];
+  negoSeen = 0;
+  await loadNego();
+  subscribeNego(debateId);
+
+  // subtitle: who you're talking to
+  const me = currentUser.email.toLowerCase();
+  const other = currentDebate.creator_email === me
+    ? currentDebate.opponent_email
+    : currentDebate.creator_email;
+  document.getElementById('nego-sub').textContent = `with ${other.split('@')[0]}`;
+
+  // enter-to-send
+  const input = document.getElementById('nego-input');
+  input.onkeydown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendNego(); }
+  };
+  input.oninput = () => { input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 120) + 'px'; };
+}
+
+function closeNego() {
+  if (negoChannel) { sb.removeChannel(negoChannel); negoChannel = null; }
+  negoDebateId = null;
+  negoOpen = false;
+  const panel = document.getElementById('nego-panel');
+  const wrap = document.getElementById('nego');
+  if (panel) panel.hidden = true;
+  if (wrap) wrap.hidden = true;
+}
+
+function toggleNego() {
+  negoOpen = !negoOpen;
+  document.getElementById('nego-panel').hidden = !negoOpen;
+  if (negoOpen) {
+    negoSeen = negoMessages.length;
+    updateNegoBadge();
+    renderNego();
+    setTimeout(() => document.getElementById('nego-input').focus(), 60);
+  }
+}
+
+async function loadNego() {
+  const { data, error } = await sb
+    .from('contract_messages')
+    .select('*')
+    .eq('debate_id', negoDebateId)
+    .order('created_at', { ascending: true });
+  if (error) { console.warn('Nego load failed', error.message); return; }
+  negoMessages = data || [];
+  renderNego();
+  updateNegoBadge();
+}
+
+function subscribeNego(debateId) {
+  if (negoChannel) sb.removeChannel(negoChannel);
+  negoChannel = sb
+    .channel(`nego-${debateId}`)
+    .on('postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'contract_messages', filter: `debate_id=eq.${debateId}` },
+      (payload) => {
+        if (!negoMessages.find(m => m.id === payload.new.id)) {
+          negoMessages.push(payload.new);
+          renderNego();
+          updateNegoBadge();
+          // ping the other party
+          const me = currentUser.email.toLowerCase();
+          if (payload.new.author_email !== me && !negoOpen) {
+            showToast('💬 New note on the terms', 'cyan');
+          }
+        }
+      }
+    )
+    .subscribe();
+}
+
+async function sendNego() {
+  const input = document.getElementById('nego-input');
+  const text = input.value.trim();
+  if (!text || !negoDebateId) return;
+  const me = currentUser.email.toLowerCase();
+  input.value = '';
+  input.style.height = 'auto';
+  const { data, error } = await sb.from('contract_messages').insert({
+    debate_id: negoDebateId,
+    author_email: me,
+    text,
+  }).select().single();
+  if (error) { showToast('Couldn\'t send: ' + error.message); input.value = text; return; }
+  if (!negoMessages.find(m => m.id === data.id)) {
+    negoMessages.push(data);
+    negoSeen = negoMessages.length;
+    renderNego();
+  }
+}
+
+function renderNego() {
+  const thread = document.getElementById('nego-thread');
+  const empty = document.getElementById('nego-empty');
+  if (!thread) return;
+  if (!negoMessages.length) {
+    thread.innerHTML = '';
+    thread.appendChild(empty);
+    empty.hidden = false;
+    return;
+  }
+  const me = currentUser.email.toLowerCase();
+  thread.innerHTML = negoMessages.map(m => {
+    const mine = m.author_email === me;
+    const who = mine ? 'You' : m.author_email.split('@')[0];
+    return `<div class="nego-msg ${mine ? 'me' : 'them'}">
+      <div class="nego-who">${escapeHtml(who)}</div>
+      ${escapeHtml(m.text)}
+    </div>`;
+  }).join('');
+  thread.scrollTop = thread.scrollHeight;
+}
+
+function updateNegoBadge() {
+  const badge = document.getElementById('nego-badge');
+  if (!badge) return;
+  const unseen = negoOpen ? 0 : Math.max(0, negoMessages.length - negoSeen);
+  if (unseen > 0) { badge.hidden = false; badge.textContent = unseen > 9 ? '9+' : unseen; }
+  else { badge.hidden = true; }
 }
 </script>
 </body>
