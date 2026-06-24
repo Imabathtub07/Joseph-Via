@@ -1014,6 +1014,9 @@
     padding: 24px;
     animation: fadein .2s ease;
   }
+  /* The [hidden] attribute must beat any display:flex/grid we set on a
+     component, or toggling .hidden in JS silently fails to hide it. */
+  [hidden] { display: none !important; }
   .modal-box {
     width: min(460px, 100%);
     background: linear-gradient(180deg, rgba(29,18,64,0.98), rgba(13,8,28,0.99));
