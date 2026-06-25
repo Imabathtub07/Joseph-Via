@@ -741,6 +741,14 @@
   .composer-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; gap: 12px; }
   .composer-hint { font-size: 11px; color: var(--ink-3); font-family: 'JetBrains Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; }
   .composer .btn { padding: 10px 22px; font-size: 12px; }
+  .char-counter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; font-variant-numeric: tabular-nums;
+    color: var(--ink-3); min-width: 44px; text-align: right;
+    transition: color 0.15s ease;
+  }
+  .char-counter.warn { color: var(--gold); }
+  .char-counter.over { color: var(--hot-pink); font-weight: 700; }
 
 
   /* mediator thinking */
@@ -1526,6 +1534,15 @@
         </div>
 
         <div class="field">
+          <label>Characters Per Message</label>
+          <div class="slider-row">
+            <input type="range" id="char-slider" min="0" max="9" step="1" value="5">
+            <div class="slider-val" id="char-val">1500</div>
+          </div>
+          <div class="slider-hint" id="char-hint">Keeps it ping-pong. The mode sets a suggestion &mdash; slide to taste.</div>
+        </div>
+
+        <div class="field">
           <label>Rules</label>
           <div class="toggle-row">
             <div>
@@ -1545,6 +1562,7 @@
         <div class="summary-row"><span class="k">Mode</span><span class="v" id="s-mode">Competitive</span></div>
         <div class="summary-row"><span class="k">Turn</span><span class="v" id="s-timer">5 min</span></div>
         <div class="summary-row"><span class="k">Cap</span><span class="v" id="s-cap">3 each</span></div>
+        <div class="summary-row"><span class="k">Limit</span><span class="v" id="s-char">1500 chars</span></div>
         <div style="margin-top: 22px; display: flex; flex-direction: column; gap: 8px;">
           <button class="btn btn-primary" style="width: 100%;" onclick="createDebate()" id="create-debate-btn">⚡ Send Invite</button>
           <button class="btn btn-ghost" style="width: 100%;" onclick="showScreen('dashboard')">Cancel</button>
@@ -1563,7 +1581,7 @@
           <div class="vs-block"><span id="inv-from">—</span> <span class="vs">VS</span> <span style="color: var(--cyan);">YOU</span></div>
           <div class="topic" id="inv-topic">—</div>
           <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink-3); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 16px;">
-            Mode: <span id="inv-mode" style="color: var(--gold);">—</span> · Turn: <span id="inv-turn" style="color: var(--ink-2);">—</span> · Cap: <span id="inv-cap" style="color: var(--ink-2);">—</span>
+            Mode: <span id="inv-mode" style="color: var(--gold);">—</span> · Turn: <span id="inv-turn" style="color: var(--ink-2);">—</span> · Cap: <span id="inv-cap" style="color: var(--ink-2);">—</span> · Limit: <span id="inv-char" style="color: var(--ink-2);">—</span>
           </div>
         </div>
         <div style="text-align: center; padding: 12px;">
@@ -1630,7 +1648,8 @@
       <textarea id="composer-input" placeholder="Make your point. The mediator is watching."></textarea>
       <div class="composer-bar">
         <div class="composer-hint" id="composer-hint">The mediator flags your message after you send.</div>
-        <div style="display: flex; gap: 8px;">
+        <div style="display: flex; gap: 12px; align-items: center;">
+          <div class="char-counter" id="char-counter" hidden>1500</div>
           <button class="btn btn-primary" id="btn-send" onclick="sendMessage()">Send ▸</button>
         </div>
       </div>
@@ -1768,6 +1787,7 @@ const state = {
   stanceB: '',
   turnSeconds: 86400,
   messageCap: 5,
+  charLimit: 1500,
   autoConcede: true,
 };
 
@@ -2102,6 +2122,7 @@ function goToContract() {
   state.mode = 'competitive';
   state.turnSeconds = 86400;   // default: 1 day
   state.messageCap = 5;
+  state.charLimit = MODE_CHAR_DEFAULTS.competitive;
   state.autoConcede = true;
   document.querySelectorAll('.mode-card').forEach(c => c.classList.toggle('active', c.dataset.mode === 'competitive'));
   // reset timer slider to the 1-day stop
@@ -2116,6 +2137,8 @@ function goToContract() {
   if (cInf) cInf.classList.remove('active');
   const cVal = document.getElementById('cap-val');
   if (cVal) cVal.textContent = '5';
+  // reset char-limit slider to the competitive default
+  syncCharSlider();
   document.getElementById('t-autoconcede').classList.add('on');
   refreshContractSummary();
   showScreen('contract');
@@ -2125,8 +2148,31 @@ function selectMode(el) {
   document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
   state.mode = el.dataset.mode;
+  // Each mode carries a suggested character limit. Picking a mode snaps the
+  // slider to that suggestion; the players are still free to drag it after.
+  state.charLimit = MODE_CHAR_DEFAULTS[state.mode] ?? 1500;
+  syncCharSlider();
   refreshContractSummary();
 }
+
+// Snap the char-limit slider + label to whatever state.charLimit currently is.
+// Finds the nearest defined stop so the thumb always lands cleanly.
+function syncCharSlider() {
+  const slider = document.getElementById('char-slider');
+  const val = document.getElementById('char-val');
+  let idx = CHAR_STOPS.indexOf(state.charLimit);
+  if (idx === -1) {
+    // nearest stop
+    idx = CHAR_STOPS.reduce((best, s, i) =>
+      Math.abs(s - state.charLimit) < Math.abs(CHAR_STOPS[best] - state.charLimit) ? i : best, 0);
+    state.charLimit = CHAR_STOPS[idx];
+  }
+  if (slider) slider.value = idx;
+  if (val) val.textContent = fmtChars(state.charLimit);
+}
+
+// "∞" for unlimited, otherwise the raw number.
+function fmtChars(n) { return n >= 99999 ? '∞' : String(n); }
 function toggle(el) {
   el.classList.toggle('on');
   if (el.id === 't-autoconcede') state.autoConcede = el.classList.contains('on');
@@ -2145,6 +2191,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (state.messageCap >= 9999) return; // infinity active — ignore
     state.messageCap = +e.target.value;
     document.getElementById('cap-val').textContent = e.target.value;
+    refreshContractSummary();
+  });
+  const chSlider = document.getElementById('char-slider');
+  if (chSlider) chSlider.addEventListener('input', e => {
+    state.charLimit = CHAR_STOPS[+e.target.value] ?? 1500;
+    document.getElementById('char-val').textContent = fmtChars(state.charLimit);
     refreshContractSummary();
   });
   ['topic', 'opp-email', 'stance-a', 'stance-b'].forEach(id => {
@@ -2170,9 +2222,23 @@ function refreshContractSummary() {
   document.getElementById('s-mode').textContent = state.mode[0].toUpperCase() + state.mode.slice(1);
   document.getElementById('s-timer').textContent = fmtTime(state.turnSeconds);
   document.getElementById('s-cap').textContent = state.messageCap >= 9999 ? '∞' : `${state.messageCap} each`;
+  document.getElementById('s-char').textContent = state.charLimit >= 99999 ? '∞ chars' : `${state.charLimit} chars`;
 }
 // Turn-timer slider stops (seconds): 5 min up to 3 days
 const TIMER_STOPS = [300, 600, 900, 1800, 3600, 7200, 14400, 28800, 43200, 86400, 172800, 259200];
+
+// Character-limit slider stops. The last stop is unlimited (∞). Rough feel:
+// ~280 ≈ a tweet, ~750 ≈ a short paragraph, ~1500 ≈ 2–3 paragraphs w/ a link.
+const CHAR_STOPS = [140, 280, 500, 750, 1000, 1500, 2000, 3000, 5000, 99999];
+// Per-mode suggested character cap. Competitive runs long (room to paste a link
+// and make a 2–3 paragraph case); exploratory is unlimited by default; the other
+// two land in the middle and are the players' to adjust.
+const MODE_CHAR_DEFAULTS = {
+  competitive:   1500,
+  collaborative: 750,
+  exploratory:   99999,
+  relationship:  750,
+};
 
 function toggleInfinityCap() {
   const btn = document.getElementById('cap-inf');
@@ -2227,6 +2293,7 @@ async function createDebate() {
       mode: state.mode,
       turn_seconds: state.turnSeconds,
       message_cap: state.messageCap,
+      char_limit: state.charLimit,
       guided_mode: true,
       auto_concede: state.autoConcede,
       status: 'pending',
@@ -2316,6 +2383,7 @@ function showInviteLanding() {
   document.getElementById('inv-mode').textContent = currentDebate.mode.toUpperCase();
   document.getElementById('inv-turn').textContent = fmtTime(currentDebate.turn_seconds);
   document.getElementById('inv-cap').textContent = currentDebate.message_cap >= 9999 ? '∞' : `${currentDebate.message_cap} each`;
+  document.getElementById('inv-char').textContent = (currentDebate.char_limit ?? 99999) >= 99999 ? '∞' : `${currentDebate.char_limit} chars`;
   showScreen('invite');
 }
 
@@ -2362,6 +2430,8 @@ function showChat() {
   document.getElementById('chat-mode-badge').textContent = currentDebate.mode.toUpperCase();
   document.getElementById('turn-cap').textContent = currentDebate.message_cap >= 9999 ? '∞' : currentDebate.message_cap;
   document.getElementById('composer-hint').textContent = 'The mediator flags your message after you send.';
+  // wire up the live (Twitter-style) character counter for this debate
+  setupCharCounter();
 
   // load both players' avatars, then repaint
   Promise.all([
@@ -2769,9 +2839,52 @@ async function resolveForfeit(decision) {
 // ============================================================================
 // SEND MESSAGE + MEDIATOR CALL
 // ============================================================================
+// ---- Live character counter (counts DOWN, Twitter-style) -------------------
+// The limit comes from the debate's char_limit. Unlimited (∞) hides the counter
+// and removes the cap. We bind once per chat open and reuse updateCharCounter.
+function currentCharLimit() {
+  const lim = currentDebate && currentDebate.char_limit != null ? currentDebate.char_limit : 99999;
+  return lim;
+}
+function setupCharCounter() {
+  const input = document.getElementById('composer-input');
+  const counter = document.getElementById('char-counter');
+  if (!input || !counter) return;
+  const lim = currentCharLimit();
+  if (lim >= 99999) {
+    // unlimited — no cap, no counter
+    counter.hidden = true;
+    input.removeAttribute('maxlength');
+  } else {
+    counter.hidden = false;
+    // hard stop in the field itself, so a paste can't blow past the limit
+    input.setAttribute('maxlength', String(lim));
+  }
+  input.removeEventListener('input', updateCharCounter);
+  input.addEventListener('input', updateCharCounter);
+  updateCharCounter();
+}
+function updateCharCounter() {
+  const input = document.getElementById('composer-input');
+  const counter = document.getElementById('char-counter');
+  if (!input || !counter) return;
+  const lim = currentCharLimit();
+  if (lim >= 99999) { counter.hidden = true; return; }
+  const remaining = lim - input.value.length;
+  counter.textContent = remaining;
+  counter.classList.toggle('warn', remaining <= 50 && remaining > 0);
+  counter.classList.toggle('over', remaining <= 0);
+}
+
 async function sendMessage() {
   const text = document.getElementById('composer-input').value.trim();
   if (!text) return;
+  // belt-and-suspenders: enforce the limit even though the field has maxlength
+  const lim = currentCharLimit();
+  if (lim < 99999 && text.length > lim) {
+    showToast(`Keep it under ${lim} characters — this is ping-pong, not a novel.`);
+    return;
+  }
   const myRole = currentDebate.creator_email === currentUser.email.toLowerCase() ? 'a' : 'b';
   if (myRole !== currentDebate.current_turn) {
     showToast('Not your turn yet.');
@@ -2816,6 +2929,7 @@ async function sendMessage() {
     }
 
     document.getElementById('composer-input').value = '';
+    updateCharCounter();
     renderMessages();
   } catch (e) {
     console.error(e);
