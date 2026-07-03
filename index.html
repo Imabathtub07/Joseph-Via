@@ -1920,9 +1920,17 @@ async function init() {
 
   sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // Handle auth state changes
+  // Handle auth state changes.
+  // IMPORTANT: Supabase re-fires SIGNED_IN every time the tab regains focus
+  // (token refresh / visibility change) — not just on real logins. Running the
+  // full sign-in flow on those re-fires navigated back to the dashboard and
+  // wiped whatever you were typing. Only route on a genuinely new session.
   sb.auth.onAuthStateChange((event, session) => {
     if (event === 'SIGNED_IN' && session) {
+      if (currentUser && currentUser.id === session.user.id) {
+        currentUser = session.user; // same person, refreshed token — stay put
+        return;
+      }
       onSignedIn(session.user);
     } else if (event === 'SIGNED_OUT') {
       currentUser = null;
@@ -1953,15 +1961,10 @@ async function onSignedIn(user) {
   currentUser = user;
   updateMastUser();
 
-  // Check allowlist
-  const { data: allowed, error } = await sb
-    .from('allowed_emails')
-    .select('email')
-    .eq('email', user.email.toLowerCase())
-    .maybeSingle();
-
-  if (error) console.warn('Allowlist check error:', error);
-  if (!allowed) { showScreen('no-access'); return; }
+  // Public app — no allowlist gate. Anyone who completes the magic-link
+  // sign-in is in. (The old closed-beta wall lives on only as the unused
+  // "no-access" screen; security is enforced by RLS in Supabase, see
+  // SUPABASE_GO_PUBLIC_RUNBOOK.md.)
 
   // Load (or create) this user's profile, then refresh the masthead with it
   await loadOrCreateProfile();
@@ -2257,6 +2260,19 @@ function goToContract() {
   if (cVal) cVal.textContent = '5';
   document.getElementById('t-guided').classList.add('on');
   document.getElementById('t-autoconcede').classList.add('on');
+  // If a half-written contract draft survived a refresh or an accidental
+  // navigation, bring it back instead of a blank form.
+  const draft = loadContractDraft();
+  if (draft && (draft.topic || draft.oppEmail || draft.opening)) {
+    document.getElementById('topic').value = draft.topic || '';
+    document.getElementById('opp-email').value = draft.oppEmail || '';
+    openingReset.value = draft.opening || '';
+    state.topic = draft.topic || '';
+    state.oppEmail = draft.oppEmail || '';
+    state.opening = draft.opening || '';
+    enforceWordMeter(openingReset, 'opening-meter', 'opening-meter-label', 'opening-count');
+    showToast('Draft restored ✓', 'cyan');
+  }
   refreshContractSummary();
   showScreen('contract');
 }
@@ -2309,6 +2325,39 @@ function enforceWordMeter(textarea, meterId, labelId, countId) {
   return words;
 }
 
+// ============================================================================
+// DRAFT PERSISTENCE — never lose a half-written opening argument
+// Drafts live in localStorage: the contract form under one key, the invitee's
+// opening under a per-debate key. Saved on every keystroke, cleared on success.
+// ============================================================================
+const CONTRACT_DRAFT_KEY = 'discourse-draft-contract';
+
+function saveContractDraft() {
+  try {
+    localStorage.setItem(CONTRACT_DRAFT_KEY, JSON.stringify({
+      topic: state.topic, oppEmail: state.oppEmail, opening: state.opening,
+    }));
+  } catch (e) { /* storage full/blocked — non-fatal */ }
+}
+function loadContractDraft() {
+  try { return JSON.parse(localStorage.getItem(CONTRACT_DRAFT_KEY) || 'null'); }
+  catch (e) { return null; }
+}
+function clearContractDraft() {
+  try { localStorage.removeItem(CONTRACT_DRAFT_KEY); } catch (e) {}
+}
+
+function openingDraftKey(debateId) { return 'discourse-draft-opening-' + debateId; }
+function saveOpeningDraft(debateId, text) {
+  try { localStorage.setItem(openingDraftKey(debateId), text); } catch (e) {}
+}
+function loadOpeningDraft(debateId) {
+  try { return localStorage.getItem(openingDraftKey(debateId)) || ''; } catch (e) { return ''; }
+}
+function clearOpeningDraft(debateId) {
+  try { localStorage.removeItem(openingDraftKey(debateId)); } catch (e) {}
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const tSlider = document.getElementById('timer-slider');
   if (tSlider) tSlider.addEventListener('input', e => {
@@ -2328,6 +2377,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (el) el.addEventListener('input', e => {
       if (id === 'topic') state.topic = e.target.value;
       if (id === 'opp-email') state.oppEmail = e.target.value.trim().toLowerCase();
+      saveContractDraft();
       refreshContractSummary();
     });
   });
@@ -2335,11 +2385,13 @@ document.addEventListener('DOMContentLoaded', () => {
   if (openingEl) openingEl.addEventListener('input', e => {
     enforceWordMeter(e.target, 'opening-meter', 'opening-meter-label', 'opening-count');
     state.opening = e.target.value;
+    saveContractDraft();
     refreshContractSummary();
   });
   const openingBEl = document.getElementById('opening-b-input');
   if (openingBEl) openingBEl.addEventListener('input', e => {
     enforceWordMeter(e.target, 'opening-b-meter', 'opening-b-meter-label', 'opening-b-count');
+    if (currentDebate) saveOpeningDraft(currentDebate.id, e.target.value);
   });
   const bioEl = document.getElementById('prof-bio');
   if (bioEl) bioEl.addEventListener('input', e => {
@@ -2408,18 +2460,8 @@ async function createDebate() {
   btn.textContent = 'Distilling your argument…';
 
   try {
-    // Check opponent is on allowlist
-    const { data: oppAllowed } = await sb
-      .from('allowed_emails')
-      .select('email')
-      .eq('email', state.oppEmail)
-      .maybeSingle();
-    if (!oppAllowed) {
-      showToast(`${state.oppEmail} isn't on the allowlist yet — add them in Supabase first.`);
-      btn.disabled = false;
-      btn.textContent = '⚡ Send Invite';
-      return;
-    }
+    // Public app: anyone with a valid email can be invited — the magic-link
+    // email doubles as their sign-up. (See SUPABASE_GO_PUBLIC_RUNBOOK.md §2b.)
 
     // Distill the opening into key points. If the AI is unavailable we still
     // create the debate — the panel just shows the full opening instead.
@@ -2444,6 +2486,7 @@ async function createDebate() {
     }).select().single();
 
     if (error) throw error;
+    clearContractDraft();
 
     // Send invite email via Supabase magic link, with redirect to the debate
     const redirectUrl = `${window.location.origin}${window.location.pathname}?debate=${debate.id}`;
@@ -2549,7 +2592,10 @@ function acceptInvite() {
 function showOpeningScreen() {
   document.getElementById('opening-topic').textContent = `"${currentDebate.topic}"`;
   const openingBReset = document.getElementById('opening-b-input');
-  openingBReset.value = '';
+  // restore a draft for THIS debate if one survived a refresh / navigation
+  const draft = loadOpeningDraft(currentDebate.id);
+  openingBReset.value = draft;
+  if (draft) showToast('Draft restored ✓', 'cyan');
   enforceWordMeter(openingBReset, 'opening-b-meter', 'opening-b-meter-label', 'opening-b-count');
   document.getElementById('opening-status').textContent = '';
   showScreen('opening');
@@ -2579,6 +2625,7 @@ async function submitOpening() {
       })
       .eq('id', currentDebate.id);
     if (error) throw error;
+    clearOpeningDraft(currentDebate.id);
     // Let the creator know the debate is live (fire-and-forget email nudge)
     sendEmailNudge(currentDebate.id, 'debate_started');
     // realtime will reload us into chat; force it for snappiness
