@@ -196,7 +196,9 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    filter: drop-shadow(0 0 22px var(--hot-pink-glow));
+    /* a tight, subtle glow — the old 22px blur smeared short words ("it!")
+       into a melty blob */
+    filter: drop-shadow(0 1px 4px rgba(255, 46, 136, 0.3));
   }
   .hero .lede {
     font-size: 18px;
@@ -1322,6 +1324,31 @@
     transition: all .15s;
   }
   .inf-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* ===== WORD METER (opening arguments) ===== */
+  .wordmeter { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+  .wm-bar {
+    flex: 1; height: 6px; border-radius: 999px;
+    background: rgba(10, 6, 18, 0.7);
+    border: 1px solid var(--rule-strong);
+    overflow: hidden;
+  }
+  .wm-fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--cyan), var(--violet));
+    border-radius: 999px;
+    transition: width .2s ease, background .2s ease;
+  }
+  .wm-fill.warn { background: linear-gradient(90deg, var(--amber), var(--hot-pink)); }
+  .wm-fill.full { background: var(--hot-pink); box-shadow: 0 0 10px var(--hot-pink-glow); }
+  .wm-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.06em;
+    color: var(--ink-3);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .wm-label.full { color: var(--hot-pink); }
   .inf-btn.active {
     background: var(--gold); color: var(--void);
     border-color: var(--gold);
@@ -1523,11 +1550,12 @@
 
         <div class="field">
           <label>Your Opening Argument</label>
-          <textarea id="opening-arg" placeholder="Make your case. Where do you stand on this topic, and why? The AI will distill this into quick-reference key points for the debate." maxlength="4000" style="width:100%;min-height:140px;background:rgba(10,6,18,0.6);border:1px solid var(--rule-strong);padding:12px 14px;font-size:15px;line-height:1.55;color:var(--ink);"></textarea>
-          <div style="display:flex;justify-content:space-between;margin-top:6px;">
-            <span class="slider-hint" style="margin-top:0;">They won't see this until they've written their own opening.</span>
-            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-3);"><span id="opening-count">0</span>/4000</span>
+          <textarea id="opening-arg" placeholder="Make your case. Where do you stand on this topic, and why? The AI will distill this into quick-reference key points for the debate." style="width:100%;min-height:140px;background:rgba(10,6,18,0.6);border:1px solid var(--rule-strong);padding:12px 14px;font-size:15px;line-height:1.55;color:var(--ink);"></textarea>
+          <div class="wordmeter">
+            <div class="wm-bar"><div class="wm-fill" id="opening-meter"></div></div>
+            <div class="wm-label" id="opening-meter-label"><span id="opening-count">0</span> / 500 words</div>
           </div>
+          <div class="slider-hint">Up to ~2 double-spaced pages. They won't see this until they've written their own opening.</div>
         </div>
 
         <div class="field">
@@ -1648,8 +1676,12 @@
         </div>
         <div class="field">
           <label>Your Opening Argument</label>
-          <textarea id="opening-b-input" placeholder="Where do you stand on this topic, and why? You haven't seen their opening — and they haven't seen yours. Both are revealed when the debate begins." maxlength="4000" style="width:100%;min-height:160px;background:rgba(10,6,18,0.6);border:1px solid var(--rule-strong);padding:12px 14px;font-size:15px;line-height:1.55;color:var(--ink);"></textarea>
-          <div style="text-align:right;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-3);margin-top:4px;"><span id="opening-b-count">0</span>/4000</div>
+          <textarea id="opening-b-input" placeholder="Where do you stand on this topic, and why? You haven't seen their opening — and they haven't seen yours. Both are revealed when the debate begins." style="width:100%;min-height:160px;background:rgba(10,6,18,0.6);border:1px solid var(--rule-strong);padding:12px 14px;font-size:15px;line-height:1.55;color:var(--ink);"></textarea>
+          <div class="wordmeter">
+            <div class="wm-bar"><div class="wm-fill" id="opening-b-meter"></div></div>
+            <div class="wm-label" id="opening-b-meter-label"><span id="opening-b-count">0</span> / 500 words</div>
+          </div>
+          <div class="slider-hint">Up to ~2 double-spaced pages.</div>
         </div>
         <div style="display:flex;gap:10px;">
           <button class="btn btn-primary" id="opening-submit-btn" onclick="submitOpening()">⚡ Lock It In & Begin</button>
@@ -2199,8 +2231,9 @@ function goToContract() {
   // reset form
   document.getElementById('topic').value = '';
   document.getElementById('opp-email').value = '';
-  document.getElementById('opening-arg').value = '';
-  document.getElementById('opening-count').textContent = '0';
+  const openingReset = document.getElementById('opening-arg');
+  openingReset.value = '';
+  enforceWordMeter(openingReset, 'opening-meter', 'opening-meter-label', 'opening-count');
   state.topic = '';
   state.oppEmail = '';
   state.opening = '';
@@ -2241,6 +2274,41 @@ function toggle(el) {
   refreshContractSummary();
 }
 
+// ============================================================================
+// OPENING-ARGUMENT WORD BUDGET
+// ~250 words per double-spaced Word page; two pages feels like the right cap
+// for an opening you actually expect someone to read.
+// ============================================================================
+const OPENING_MAX_WORDS = 500;
+const OPENING_MIN_WORDS = 20;
+
+function countWords(s) {
+  const t = (s || '').trim();
+  return t ? t.split(/\s+/).length : 0;
+}
+
+// Clamp a textarea to the word budget (extra words past 500 are dropped),
+// then repaint its meter bar + label. Returns the current word count.
+function enforceWordMeter(textarea, meterId, labelId, countId) {
+  let words = countWords(textarea.value);
+  if (words > OPENING_MAX_WORDS) {
+    textarea.value = textarea.value.trim().split(/\s+/).slice(0, OPENING_MAX_WORDS).join(' ');
+    words = OPENING_MAX_WORDS;
+  }
+  const pct = Math.min(100, (words / OPENING_MAX_WORDS) * 100);
+  const fill = document.getElementById(meterId);
+  const label = document.getElementById(labelId);
+  const count = document.getElementById(countId);
+  if (count) count.textContent = words;
+  if (fill) {
+    fill.style.width = pct + '%';
+    fill.classList.toggle('warn', words >= OPENING_MAX_WORDS * 0.9 && words < OPENING_MAX_WORDS);
+    fill.classList.toggle('full', words >= OPENING_MAX_WORDS);
+  }
+  if (label) label.classList.toggle('full', words >= OPENING_MAX_WORDS);
+  return words;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const tSlider = document.getElementById('timer-slider');
   if (tSlider) tSlider.addEventListener('input', e => {
@@ -2265,15 +2333,13 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   const openingEl = document.getElementById('opening-arg');
   if (openingEl) openingEl.addEventListener('input', e => {
+    enforceWordMeter(e.target, 'opening-meter', 'opening-meter-label', 'opening-count');
     state.opening = e.target.value;
-    const c = document.getElementById('opening-count');
-    if (c) c.textContent = e.target.value.length;
     refreshContractSummary();
   });
   const openingBEl = document.getElementById('opening-b-input');
   if (openingBEl) openingBEl.addEventListener('input', e => {
-    const c = document.getElementById('opening-b-count');
-    if (c) c.textContent = e.target.value.length;
+    enforceWordMeter(e.target, 'opening-b-meter', 'opening-b-meter-label', 'opening-b-count');
   });
   const bioEl = document.getElementById('prof-bio');
   if (bioEl) bioEl.addEventListener('input', e => {
@@ -2291,7 +2357,8 @@ function refreshContractSummary() {
   document.getElementById('s-topic').textContent = state.topic || '—';
   document.getElementById('s-opp').textContent = state.oppEmail || '—';
   const op = document.getElementById('s-opening');
-  if (op) op.textContent = state.opening.trim().length >= 40 ? '✓ Written' : (state.opening.trim() ? 'Too short' : '—');
+  const opWords = countWords(state.opening);
+  if (op) op.textContent = opWords >= OPENING_MIN_WORDS ? `✓ ${opWords} words` : (opWords ? 'Too short' : '—');
   document.getElementById('s-mode').textContent = state.mode[0].toUpperCase() + state.mode.slice(1);
   document.getElementById('s-timer').textContent = fmtTime(state.turnSeconds);
   document.getElementById('s-cap').textContent = state.messageCap >= 9999 ? '∞' : `${state.messageCap} each`;
@@ -2334,7 +2401,7 @@ async function createDebate() {
   if (!state.topic.trim()) { showToast('Pick a topic first.'); return; }
   if (!state.oppEmail || !state.oppEmail.includes('@')) { showToast('Need a valid opponent email.'); return; }
   if (state.oppEmail === currentUser.email.toLowerCase()) { showToast('You can\'t debate yourself.'); return; }
-  if (state.opening.trim().length < 40) { showToast('Write your opening argument first (a few sentences at least).'); return; }
+  if (countWords(state.opening) < OPENING_MIN_WORDS) { showToast(`Write your opening argument first (at least ${OPENING_MIN_WORDS} words).`); return; }
 
   const btn = document.getElementById('create-debate-btn');
   btn.disabled = true;
@@ -2481,15 +2548,16 @@ function acceptInvite() {
 
 function showOpeningScreen() {
   document.getElementById('opening-topic').textContent = `"${currentDebate.topic}"`;
-  document.getElementById('opening-b-input').value = '';
-  document.getElementById('opening-b-count').textContent = '0';
+  const openingBReset = document.getElementById('opening-b-input');
+  openingBReset.value = '';
+  enforceWordMeter(openingBReset, 'opening-b-meter', 'opening-b-meter-label', 'opening-b-count');
   document.getElementById('opening-status').textContent = '';
   showScreen('opening');
 }
 
 async function submitOpening() {
   const text = document.getElementById('opening-b-input').value.trim();
-  if (text.length < 40) { showToast('Give it a few sentences at least — this is your opening case.'); return; }
+  if (countWords(text) < OPENING_MIN_WORDS) { showToast(`Give it at least ${OPENING_MIN_WORDS} words — this is your opening case.`); return; }
 
   const btn = document.getElementById('opening-submit-btn');
   const status = document.getElementById('opening-status');
