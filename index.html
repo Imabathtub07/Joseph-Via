@@ -766,6 +766,33 @@
     display: block;
   }
 
+  /* citation links in messages */
+  .msg-body a, .nego-msg a {
+    color: var(--cyan);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    word-break: break-all;
+    transition: all .12s;
+  }
+  .msg-body a:hover, .nego-msg a:hover { text-shadow: 0 0 10px var(--cyan-glow); }
+
+  /* link/citation bar in the composer */
+  .link-bar {
+    display: flex; gap: 8px; align-items: center;
+    border-top: 1px dashed var(--rule-strong);
+    padding-top: 10px; margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  .link-bar input {
+    flex: 1; min-width: 160px;
+    background: rgba(10, 6, 18, 0.6);
+    border: 1px solid var(--rule-strong);
+    padding: 9px 11px;
+    font-size: 13px;
+    color: var(--ink);
+  }
+  .link-bar input:focus { border-color: var(--cyan); }
+
   /* mediator thinking */
   .mediator-thinking {
     display: flex; align-items: center; gap: 10px;
@@ -1535,14 +1562,15 @@
     <div class="contract">
       <div class="panel contract-main">
         <div class="panel-tag">The Contract</div>
-        <h2>Set the terms.</h2>
-        <p class="sub">Lock the topic, make your opening argument, pick the rules. They'll get an email with a link — and they'll write their own opening before the debate begins.</p>
+        <h2 id="contract-title">Set the terms.</h2>
+        <p class="sub" id="contract-sub">Lock the topic, make your opening argument, pick the rules. They'll get an email with a link — and they'll write their own opening before the debate begins.</p>
 
         <div class="field">
           <label>The Topic</label>
           <input type="text" id="topic" placeholder="e.g. Is a hot dog a sandwich?" value="">
         </div>
 
+        <div id="new-debate-only">
         <div class="field">
           <label>Opponent's Email</label>
           <input type="email" id="opp-email" placeholder="them@email.com">
@@ -1557,6 +1585,7 @@
           </div>
           <div class="slider-hint">Up to ~2 double-spaced pages. They won't see this until they've written their own opening.</div>
         </div>
+        </div><!-- /new-debate-only -->
 
         <div class="field">
           <label>Mode</label>
@@ -1607,13 +1636,6 @@
           <label>Rules</label>
           <div class="toggle-row">
             <div>
-              <div class="tlabel">Guided mode</div>
-              <div class="thint">Preview flags before sending</div>
-            </div>
-            <div class="switch on" id="t-guided" onclick="toggle(this)"></div>
-          </div>
-          <div class="toggle-row">
-            <div>
               <div class="tlabel">Auto-concede on timeout</div>
               <div class="thint">No response in time = forfeit</div>
             </div>
@@ -1631,10 +1653,9 @@
         <div class="summary-row"><span class="k">Mode</span><span class="v" id="s-mode">Competitive</span></div>
         <div class="summary-row"><span class="k">Turn</span><span class="v" id="s-timer">5 min</span></div>
         <div class="summary-row"><span class="k">Cap</span><span class="v" id="s-cap">3 each</span></div>
-        <div class="summary-row"><span class="k">Guided</span><span class="v" id="s-guided">On</span></div>
         <div style="margin-top: 22px; display: flex; flex-direction: column; gap: 8px;">
           <button class="btn btn-primary" style="width: 100%;" onclick="createDebate()" id="create-debate-btn">⚡ Send Invite</button>
-          <button class="btn btn-ghost" style="width: 100%;" onclick="goToDashboard()">Cancel</button>
+          <button class="btn btn-ghost" style="width: 100%;" id="contract-cancel-btn" onclick="goToDashboard()">Cancel</button>
         </div>
       </aside>
     </div>
@@ -1655,10 +1676,12 @@
         </div>
         <div style="text-align: center; padding: 12px;">
           <p style="margin-bottom: 16px; color: var(--ink-2); font-size: 14px;">By accepting, you agree to abide by the rules of structured discourse.<br>You'll write your opening argument next — before you see theirs.<br>The AI mediator will flag fallacies and highlight strong arguments in real-time.</p>
-          <div style="display: flex; gap: 12px; justify-content: center;">
+          <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
             <button class="btn btn-primary" onclick="acceptInvite()">⚔ Accept & Make Your Case</button>
+            <button class="btn btn-secondary" onclick="openRulesEditor()">⚙ Adjust the Rules</button>
             <button class="btn btn-ghost" onclick="declineInvite()">Decline</button>
           </div>
+          <p style="margin-top: 14px; font-size: 12px; color: var(--ink-3);">Don't like the terms? Adjust them or talk it over in the 💬 bubble — rules stay negotiable until the debate begins.</p>
         </div>
       </div>
     </div>
@@ -1702,7 +1725,10 @@
           <h2 class="display" style="font-size: 32px; margin-bottom: 12px; color: var(--gold);">Waiting on <span id="wait-name">your opponent</span>…</h2>
           <p style="color: var(--ink-2); margin-bottom: 8px;">They'll get a magic-link email at <span id="wait-email" style="color: var(--cyan); font-family: 'JetBrains Mono', monospace;">—</span></p>
           <p style="color: var(--ink-3); font-size: 13px; margin-bottom: 28px;">They'll see the topic, write their own opening argument, and then the debate begins. Your opening stays sealed until theirs is in.</p>
-          <button class="btn btn-ghost" onclick="goToDashboard()">← Back to Dashboard</button>
+          <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+            <button class="btn btn-secondary" onclick="openRulesEditor()">⚙ Adjust the Rules</button>
+            <button class="btn btn-ghost" onclick="goToDashboard()">← Back to Dashboard</button>
+          </div>
         </div>
       </div>
     </div>
@@ -1743,11 +1769,15 @@
     <div class="composer" id="composer">
       <div class="composer-tag" id="composer-tag">YOUR MOVE</div>
       <textarea id="composer-input" placeholder="Make your point."></textarea>
-      <div id="preview-area"></div>
+      <div class="link-bar" id="link-bar" hidden>
+        <input type="url" id="link-url" placeholder="https://source.example.com/article">
+        <input type="text" id="link-label" placeholder="Label — e.g. CDC 2024 report" maxlength="60">
+        <button class="btn btn-secondary" onclick="insertLink()" style="padding: 8px 14px; font-size: 11px;">Insert ↵</button>
+      </div>
       <div class="composer-bar">
-        <div class="composer-hint" id="composer-hint">Guided mode on · preview before sending</div>
+        <div class="composer-hint" id="composer-hint">Ctrl+Enter sends · 🔗 to cite a source</div>
         <div style="display: flex; gap: 8px;">
-          <button class="btn btn-secondary" id="btn-preview" onclick="runPreview()">Preview</button>
+          <button class="btn btn-secondary" id="btn-link" onclick="toggleLinkBar()">🔗 Cite</button>
           <button class="btn btn-primary" id="btn-send" onclick="sendMessage()">Send ▸</button>
         </div>
       </div>
@@ -1892,6 +1922,7 @@ const AVATARS = ['🦊','🐙','👾','🤖','🐉','🦄','🔥','⚡','🎭','
 // topic suggestions players can tag on their profile
 const TOPIC_POOL = ['Politics','Philosophy','Movies','Tech','Sports','Food','Science','Music','Gaming','Ethics','History','Books','Economics','Relationships','Art','Space','Religion','Health','Travel','Pop Culture'];
 let editorDraft = { avatar: '🦊', topics: [] };
+let editingRules = false;     // contract screen doubles as a rules editor pre-debate
 
 const state = {
   // contract form
@@ -2230,7 +2261,22 @@ async function loadDashboard() {
 // ============================================================================
 // CONTRACT
 // ============================================================================
+// Flip the contract screen between "new debate" and "edit rules" chrome.
+function setContractFormMode(editing) {
+  editingRules = editing;
+  document.getElementById('new-debate-only').style.display = editing ? 'none' : '';
+  document.getElementById('contract-title').textContent = editing ? 'Amend the terms.' : 'Set the terms.';
+  document.getElementById('contract-sub').textContent = editing
+    ? 'The debate hasn\'t started yet, so everything here is still on the table. The other side sees your changes instantly — talk it over in the 💬 bubble.'
+    : 'Lock the topic, make your opening argument, pick the rules. They\'ll get an email with a link — and they\'ll write their own opening before the debate begins.';
+  document.getElementById('create-debate-btn').textContent = editing ? '💾 Save Changes' : '⚡ Send Invite';
+  const cancel = document.getElementById('contract-cancel-btn');
+  cancel.onclick = editing ? () => openDebate(currentDebate.id) : goToDashboard;
+}
+
 function goToContract() {
+  currentDebate = null; // new-debate context — don't attach to an old debate
+  setContractFormMode(false);
   // reset form
   document.getElementById('topic').value = '';
   document.getElementById('opp-email').value = '';
@@ -2258,7 +2304,6 @@ function goToContract() {
   if (cInf) cInf.classList.remove('active');
   const cVal = document.getElementById('cap-val');
   if (cVal) cVal.textContent = '5';
-  document.getElementById('t-guided').classList.add('on');
   document.getElementById('t-autoconcede').classList.add('on');
   // If a half-written contract draft survived a refresh or an accidental
   // navigation, bring it back instead of a blank form.
@@ -2277,6 +2322,74 @@ function goToContract() {
   showScreen('contract');
 }
 
+// ============================================================================
+// RULES EDITOR — either participant can renegotiate the terms while the
+// debate is still pending. This is what makes the pre-debate chat matter.
+// ============================================================================
+function openRulesEditor() {
+  if (!currentDebate || currentDebate.status !== 'pending') { showToast('Rules can only change before the debate begins.'); return; }
+  setContractFormMode(true);
+  // prefill the form from the live debate row
+  document.getElementById('topic').value = currentDebate.topic;
+  state.topic = currentDebate.topic;
+  state.mode = currentDebate.mode;
+  state.turnSeconds = currentDebate.turn_seconds;
+  state.messageCap = currentDebate.message_cap;
+  state.autoConcede = currentDebate.auto_concede;
+  state.oppEmail = currentDebate.opponent_email; // summary display only
+  document.querySelectorAll('.mode-card').forEach(c => c.classList.toggle('active', c.dataset.mode === currentDebate.mode));
+  // timer slider: snap to the nearest stop
+  let ti = TIMER_STOPS.indexOf(currentDebate.turn_seconds);
+  if (ti === -1) {
+    ti = 0;
+    for (let i = 0; i < TIMER_STOPS.length; i++) {
+      if (Math.abs(TIMER_STOPS[i] - currentDebate.turn_seconds) < Math.abs(TIMER_STOPS[ti] - currentDebate.turn_seconds)) ti = i;
+    }
+  }
+  const tSlider = document.getElementById('timer-slider');
+  if (tSlider) tSlider.value = ti;
+  const tVal = document.getElementById('timer-val');
+  if (tVal) tVal.textContent = fmtTime(state.turnSeconds);
+  // cap slider + infinity
+  const inf = currentDebate.message_cap >= 9999;
+  const cSlider = document.getElementById('cap-slider');
+  const cInf = document.getElementById('cap-inf');
+  const cVal = document.getElementById('cap-val');
+  if (cSlider) { cSlider.disabled = inf; cSlider.value = inf ? 5 : Math.min(30, Math.max(2, currentDebate.message_cap)); }
+  if (cInf) cInf.classList.toggle('active', inf);
+  if (cVal) cVal.textContent = inf ? '∞' : String(currentDebate.message_cap);
+  document.getElementById('t-autoconcede').classList.toggle('on', !!currentDebate.auto_concede);
+  refreshContractSummary();
+  showScreen('contract');
+}
+
+async function saveRuleChanges() {
+  if (!state.topic.trim()) { showToast('The topic can\'t be empty.'); return; }
+  const btn = document.getElementById('create-debate-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  try {
+    const { data, error } = await sb.from('debates').update({
+      topic: state.topic.trim(),
+      mode: state.mode,
+      turn_seconds: state.turnSeconds,
+      message_cap: state.messageCap,
+      auto_concede: state.autoConcede,
+    }).eq('id', currentDebate.id).select().single();
+    if (error) throw error;
+    currentDebate = data;
+    showToast('Rules updated ✓ — they can see the changes now.', 'cyan');
+    setContractFormMode(false);
+    await openDebate(currentDebate.id); // back to waiting / invite landing
+  } catch (e) {
+    console.error(e);
+    showToast('Couldn\'t save: ' + (e.message || 'unknown error'));
+  } finally {
+    btn.disabled = false;
+    btn.textContent = editingRules ? '💾 Save Changes' : '⚡ Send Invite';
+  }
+}
+
 function selectMode(el) {
   document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
@@ -2285,7 +2398,6 @@ function selectMode(el) {
 }
 function toggle(el) {
   el.classList.toggle('on');
-  if (el.id === 't-guided') state.guidedMode = el.classList.contains('on');
   if (el.id === 't-autoconcede') state.autoConcede = el.classList.contains('on');
   refreshContractSummary();
 }
@@ -2377,7 +2489,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (el) el.addEventListener('input', e => {
       if (id === 'topic') state.topic = e.target.value;
       if (id === 'opp-email') state.oppEmail = e.target.value.trim().toLowerCase();
-      saveContractDraft();
+      if (!editingRules) saveContractDraft(); // don't pollute the new-debate draft while amending rules
       refreshContractSummary();
     });
   });
@@ -2385,7 +2497,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (openingEl) openingEl.addEventListener('input', e => {
     enforceWordMeter(e.target, 'opening-meter', 'opening-meter-label', 'opening-count');
     state.opening = e.target.value;
-    saveContractDraft();
+    if (!editingRules) saveContractDraft();
     refreshContractSummary();
   });
   const openingBEl = document.getElementById('opening-b-input');
@@ -2414,7 +2526,6 @@ function refreshContractSummary() {
   document.getElementById('s-mode').textContent = state.mode[0].toUpperCase() + state.mode.slice(1);
   document.getElementById('s-timer').textContent = fmtTime(state.turnSeconds);
   document.getElementById('s-cap').textContent = state.messageCap >= 9999 ? '∞' : `${state.messageCap} each`;
-  document.getElementById('s-guided').textContent = state.guidedMode ? 'On' : 'Off';
 }
 // Turn-timer slider stops (seconds): 5 min up to 3 days
 const TIMER_STOPS = [300, 600, 900, 1800, 3600, 7200, 14400, 28800, 43200, 86400, 172800, 259200];
@@ -2450,6 +2561,7 @@ function fmtTime(s) {
 // CREATE DEBATE
 // ============================================================================
 async function createDebate() {
+  if (editingRules) return saveRuleChanges();
   if (!state.topic.trim()) { showToast('Pick a topic first.'); return; }
   if (!state.oppEmail || !state.oppEmail.includes('@')) { showToast('Need a valid opponent email.'); return; }
   if (state.oppEmail === currentUser.email.toLowerCase()) { showToast('You can\'t debate yourself.'); return; }
@@ -2463,9 +2575,13 @@ async function createDebate() {
     // Public app: anyone with a valid email can be invited — the magic-link
     // email doubles as their sign-up. (See SUPABASE_GO_PUBLIC_RUNBOOK.md §2b.)
 
-    // Distill the opening into key points. If the AI is unavailable we still
-    // create the debate — the panel just shows the full opening instead.
-    const points = await distillArgument(state.opening.trim(), state.topic.trim());
+    // Distill the opening into key points AND have the mediator judge it as
+    // an opening (thesis clarity, scoping, framing) — in parallel. If the AI
+    // is unavailable we still create the debate; backfill heals it later.
+    const [points, openingFlags] = await Promise.all([
+      distillArgument(state.opening.trim(), state.topic.trim()),
+      flagOpening(state.opening.trim(), state.topic.trim(), state.mode),
+    ]);
 
     btn.textContent = 'Creating…';
 
@@ -2476,6 +2592,7 @@ async function createDebate() {
       topic: state.topic.trim(),
       opening_a: state.opening.trim(),
       points_a: points,
+      opening_flags_a: openingFlags,
       mode: state.mode,
       turn_seconds: state.turnSeconds,
       message_cap: state.messageCap,
@@ -2612,13 +2729,17 @@ async function submitOpening() {
   status.textContent = 'The mediator is distilling your argument into key points…';
 
   try {
-    const points = await distillArgument(text, currentDebate.topic);
+    const [points, openingFlags] = await Promise.all([
+      distillArgument(text, currentDebate.topic),
+      flagOpening(text, currentDebate.topic, currentDebate.mode),
+    ]);
     btn.textContent = 'Starting…';
     const { error } = await sb
       .from('debates')
       .update({
         opening_b: text,
         points_b: points,
+        opening_flags_b: openingFlags,
         status: 'active',
         accepted_at: new Date().toISOString(),
         turn_started_at: new Date().toISOString(), // start the persistent clock
@@ -2669,10 +2790,6 @@ function showChat() {
   document.getElementById('chat-topic').textContent = `"${currentDebate.topic}"`;
   document.getElementById('chat-mode-badge').textContent = currentDebate.mode.toUpperCase();
   document.getElementById('turn-cap').textContent = currentDebate.message_cap >= 9999 ? '∞' : currentDebate.message_cap;
-  document.getElementById('composer-hint').textContent = currentDebate.guided_mode
-    ? 'Guided mode on · preview before sending'
-    : 'Direct mode · flags appear after sending';
-  document.getElementById('btn-preview').style.display = currentDebate.guided_mode ? '' : 'none';
 
   // load both players' avatars, then repaint
   Promise.all([
@@ -2691,6 +2808,7 @@ function showChat() {
   ensureNotifyPermission();
   showScreen('chat');
   renderPointsWidget();
+  backfillOpeningAI(); // fire-and-forget: fills in missing points/flags
 }
 
 function refreshTurnUI() {
@@ -2732,6 +2850,13 @@ function refreshTurnUI() {
 
 function computeScore(role) {
   let score = 0;
+  // opening-argument flags count too — both sides wrote one, so it's symmetric
+  const openingFlags = (currentDebate && (role === 'a' ? currentDebate.opening_flags_a : currentDebate.opening_flags_b)) || [];
+  for (const f of openingFlags) {
+    if (f.kind === 'red') score -= 2;
+    else if (f.kind === 'green') score += 3;
+    else if (f.kind === 'amber') score -= 1;
+  }
   for (const m of currentMessages) {
     if (m.role !== role) continue;
     for (const f of (m.flags || [])) {
@@ -2771,6 +2896,7 @@ async function loadMessages(debateId) {
 function renderOpeningCard(role) {
   const opening = role === 'a' ? currentDebate.opening_a : currentDebate.opening_b;
   if (!opening) return null;
+  const flags = (role === 'a' ? currentDebate.opening_flags_a : currentDebate.opening_flags_b) || [];
   const side = role === 'a' ? 'left' : 'right';
   const email = (role === 'a' ? currentDebate.creator_email : currentDebate.opponent_email || '').toLowerCase();
   const name = email.split('@')[0];
@@ -2782,7 +2908,7 @@ function renderOpeningCard(role) {
   div.innerHTML = `
     <div class="${avaClass}">${avaInner}</div>
     <div>
-      <div class="msg-body"><span class="opening-tag">★ Opening Argument</span><br>${escapeHtml(opening)}</div>
+      <div class="msg-body"><span class="opening-tag">★ Opening Argument</span><br>${renderTextWithFlags(opening, flags)}</div>
       <div class="msg-meta"><span>${escapeHtml(name)}</span></div>
     </div>
   `;
@@ -2832,20 +2958,32 @@ function renderMessages() {
   container.scrollIntoView({ behavior: 'smooth', block: 'end' });
 }
 
+// Turn citation markdown [label](https://url) and bare URLs into safe links.
+// IMPORTANT: operates on ALREADY-ESCAPED html — quotes are entities, so the
+// matched URL can't break out of the href attribute. Only http(s) is matched.
+function linkify(escaped) {
+  let out = escaped.replace(/\[([^\]]{1,80})\]\((https?:\/\/[^\s)]+)\)/g,
+    (m, label, url) => `<a href="${url}" target="_blank" rel="noopener noreferrer" title="${url}">${label} ↗</a>`);
+  // bare URLs — skip ones already inside an attribute (preceded by " or =)
+  out = out.replace(/(^|[^"'=>\]])(https?:\/\/[^\s<]+?)([.,;:!?)]*)(?=\s|$|<)/g,
+    (m, pre, url, trail) => `${pre}<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>${trail}`);
+  return out;
+}
+
 function renderTextWithFlags(text, flags) {
-  if (!flags || !flags.length) return escapeHtml(text);
+  if (!flags || !flags.length) return linkify(escapeHtml(text));
   const sorted = [...flags].sort((a, b) => a.start - b.start);
   let out = '';
   let cursor = 0;
   for (const f of sorted) {
     if (f.start < cursor) continue;
-    out += escapeHtml(text.slice(cursor, f.start));
+    out += linkify(escapeHtml(text.slice(cursor, f.start)));
     const span = text.slice(f.start, f.end);
     const kindClass = f.kind === 'red' ? 'hl-red' : f.kind === 'green' ? 'hl-green' : 'hl-amber';
     out += `<span class="hl ${kindClass}">${escapeHtml(span)}<span class="hl-tooltip ${f.kind}"><span class="tt-label">${escapeHtml(f.label || f.kind.toUpperCase())}</span>${escapeHtml(f.reason || '')}</span></span>`;
     cursor = f.end;
   }
-  out += escapeHtml(text.slice(cursor));
+  out += linkify(escapeHtml(text.slice(cursor)));
   return out;
 }
 
@@ -2920,6 +3058,26 @@ function subscribeToDebate(debateId) {
           startTimer();
         }
         refreshTurnUI();
+
+        // still pending and the terms changed -> the other side renegotiated.
+        // Refresh whatever pending screen is up so the new rules show.
+        if (currentDebate.status === 'pending') {
+          const changed = old.topic !== currentDebate.topic
+            || old.mode !== currentDebate.mode
+            || old.turn_seconds !== currentDebate.turn_seconds
+            || old.message_cap !== currentDebate.message_cap
+            || old.auto_concede !== currentDebate.auto_concede;
+          if (changed) {
+            showToast('📜 The terms were updated', 'cyan');
+            notifyLocal('📜 Terms updated', `"${currentDebate.topic}" — the rules were adjusted.`);
+            const active = document.querySelector('.screen.active');
+            if (active && active.id === 'screen-invite') showInviteLanding();
+            if (active && active.id === 'screen-opening') {
+              document.getElementById('opening-topic').textContent = `"${currentDebate.topic}"`;
+            }
+          }
+          return;
+        }
 
         // a forfeit prompt was raised by the other device -> show it here too
         if (!old.forfeit_offered_by && currentDebate.forfeit_offered_by) {
@@ -3113,7 +3271,6 @@ async function sendMessage() {
   }
 
   document.getElementById('btn-send').disabled = true;
-  document.getElementById('btn-preview').disabled = true;
   appendThinkingIndicator();
 
   try {
@@ -3161,35 +3318,48 @@ async function sendMessage() {
     }
 
     document.getElementById('composer-input').value = '';
-    document.getElementById('preview-area').innerHTML = '';
     renderMessages();
   } catch (e) {
     console.error(e);
     showToast('Send failed: ' + (e.message || ''));
   } finally {
     document.getElementById('btn-send').disabled = false;
-    document.getElementById('btn-preview').disabled = false;
     removeThinkingIndicator();
   }
 }
 
-async function runPreview() {
-  const text = document.getElementById('composer-input').value.trim();
-  if (!text) return;
-  const previewArea = document.getElementById('preview-area');
-  previewArea.innerHTML = `<div class="mediator-thinking"><div class="dots"><span></span><span></span><span></span></div>Mediator reading your draft</div>`;
-  try {
-    const flags = await callMediator(text);
-    previewArea.innerHTML = `
-      <div class="preview-box">
-        <span class="ttl">↳ Pre-send Preview</span>
-        ${renderTextWithFlags(text, flags)}
-        ${flags.length === 0 ? '<div style="margin-top: 10px; color: var(--cyan); font-family: \'JetBrains Mono\', monospace; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;">✓ Clean · no flags</div>' : ''}
-      </div>
-    `;
-  } catch (e) {
-    previewArea.innerHTML = `<div class="preview-box" style="color: var(--hot-pink);"><span class="ttl">Preview failed</span>${escapeHtml(e.message || 'Mediator unavailable')}</div>`;
+// ============================================================================
+// CITATION LINKS — insert [label](url) from the composer's 🔗 bar
+// ============================================================================
+function toggleLinkBar() {
+  const bar = document.getElementById('link-bar');
+  bar.hidden = !bar.hidden;
+  if (!bar.hidden) document.getElementById('link-url').focus();
+}
+
+function insertLink() {
+  const urlEl = document.getElementById('link-url');
+  const labelEl = document.getElementById('link-label');
+  let url = urlEl.value.trim();
+  if (!url) { showToast('Paste a URL first.'); return; }
+  if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+  let label = labelEl.value.trim();
+  if (!label) {
+    // default label: the site's domain, e.g. "nytimes.com"
+    try { label = new URL(url).hostname.replace(/^www\./, ''); } catch (e) { label = 'source'; }
   }
+  const md = `[${label}](${url})`;
+  const ta = document.getElementById('composer-input');
+  const start = ta.selectionStart ?? ta.value.length;
+  const end = ta.selectionEnd ?? ta.value.length;
+  const pad = start > 0 && !/\s/.test(ta.value[start - 1]) ? ' ' : '';
+  ta.value = ta.value.slice(0, start) + pad + md + ta.value.slice(end);
+  urlEl.value = '';
+  labelEl.value = '';
+  document.getElementById('link-bar').hidden = true;
+  ta.focus();
+  const pos = start + pad.length + md.length;
+  ta.setSelectionRange(pos, pos);
 }
 
 async function callMediator(text) {
@@ -3249,6 +3419,67 @@ async function distillArgument(text, topic) {
   } catch (e) {
     console.warn('Distill failed (continuing without points):', e.message || e);
     return [];
+  }
+}
+
+// Ask the mediator to judge an OPENING argument (opening-specific rubric:
+// thesis clarity, honest scoping, framing). Returns mapped flags, [] on failure.
+async function flagOpening(text, topic, mode) {
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/mediator`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        text,
+        topic,
+        mode,
+        authorName: 'the author of this opening argument',
+        priorMessages: [],
+        opening: true,
+      }),
+    });
+    if (!response.ok) throw new Error(`flags ${response.status}`);
+    const data = await response.json();
+    return mapSpansToFlags(text, data.flags || []);
+  } catch (e) {
+    console.warn('Opening flags failed (continuing without):', e.message || e);
+    return [];
+  }
+}
+
+// Self-heal: if a debate's openings are missing their AI points or flags
+// (e.g. the mediator was down, or the function wasn't deployed yet when the
+// debate was created), re-run the AI once when the chat opens and save.
+let backfilledDebateId = null;
+async function backfillOpeningAI() {
+  if (!currentDebate || currentDebate.status === 'pending') return;
+  if (backfilledDebateId === currentDebate.id) return;
+  backfilledDebateId = currentDebate.id;
+  const updates = {};
+  for (const side of ['a', 'b']) {
+    const opening = currentDebate['opening_' + side];
+    if (!opening) continue;
+    const pts = currentDebate['points_' + side];
+    if (!pts || !pts.length) {
+      const p = await distillArgument(opening, currentDebate.topic);
+      if (p.length) updates['points_' + side] = p;
+    }
+    const flg = currentDebate['opening_flags_' + side];
+    if (!flg || !flg.length) {
+      const f = await flagOpening(opening, currentDebate.topic, currentDebate.mode);
+      if (f.length) updates['opening_flags_' + side] = f;
+    }
+  }
+  if (!Object.keys(updates).length) return;
+  const { data, error } = await sb.from('debates').update(updates).eq('id', currentDebate.id).select().single();
+  if (!error && data && currentDebate && currentDebate.id === data.id) {
+    currentDebate = data;
+    renderMessages();
+    renderPointsWidget();
   }
 }
 
@@ -3380,8 +3611,15 @@ async function endDebate(reason) {
 function showSummary() {
   if (timerInterval) clearInterval(timerInterval);
 
-  // aggregate stats
+  // aggregate stats (opening-argument flags included)
   const stats = { a: { red: 0, green: 0, amber: 0, conc: 0 }, b: { red: 0, green: 0, amber: 0, conc: 0 } };
+  for (const role of ['a', 'b']) {
+    for (const f of ((role === 'a' ? currentDebate.opening_flags_a : currentDebate.opening_flags_b) || [])) {
+      if (f.kind === 'red') stats[role].red++;
+      if (f.kind === 'green') stats[role].green++;
+      if (f.kind === 'amber') stats[role].amber++;
+    }
+  }
   for (const m of currentMessages) {
     for (const f of (m.flags || [])) {
       if (f.kind === 'red') stats[m.role].red++;
@@ -3481,7 +3719,7 @@ function showScreen(id) {
   // The negotiation bubble only makes sense pre-match, when a debate row
   // exists to attach the thread to: the creator's "waiting" screen and the
   // opponent's "invite" landing. Tear it down everywhere else.
-  if ((id === 'waiting' || id === 'invite' || id === 'opening') && currentDebate && currentDebate.status === 'pending') {
+  if ((id === 'waiting' || id === 'invite' || id === 'opening' || id === 'contract') && currentDebate && currentDebate.status === 'pending') {
     openNegoFor(currentDebate.id);
   } else {
     closeNego();
@@ -3676,7 +3914,7 @@ function renderNego() {
     const who = mine ? 'You' : m.author_email.split('@')[0];
     return `<div class="nego-msg ${mine ? 'me' : 'them'}">
       <div class="nego-who">${escapeHtml(who)}</div>
-      ${escapeHtml(m.text)}
+      ${linkify(escapeHtml(m.text))}
     </div>`;
   }).join('');
   thread.scrollTop = thread.scrollHeight;
