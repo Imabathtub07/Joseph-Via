@@ -1581,9 +1581,9 @@
           <textarea id="opening-arg" placeholder="Make your case. Where do you stand on this topic, and why? The AI will distill this into quick-reference key points for the debate." style="width:100%;min-height:140px;background:rgba(10,6,18,0.6);border:1px solid var(--rule-strong);padding:12px 14px;font-size:15px;line-height:1.55;color:var(--ink);"></textarea>
           <div class="wordmeter">
             <div class="wm-bar"><div class="wm-fill" id="opening-meter"></div></div>
-            <div class="wm-label" id="opening-meter-label"><span id="opening-count">0</span> / 500 words</div>
+            <div class="wm-label" id="opening-meter-label"><span id="opening-count">0</span> / 250 words</div>
           </div>
-          <div class="slider-hint">Up to ~2 double-spaced pages. They won't see this until they've written their own opening.</div>
+          <div class="slider-hint">They won't see this until they've written their own opening.</div>
         </div>
         </div><!-- /new-debate-only -->
 
@@ -1633,6 +1633,15 @@
         </div>
 
         <div class="field">
+          <label>Words Per Message</label>
+          <div class="slider-row">
+            <input type="range" id="msgword-slider" min="50" max="500" step="25" value="200">
+            <div class="slider-val" id="msgword-val">200</div>
+          </div>
+          <div class="slider-hint">50 &rarr; 500 words per single message. Keeps turns punchy or lets them breathe.</div>
+        </div>
+
+        <div class="field">
           <label>Rules</label>
           <div class="toggle-row">
             <div>
@@ -1653,6 +1662,7 @@
         <div class="summary-row"><span class="k">Mode</span><span class="v" id="s-mode">Competitive</span></div>
         <div class="summary-row"><span class="k">Turn</span><span class="v" id="s-timer">5 min</span></div>
         <div class="summary-row"><span class="k">Cap</span><span class="v" id="s-cap">3 each</span></div>
+        <div class="summary-row"><span class="k">Words/Msg</span><span class="v" id="s-msgwords">200</span></div>
         <div style="margin-top: 22px; display: flex; flex-direction: column; gap: 8px;">
           <button class="btn btn-primary" style="width: 100%;" onclick="createDebate()" id="create-debate-btn">⚡ Send Invite</button>
           <button class="btn btn-ghost" style="width: 100%;" id="contract-cancel-btn" onclick="goToDashboard()">Cancel</button>
@@ -1671,7 +1681,7 @@
           <div class="vs-block"><span id="inv-from">—</span> <span class="vs">VS</span> <span style="color: var(--cyan);">YOU</span></div>
           <div class="topic" id="inv-topic">—</div>
           <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink-3); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 16px;">
-            Mode: <span id="inv-mode" style="color: var(--gold);">—</span> · Turn: <span id="inv-turn" style="color: var(--ink-2);">—</span> · Cap: <span id="inv-cap" style="color: var(--ink-2);">—</span>
+            Mode: <span id="inv-mode" style="color: var(--gold);">—</span> · Turn: <span id="inv-turn" style="color: var(--ink-2);">—</span> · Cap: <span id="inv-cap" style="color: var(--ink-2);">—</span> · Words/Msg: <span id="inv-words" style="color: var(--ink-2);">—</span>
           </div>
         </div>
         <div style="text-align: center; padding: 12px;">
@@ -1702,9 +1712,8 @@
           <textarea id="opening-b-input" placeholder="Where do you stand on this topic, and why? You haven't seen their opening — and they haven't seen yours. Both are revealed when the debate begins." style="width:100%;min-height:160px;background:rgba(10,6,18,0.6);border:1px solid var(--rule-strong);padding:12px 14px;font-size:15px;line-height:1.55;color:var(--ink);"></textarea>
           <div class="wordmeter">
             <div class="wm-bar"><div class="wm-fill" id="opening-b-meter"></div></div>
-            <div class="wm-label" id="opening-b-meter-label"><span id="opening-b-count">0</span> / 500 words</div>
+            <div class="wm-label" id="opening-b-meter-label"><span id="opening-b-count">0</span> / 250 words</div>
           </div>
-          <div class="slider-hint">Up to ~2 double-spaced pages.</div>
         </div>
         <div style="display:flex;gap:10px;">
           <button class="btn btn-primary" id="opening-submit-btn" onclick="submitOpening()">⚡ Lock It In & Begin</button>
@@ -1932,6 +1941,7 @@ const state = {
   opening: '',        // creator's opening argument
   turnSeconds: 86400,
   messageCap: 5,
+  msgWordCap: 200,    // max words in a single chat message
   guidedMode: true,
   autoConcede: true,
 };
@@ -2304,6 +2314,12 @@ function goToContract() {
   if (cInf) cInf.classList.remove('active');
   const cVal = document.getElementById('cap-val');
   if (cVal) cVal.textContent = '5';
+  // reset words-per-message slider
+  state.msgWordCap = 200;
+  const mwSlider = document.getElementById('msgword-slider');
+  if (mwSlider) mwSlider.value = 200;
+  const mwVal = document.getElementById('msgword-val');
+  if (mwVal) mwVal.textContent = '200';
   document.getElementById('t-autoconcede').classList.add('on');
   // If a half-written contract draft survived a refresh or an accidental
   // navigation, bring it back instead of a blank form.
@@ -2335,6 +2351,7 @@ function openRulesEditor() {
   state.mode = currentDebate.mode;
   state.turnSeconds = currentDebate.turn_seconds;
   state.messageCap = currentDebate.message_cap;
+  state.msgWordCap = currentDebate.message_word_cap || 200;
   state.autoConcede = currentDebate.auto_concede;
   state.oppEmail = currentDebate.opponent_email; // summary display only
   document.querySelectorAll('.mode-card').forEach(c => c.classList.toggle('active', c.dataset.mode === currentDebate.mode));
@@ -2358,6 +2375,10 @@ function openRulesEditor() {
   if (cSlider) { cSlider.disabled = inf; cSlider.value = inf ? 5 : Math.min(30, Math.max(2, currentDebate.message_cap)); }
   if (cInf) cInf.classList.toggle('active', inf);
   if (cVal) cVal.textContent = inf ? '∞' : String(currentDebate.message_cap);
+  const mwSlider = document.getElementById('msgword-slider');
+  if (mwSlider) mwSlider.value = Math.min(500, Math.max(50, state.msgWordCap));
+  const mwVal = document.getElementById('msgword-val');
+  if (mwVal) mwVal.textContent = String(state.msgWordCap);
   document.getElementById('t-autoconcede').classList.toggle('on', !!currentDebate.auto_concede);
   refreshContractSummary();
   showScreen('contract');
@@ -2374,6 +2395,7 @@ async function saveRuleChanges() {
       mode: state.mode,
       turn_seconds: state.turnSeconds,
       message_cap: state.messageCap,
+      message_word_cap: state.msgWordCap,
       auto_concede: state.autoConcede,
     }).eq('id', currentDebate.id).select().single();
     if (error) throw error;
@@ -2404,10 +2426,10 @@ function toggle(el) {
 
 // ============================================================================
 // OPENING-ARGUMENT WORD BUDGET
-// ~250 words per double-spaced Word page; two pages feels like the right cap
-// for an opening you actually expect someone to read.
+// ~250 words ≈ one double-spaced page — long enough to make a real case,
+// short enough that the other side actually reads it.
 // ============================================================================
-const OPENING_MAX_WORDS = 500;
+const OPENING_MAX_WORDS = 250;
 const OPENING_MIN_WORDS = 20;
 
 function countWords(s) {
@@ -2484,6 +2506,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('cap-val').textContent = e.target.value;
     refreshContractSummary();
   });
+  const mwSlider = document.getElementById('msgword-slider');
+  if (mwSlider) mwSlider.addEventListener('input', e => {
+    state.msgWordCap = +e.target.value;
+    document.getElementById('msgword-val').textContent = e.target.value;
+    refreshContractSummary();
+  });
   ['topic', 'opp-email'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('input', e => {
@@ -2512,9 +2540,12 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   // Ctrl/Cmd+Enter sends from the debate composer
   const composerEl = document.getElementById('composer-input');
-  if (composerEl) composerEl.addEventListener('keydown', e => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); sendMessage(); }
-  });
+  if (composerEl) {
+    composerEl.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); sendMessage(); }
+    });
+    composerEl.addEventListener('input', updateComposerHint);
+  }
 });
 
 function refreshContractSummary() {
@@ -2526,6 +2557,7 @@ function refreshContractSummary() {
   document.getElementById('s-mode').textContent = state.mode[0].toUpperCase() + state.mode.slice(1);
   document.getElementById('s-timer').textContent = fmtTime(state.turnSeconds);
   document.getElementById('s-cap').textContent = state.messageCap >= 9999 ? '∞' : `${state.messageCap} each`;
+  document.getElementById('s-msgwords').textContent = state.msgWordCap;
 }
 // Turn-timer slider stops (seconds): 5 min up to 3 days
 const TIMER_STOPS = [300, 600, 900, 1800, 3600, 7200, 14400, 28800, 43200, 86400, 172800, 259200];
@@ -2596,6 +2628,7 @@ async function createDebate() {
       mode: state.mode,
       turn_seconds: state.turnSeconds,
       message_cap: state.messageCap,
+      message_word_cap: state.msgWordCap,
       guided_mode: state.guidedMode,
       auto_concede: state.autoConcede,
       status: 'pending',
@@ -2690,6 +2723,7 @@ function showInviteLanding() {
   document.getElementById('inv-mode').textContent = currentDebate.mode.toUpperCase();
   document.getElementById('inv-turn').textContent = fmtTime(currentDebate.turn_seconds);
   document.getElementById('inv-cap').textContent = currentDebate.message_cap >= 9999 ? '∞' : `${currentDebate.message_cap} each`;
+  document.getElementById('inv-words').textContent = currentDebate.message_word_cap || '—';
   showScreen('invite');
 }
 
@@ -2790,6 +2824,7 @@ function showChat() {
   document.getElementById('chat-topic').textContent = `"${currentDebate.topic}"`;
   document.getElementById('chat-mode-badge').textContent = currentDebate.mode.toUpperCase();
   document.getElementById('turn-cap').textContent = currentDebate.message_cap >= 9999 ? '∞' : currentDebate.message_cap;
+  updateComposerHint();
 
   // load both players' avatars, then repaint
   Promise.all([
@@ -3066,6 +3101,7 @@ function subscribeToDebate(debateId) {
             || old.mode !== currentDebate.mode
             || old.turn_seconds !== currentDebate.turn_seconds
             || old.message_cap !== currentDebate.message_cap
+            || old.message_word_cap !== currentDebate.message_word_cap
             || old.auto_concede !== currentDebate.auto_concede;
           if (changed) {
             showToast('📜 The terms were updated', 'cyan');
@@ -3264,6 +3300,11 @@ async function resolveForfeit(decision) {
 async function sendMessage() {
   const text = document.getElementById('composer-input').value.trim();
   if (!text) return;
+  const limit = msgWordLimit();
+  if (limit && countWords(text) > limit) {
+    showToast(`Over the word limit — this debate allows ${limit} words per message.`);
+    return;
+  }
   const myRole = currentDebate.creator_email === currentUser.email.toLowerCase() ? 'a' : 'b';
   if (myRole !== currentDebate.current_turn) {
     showToast('Not your turn yet.');
@@ -3318,6 +3359,7 @@ async function sendMessage() {
     }
 
     document.getElementById('composer-input').value = '';
+    updateComposerHint();
     renderMessages();
   } catch (e) {
     console.error(e);
@@ -3326,6 +3368,22 @@ async function sendMessage() {
     document.getElementById('btn-send').disabled = false;
     removeThinkingIndicator();
   }
+}
+
+// Live word count vs. this debate's per-message limit, shown in the composer
+// hint. Red when over — sendMessage() blocks it there too.
+function msgWordLimit() {
+  return (currentDebate && currentDebate.message_word_cap) || 0; // 0 = no limit (legacy debates)
+}
+
+function updateComposerHint() {
+  const hint = document.getElementById('composer-hint');
+  if (!hint) return;
+  const limit = msgWordLimit();
+  if (!limit) { hint.textContent = 'Ctrl+Enter sends · 🔗 to cite a source'; hint.style.color = ''; return; }
+  const words = countWords(document.getElementById('composer-input').value);
+  hint.textContent = `${words} / ${limit} words · Ctrl+Enter sends · 🔗 to cite`;
+  hint.style.color = words > limit ? 'var(--hot-pink)' : '';
 }
 
 // ============================================================================
