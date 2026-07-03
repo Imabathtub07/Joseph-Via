@@ -47,6 +47,10 @@
     --rule-strong: rgba(236, 227, 255, 0.25);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  /* An element with the hidden attribute stays hidden even when its class
+     sets display (flex/grid) — without this, the forfeit modal and the
+     floating-panel bubbles render open on page load. */
+  [hidden] { display: none !important; }
   html, body { height: 100%; }
   body {
     font-family: 'Space Grotesk', -apple-system, sans-serif;
@@ -741,15 +745,24 @@
   .composer-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; gap: 12px; }
   .composer-hint { font-size: 11px; color: var(--ink-3); font-family: 'JetBrains Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; }
   .composer .btn { padding: 10px 22px; font-size: 12px; }
-  .char-counter {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px; font-variant-numeric: tabular-nums;
-    color: var(--ink-3); min-width: 44px; text-align: right;
-    transition: color 0.15s ease;
-  }
-  .char-counter.warn { color: var(--gold); }
-  .char-counter.over { color: var(--hot-pink); font-weight: 700; }
 
+  .preview-box {
+    border-top: 1px dashed var(--rule-strong);
+    padding-top: 12px;
+    margin-top: 12px;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--ink-2);
+  }
+  .preview-box .ttl {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--ink-3);
+    margin-bottom: 8px;
+    display: block;
+  }
 
   /* mediator thinking */
   .mediator-thinking {
@@ -996,6 +1009,63 @@
   .nego-compose textarea:focus { outline: none; border-color: var(--violet); }
   .nego-send { padding: 9px 14px; font-size: 12px; white-space: nowrap; }
 
+  /* ===== FLOATING KEY-POINTS BUBBLE (reuses nego shell) ===== */
+  .points-fab {
+    border-color: var(--gold);
+    box-shadow: 0 0 24px rgba(255, 211, 77, 0.4), 0 6px 20px rgba(0,0,0,0.5);
+  }
+  .points-fab:hover { box-shadow: 0 0 32px rgba(255, 211, 77, 0.6), 0 8px 24px rgba(0,0,0,0.5); }
+  .points-body { flex: 1; overflow-y: auto; padding: 14px 16px; }
+  .points-side { margin-bottom: 18px; }
+  .points-side:last-child { margin-bottom: 4px; }
+  .points-side .ps-head {
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'Bowlby One', serif;
+    font-size: 15px;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed var(--rule-strong);
+  }
+  .points-side.side-a .ps-head { color: var(--cyan); }
+  .points-side.side-b .ps-head { color: var(--hot-pink); }
+  .points-side .ps-ava { font-size: 18px; font-family: inherit; }
+  .points-side ul { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+  .points-side li {
+    font-size: 13px; line-height: 1.45; color: var(--ink-2);
+    padding-left: 16px; position: relative;
+  }
+  .points-side li::before {
+    content: '▸';
+    position: absolute; left: 0;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .points-side.side-a li::before { color: var(--cyan); }
+  .points-side.side-b li::before { color: var(--hot-pink); }
+  .points-raw {
+    font-size: 13px; line-height: 1.5; color: var(--ink-2);
+    white-space: pre-wrap; word-break: break-word;
+    max-height: 180px; overflow-y: auto;
+    border-left: 2px solid var(--rule-strong);
+    padding-left: 10px;
+  }
+  .points-empty { font-size: 12px; color: var(--ink-3); font-style: italic; }
+
+  /* ===== OPENING ARGUMENT CARDS (pinned at top of chat) ===== */
+  .msg.opening .msg-body { background: rgba(42, 24, 88, 0.45); }
+  .opening-tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    margin-bottom: 8px;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    background: rgba(255, 211, 77, 0.08);
+  }
+
   /* ===== TIMEOUT / FORFEIT MODAL ===== */
   .modal-backdrop {
     position: fixed; inset: 0; z-index: 220;
@@ -1005,9 +1075,6 @@
     padding: 24px;
     animation: fadein .2s ease;
   }
-  /* The [hidden] attribute must beat any display:flex/grid we set on a
-     component, or toggling .hidden in JS silently fails to hide it. */
-  [hidden] { display: none !important; }
   .modal-box {
     width: min(460px, 100%);
     background: linear-gradient(180deg, rgba(29,18,64,0.98), rgba(13,8,28,0.99));
@@ -1018,30 +1085,6 @@
   }
   .modal-box::before { content: ''; position: absolute; top: -1px; left: -1px; right: -1px; height: 3px; background: linear-gradient(90deg, var(--hot-pink), var(--gold)); }
   .modal-tag { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.25em; color: var(--hot-pink); text-transform: uppercase; margin-bottom: 14px; text-shadow: 0 0 12px var(--hot-pink-glow); }
-  .modal-close {
-    position: absolute; top: 14px; right: 14px;
-    width: 30px; height: 30px;
-    background: rgba(10,6,18,0.5); border: 1px solid var(--rule-strong);
-    color: var(--ink-2); font-size: 14px; cursor: pointer; line-height: 1;
-    display: flex; align-items: center; justify-content: center;
-    transition: all .15s;
-  }
-  .modal-close:hover { color: var(--ink); border-color: var(--hot-pink); }
-  .modal-context {
-    font-family: 'JetBrains Mono', monospace; font-size: 11px;
-    letter-spacing: 0.04em; color: var(--ink-3);
-    margin-bottom: 10px; line-height: 1.4;
-  }
-  .modal-context .ff-topic { color: var(--cyan); }
-  .modal-dismiss-link {
-    display: block; width: 100%; margin-top: 12px;
-    background: none; border: none; cursor: pointer;
-    font-family: 'JetBrains Mono', monospace; font-size: 11px;
-    letter-spacing: 0.05em; color: var(--ink-3);
-    text-decoration: underline; text-underline-offset: 3px;
-    transition: color .15s;
-  }
-  .modal-dismiss-link:hover { color: var(--ink-2); }
   .modal-title { font-family: 'Bowlby One', serif; font-size: 26px; line-height: 1.05; margin-bottom: 12px; }
   .modal-body { color: var(--ink-2); font-size: 15px; line-height: 1.55; margin-bottom: 22px; }
   .modal-actions { display: flex; flex-direction: column; gap: 10px; }
@@ -1339,7 +1382,7 @@
 <div class="app">
 
   <header class="masthead">
-    <div class="brand">DISCOURSE<span class="slash">//</span><span class="sub" id="mast-sub">PROTO</span></div>
+    <div class="brand" id="mast-brand" onclick="brandHome()" title="Back to dashboard" style="cursor: pointer;">DISCOURSE<span class="slash">//</span><span class="sub" id="mast-sub">PROTO</span></div>
     <div class="user" id="mast-user"></div>
   </header>
 
@@ -1453,7 +1496,7 @@
 
         <div style="display:flex;gap:10px;margin-top:8px;">
           <button class="btn btn-primary" id="prof-save-btn" onclick="saveProfile()">Save Profile</button>
-          <button class="btn btn-ghost" onclick="showScreen('dashboard')">Cancel</button>
+          <button class="btn btn-ghost" onclick="goToDashboard()">Cancel</button>
         </div>
         <p id="prof-status" style="margin-top:12px;font-size:13px;min-height:18px;"></p>
       </div>
@@ -1466,7 +1509,7 @@
       <div class="panel contract-main">
         <div class="panel-tag">The Contract</div>
         <h2>Set the terms.</h2>
-        <p class="sub">Lock the topic, the rules, the opponent. They'll get an email with a link.</p>
+        <p class="sub">Lock the topic, make your opening argument, pick the rules. They'll get an email with a link — and they'll write their own opening before the debate begins.</p>
 
         <div class="field">
           <label>The Topic</label>
@@ -1479,13 +1522,12 @@
         </div>
 
         <div class="field">
-          <label>Your Stance (Affirmative)</label>
-          <input type="text" id="stance-a" placeholder="What you'll argue (1 line)">
-        </div>
-
-        <div class="field">
-          <label>Their Stance (Negative)</label>
-          <input type="text" id="stance-b" placeholder="What they'll argue (1 line)">
+          <label>Your Opening Argument</label>
+          <textarea id="opening-arg" placeholder="Make your case. Where do you stand on this topic, and why? The AI will distill this into quick-reference key points for the debate." maxlength="4000" style="width:100%;min-height:140px;background:rgba(10,6,18,0.6);border:1px solid var(--rule-strong);padding:12px 14px;font-size:15px;line-height:1.55;color:var(--ink);"></textarea>
+          <div style="display:flex;justify-content:space-between;margin-top:6px;">
+            <span class="slider-hint" style="margin-top:0;">They won't see this until they've written their own opening.</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-3);"><span id="opening-count">0</span>/4000</span>
+          </div>
         </div>
 
         <div class="field">
@@ -1534,16 +1576,14 @@
         </div>
 
         <div class="field">
-          <label>Characters Per Message</label>
-          <div class="slider-row">
-            <input type="range" id="char-slider" min="0" max="9" step="1" value="5">
-            <div class="slider-val" id="char-val">1500</div>
-          </div>
-          <div class="slider-hint" id="char-hint">Keeps it ping-pong. The mode sets a suggestion &mdash; slide to taste.</div>
-        </div>
-
-        <div class="field">
           <label>Rules</label>
+          <div class="toggle-row">
+            <div>
+              <div class="tlabel">Guided mode</div>
+              <div class="thint">Preview flags before sending</div>
+            </div>
+            <div class="switch on" id="t-guided" onclick="toggle(this)"></div>
+          </div>
           <div class="toggle-row">
             <div>
               <div class="tlabel">Auto-concede on timeout</div>
@@ -1559,13 +1599,14 @@
         <h3>📋 At a Glance</h3>
         <div class="summary-row"><span class="k">Topic</span><span class="v" id="s-topic">—</span></div>
         <div class="summary-row"><span class="k">Opponent</span><span class="v" id="s-opp">—</span></div>
+        <div class="summary-row"><span class="k">Opening</span><span class="v" id="s-opening">—</span></div>
         <div class="summary-row"><span class="k">Mode</span><span class="v" id="s-mode">Competitive</span></div>
         <div class="summary-row"><span class="k">Turn</span><span class="v" id="s-timer">5 min</span></div>
         <div class="summary-row"><span class="k">Cap</span><span class="v" id="s-cap">3 each</span></div>
-        <div class="summary-row"><span class="k">Limit</span><span class="v" id="s-char">1500 chars</span></div>
+        <div class="summary-row"><span class="k">Guided</span><span class="v" id="s-guided">On</span></div>
         <div style="margin-top: 22px; display: flex; flex-direction: column; gap: 8px;">
           <button class="btn btn-primary" style="width: 100%;" onclick="createDebate()" id="create-debate-btn">⚡ Send Invite</button>
-          <button class="btn btn-ghost" style="width: 100%;" onclick="showScreen('dashboard')">Cancel</button>
+          <button class="btn btn-ghost" style="width: 100%;" onclick="goToDashboard()">Cancel</button>
         </div>
       </aside>
     </div>
@@ -1581,16 +1622,40 @@
           <div class="vs-block"><span id="inv-from">—</span> <span class="vs">VS</span> <span style="color: var(--cyan);">YOU</span></div>
           <div class="topic" id="inv-topic">—</div>
           <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink-3); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 16px;">
-            Mode: <span id="inv-mode" style="color: var(--gold);">—</span> · Turn: <span id="inv-turn" style="color: var(--ink-2);">—</span> · Cap: <span id="inv-cap" style="color: var(--ink-2);">—</span> · Limit: <span id="inv-char" style="color: var(--ink-2);">—</span>
+            Mode: <span id="inv-mode" style="color: var(--gold);">—</span> · Turn: <span id="inv-turn" style="color: var(--ink-2);">—</span> · Cap: <span id="inv-cap" style="color: var(--ink-2);">—</span>
           </div>
         </div>
         <div style="text-align: center; padding: 12px;">
-          <p style="margin-bottom: 16px; color: var(--ink-2); font-size: 14px;">By accepting, you agree to abide by the rules of structured discourse.<br>The AI mediator will flag fallacies and highlight strong arguments in real-time.</p>
+          <p style="margin-bottom: 16px; color: var(--ink-2); font-size: 14px;">By accepting, you agree to abide by the rules of structured discourse.<br>You'll write your opening argument next — before you see theirs.<br>The AI mediator will flag fallacies and highlight strong arguments in real-time.</p>
           <div style="display: flex; gap: 12px; justify-content: center;">
-            <button class="btn btn-primary" onclick="acceptInvite()">⚔ Accept & Begin</button>
+            <button class="btn btn-primary" onclick="acceptInvite()">⚔ Accept & Make Your Case</button>
             <button class="btn btn-ghost" onclick="declineInvite()">Decline</button>
           </div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN: OPENING ARGUMENT (invitee, after accepting) ============ -->
+  <section id="screen-opening" class="screen">
+    <div class="auth-wrap" style="max-width: 640px;">
+      <div class="panel">
+        <div class="panel-tag">Opening Argument</div>
+        <h2 style="font-family:'Bowlby One',serif;font-size:32px;margin-bottom:6px;background:linear-gradient(135deg,var(--ink),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Make your case.</h2>
+        <p class="sub" style="color:var(--ink-3);margin-bottom:18px;font-size:13px;">The topic on the table:</p>
+        <div class="invite-pending" style="margin-bottom:20px;">
+          <div class="topic" id="opening-topic" style="margin:0;">—</div>
+        </div>
+        <div class="field">
+          <label>Your Opening Argument</label>
+          <textarea id="opening-b-input" placeholder="Where do you stand on this topic, and why? You haven't seen their opening — and they haven't seen yours. Both are revealed when the debate begins." maxlength="4000" style="width:100%;min-height:160px;background:rgba(10,6,18,0.6);border:1px solid var(--rule-strong);padding:12px 14px;font-size:15px;line-height:1.55;color:var(--ink);"></textarea>
+          <div style="text-align:right;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-3);margin-top:4px;"><span id="opening-b-count">0</span>/4000</div>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-primary" id="opening-submit-btn" onclick="submitOpening()">⚡ Lock It In & Begin</button>
+          <button class="btn btn-ghost" onclick="goToDashboard()">Later</button>
+        </div>
+        <p id="opening-status" style="margin-top:12px;font-size:13px;min-height:18px;color:var(--ink-3);"></p>
       </div>
     </div>
   </section>
@@ -1604,8 +1669,8 @@
           <div style="font-family: 'Bowlby One', serif; font-size: 72px; margin-bottom: 16px;">⏳</div>
           <h2 class="display" style="font-size: 32px; margin-bottom: 12px; color: var(--gold);">Waiting on <span id="wait-name">your opponent</span>…</h2>
           <p style="color: var(--ink-2); margin-bottom: 8px;">They'll get a magic-link email at <span id="wait-email" style="color: var(--cyan); font-family: 'JetBrains Mono', monospace;">—</span></p>
-          <p style="color: var(--ink-3); font-size: 13px; margin-bottom: 28px;">Once they accept, the debate begins. You'll get an email too.</p>
-          <button class="btn btn-ghost" onclick="showScreen('dashboard')">← Back to Dashboard</button>
+          <p style="color: var(--ink-3); font-size: 13px; margin-bottom: 28px;">They'll see the topic, write their own opening argument, and then the debate begins. Your opening stays sealed until theirs is in.</p>
+          <button class="btn btn-ghost" onclick="goToDashboard()">← Back to Dashboard</button>
         </div>
       </div>
     </div>
@@ -1645,11 +1710,12 @@
 
     <div class="composer" id="composer">
       <div class="composer-tag" id="composer-tag">YOUR MOVE</div>
-      <textarea id="composer-input" placeholder="Make your point. The mediator is watching."></textarea>
+      <textarea id="composer-input" placeholder="Make your point."></textarea>
+      <div id="preview-area"></div>
       <div class="composer-bar">
-        <div class="composer-hint" id="composer-hint">The mediator flags your message after you send.</div>
-        <div style="display: flex; gap: 12px; align-items: center;">
-          <div class="char-counter" id="char-counter" hidden>1500</div>
+        <div class="composer-hint" id="composer-hint">Guided mode on · preview before sending</div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-secondary" id="btn-preview" onclick="runPreview()">Preview</button>
           <button class="btn btn-primary" id="btn-send" onclick="sendMessage()">Send ▸</button>
         </div>
       </div>
@@ -1657,6 +1723,7 @@
 
     <div class="end-debate">
       <button onclick="endDebate('mutual')">End debate now</button>
+      <button onclick="goToDashboard()" style="margin-left: 10px;">← Dashboard</button>
     </div>
   </section>
 
@@ -1699,7 +1766,7 @@
       </div>
       <div class="summary-actions">
         <button class="btn btn-primary" onclick="screenshotHint()">📸 Screenshot This</button>
-        <button class="btn btn-secondary" onclick="showScreen('dashboard')">← Dashboard</button>
+        <button class="btn btn-secondary" onclick="goToDashboard()">← Dashboard</button>
       </div>
     </div>
   </section>
@@ -1733,16 +1800,32 @@
   </div>
 </div>
 
+<!-- ============ FLOATING KEY-POINTS BUBBLE ============ -->
+<!-- Follows you through the chat. One tap shows both sides' opening
+     arguments distilled into quick-reference points. -->
+<div id="points" class="nego points" hidden>
+  <button class="nego-fab points-fab" id="points-fab" onclick="togglePoints()" aria-label="Open key points" title="Key points">
+    <span class="nego-fab-icon">📌</span>
+  </button>
+  <div class="nego-panel" id="points-panel" hidden>
+    <div class="nego-head">
+      <div>
+        <div class="nego-title">Key Points</div>
+        <div class="nego-sub">Each side's opening, distilled by the mediator</div>
+      </div>
+      <button class="nego-close" onclick="togglePoints()" aria-label="Close">✕</button>
+    </div>
+    <div class="points-body" id="points-body"></div>
+  </div>
+</div>
+
 <!-- ============ TIMEOUT / FORFEIT MODAL ============ -->
-<div id="forfeit-modal" class="modal-backdrop" hidden onclick="if(event.target===this)dismissForfeit()">
+<div id="forfeit-modal" class="modal-backdrop" hidden>
   <div class="modal-box">
-    <button class="modal-close" id="ff-close" onclick="dismissForfeit()" aria-label="Dismiss">✕</button>
     <div class="modal-tag" id="ff-tag">⏱ TIME'S UP</div>
-    <div class="modal-context" id="ff-context"></div>
     <h3 class="modal-title" id="ff-title">The clock ran out.</h3>
     <p class="modal-body" id="ff-body">Nobody answered in time. How do you want to handle it?</p>
     <div class="modal-actions" id="ff-actions"></div>
-    <button class="modal-dismiss-link" id="ff-dismiss" onclick="dismissForfeit()">Decide later — back to debate</button>
     <p class="modal-note" id="ff-note"></p>
   </div>
 </div>
@@ -1783,11 +1866,10 @@ const state = {
   topic: '',
   mode: 'competitive',
   oppEmail: '',
-  stanceA: '',
-  stanceB: '',
+  opening: '',        // creator's opening argument
   turnSeconds: 86400,
   messageCap: 5,
-  charLimit: 1500,
+  guidedMode: true,
   autoConcede: true,
 };
 
@@ -1839,9 +1921,15 @@ async function onSignedIn(user) {
   currentUser = user;
   updateMastUser();
 
-  // Open beta: anyone who can complete a magic-link sign-in is in. No
-  // allowlist gate. (The allowed_emails table is left in place but unused, so
-  // you can re-enable gating later by restoring a check here.)
+  // Check allowlist
+  const { data: allowed, error } = await sb
+    .from('allowed_emails')
+    .select('email')
+    .eq('email', user.email.toLowerCase())
+    .maybeSingle();
+
+  if (error) console.warn('Allowlist check error:', error);
+  if (!allowed) { showScreen('no-access'); return; }
 
   // Load (or create) this user's profile, then refresh the masthead with it
   await loadOrCreateProfile();
@@ -1862,7 +1950,9 @@ function updateMastUser() {
   if (currentUser) {
     const ava = (currentProfile && currentProfile.avatar) || '👤';
     const name = (currentProfile && currentProfile.display_name) || currentUser.email.split('@')[0];
-    el.innerHTML = `<span class="pill" onclick="openProfileEditor()" title="Edit your profile"><span class="mast-ava">${escapeHtml(ava)}</span>${escapeHtml(name)}</span>`;
+    el.innerHTML = `
+      <span class="pill" onclick="goToDashboard()" title="Back to dashboard" style="cursor:pointer;">⌂ HOME</span>
+      <span class="pill" onclick="openProfileEditor()" title="Edit your profile"><span class="mast-ava">${escapeHtml(ava)}</span>${escapeHtml(name)}</span>`;
   } else {
     el.innerHTML = '';
   }
@@ -1898,12 +1988,8 @@ async function sendMagicLink() {
 async function signOut() {
   if (messagesChannel) sb.removeChannel(messagesChannel);
   if (debateChannel) sb.removeChannel(debateChannel);
-  closeNego();
-  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-  hideForfeitModal();
-  currentDebate = null;
-  currentMessages = [];
-  timeoutShownForTurn = null;
+  updateTitleBadge(false);
+  closePoints();
   await sb.auth.signOut();
   // Clear URL params
   window.history.replaceState({}, '', window.location.pathname);
@@ -2113,16 +2199,15 @@ function goToContract() {
   // reset form
   document.getElementById('topic').value = '';
   document.getElementById('opp-email').value = '';
-  document.getElementById('stance-a').value = '';
-  document.getElementById('stance-b').value = '';
+  document.getElementById('opening-arg').value = '';
+  document.getElementById('opening-count').textContent = '0';
   state.topic = '';
   state.oppEmail = '';
-  state.stanceA = '';
-  state.stanceB = '';
+  state.opening = '';
   state.mode = 'competitive';
   state.turnSeconds = 86400;   // default: 1 day
   state.messageCap = 5;
-  state.charLimit = MODE_CHAR_DEFAULTS.competitive;
+  state.guidedMode = true;
   state.autoConcede = true;
   document.querySelectorAll('.mode-card').forEach(c => c.classList.toggle('active', c.dataset.mode === 'competitive'));
   // reset timer slider to the 1-day stop
@@ -2137,8 +2222,7 @@ function goToContract() {
   if (cInf) cInf.classList.remove('active');
   const cVal = document.getElementById('cap-val');
   if (cVal) cVal.textContent = '5';
-  // reset char-limit slider to the competitive default
-  syncCharSlider();
+  document.getElementById('t-guided').classList.add('on');
   document.getElementById('t-autoconcede').classList.add('on');
   refreshContractSummary();
   showScreen('contract');
@@ -2148,33 +2232,11 @@ function selectMode(el) {
   document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
   state.mode = el.dataset.mode;
-  // Each mode carries a suggested character limit. Picking a mode snaps the
-  // slider to that suggestion; the players are still free to drag it after.
-  state.charLimit = MODE_CHAR_DEFAULTS[state.mode] ?? 1500;
-  syncCharSlider();
   refreshContractSummary();
 }
-
-// Snap the char-limit slider + label to whatever state.charLimit currently is.
-// Finds the nearest defined stop so the thumb always lands cleanly.
-function syncCharSlider() {
-  const slider = document.getElementById('char-slider');
-  const val = document.getElementById('char-val');
-  let idx = CHAR_STOPS.indexOf(state.charLimit);
-  if (idx === -1) {
-    // nearest stop
-    idx = CHAR_STOPS.reduce((best, s, i) =>
-      Math.abs(s - state.charLimit) < Math.abs(CHAR_STOPS[best] - state.charLimit) ? i : best, 0);
-    state.charLimit = CHAR_STOPS[idx];
-  }
-  if (slider) slider.value = idx;
-  if (val) val.textContent = fmtChars(state.charLimit);
-}
-
-// "∞" for unlimited, otherwise the raw number.
-function fmtChars(n) { return n >= 99999 ? '∞' : String(n); }
 function toggle(el) {
   el.classList.toggle('on');
+  if (el.id === 't-guided') state.guidedMode = el.classList.contains('on');
   if (el.id === 't-autoconcede') state.autoConcede = el.classList.contains('on');
   refreshContractSummary();
 }
@@ -2193,52 +2255,50 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('cap-val').textContent = e.target.value;
     refreshContractSummary();
   });
-  const chSlider = document.getElementById('char-slider');
-  if (chSlider) chSlider.addEventListener('input', e => {
-    state.charLimit = CHAR_STOPS[+e.target.value] ?? 1500;
-    document.getElementById('char-val').textContent = fmtChars(state.charLimit);
-    refreshContractSummary();
-  });
-  ['topic', 'opp-email', 'stance-a', 'stance-b'].forEach(id => {
+  ['topic', 'opp-email'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('input', e => {
       if (id === 'topic') state.topic = e.target.value;
       if (id === 'opp-email') state.oppEmail = e.target.value.trim().toLowerCase();
-      if (id === 'stance-a') state.stanceA = e.target.value;
-      if (id === 'stance-b') state.stanceB = e.target.value;
       refreshContractSummary();
     });
+  });
+  const openingEl = document.getElementById('opening-arg');
+  if (openingEl) openingEl.addEventListener('input', e => {
+    state.opening = e.target.value;
+    const c = document.getElementById('opening-count');
+    if (c) c.textContent = e.target.value.length;
+    refreshContractSummary();
+  });
+  const openingBEl = document.getElementById('opening-b-input');
+  if (openingBEl) openingBEl.addEventListener('input', e => {
+    const c = document.getElementById('opening-b-count');
+    if (c) c.textContent = e.target.value.length;
   });
   const bioEl = document.getElementById('prof-bio');
   if (bioEl) bioEl.addEventListener('input', e => {
     const c = document.getElementById('bio-count');
     if (c) c.textContent = e.target.value.length;
   });
+  // Ctrl/Cmd+Enter sends from the debate composer
+  const composerEl = document.getElementById('composer-input');
+  if (composerEl) composerEl.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); sendMessage(); }
+  });
 });
 
 function refreshContractSummary() {
   document.getElementById('s-topic').textContent = state.topic || '—';
   document.getElementById('s-opp').textContent = state.oppEmail || '—';
+  const op = document.getElementById('s-opening');
+  if (op) op.textContent = state.opening.trim().length >= 40 ? '✓ Written' : (state.opening.trim() ? 'Too short' : '—');
   document.getElementById('s-mode').textContent = state.mode[0].toUpperCase() + state.mode.slice(1);
   document.getElementById('s-timer').textContent = fmtTime(state.turnSeconds);
   document.getElementById('s-cap').textContent = state.messageCap >= 9999 ? '∞' : `${state.messageCap} each`;
-  document.getElementById('s-char').textContent = state.charLimit >= 99999 ? '∞ chars' : `${state.charLimit} chars`;
+  document.getElementById('s-guided').textContent = state.guidedMode ? 'On' : 'Off';
 }
 // Turn-timer slider stops (seconds): 5 min up to 3 days
 const TIMER_STOPS = [300, 600, 900, 1800, 3600, 7200, 14400, 28800, 43200, 86400, 172800, 259200];
-
-// Character-limit slider stops. The last stop is unlimited (∞). Rough feel:
-// ~280 ≈ a tweet, ~750 ≈ a short paragraph, ~1500 ≈ 2–3 paragraphs w/ a link.
-const CHAR_STOPS = [140, 280, 500, 750, 1000, 1500, 2000, 3000, 5000, 99999];
-// Per-mode suggested character cap. Competitive runs long (room to paste a link
-// and make a 2–3 paragraph case); exploratory is unlimited by default; the other
-// two land in the middle and are the players' to adjust.
-const MODE_CHAR_DEFAULTS = {
-  competitive:   1500,
-  collaborative: 750,
-  exploratory:   99999,
-  relationship:  750,
-};
 
 function toggleInfinityCap() {
   const btn = document.getElementById('cap-inf');
@@ -2274,27 +2334,43 @@ async function createDebate() {
   if (!state.topic.trim()) { showToast('Pick a topic first.'); return; }
   if (!state.oppEmail || !state.oppEmail.includes('@')) { showToast('Need a valid opponent email.'); return; }
   if (state.oppEmail === currentUser.email.toLowerCase()) { showToast('You can\'t debate yourself.'); return; }
+  if (state.opening.trim().length < 40) { showToast('Write your opening argument first (a few sentences at least).'); return; }
 
   const btn = document.getElementById('create-debate-btn');
   btn.disabled = true;
-  btn.textContent = 'Creating…';
+  btn.textContent = 'Distilling your argument…';
 
   try {
-    // Open beta: you can challenge any email, even one that's never signed in.
-    // They'll get the magic-link invite and land straight into the debate.
+    // Check opponent is on allowlist
+    const { data: oppAllowed } = await sb
+      .from('allowed_emails')
+      .select('email')
+      .eq('email', state.oppEmail)
+      .maybeSingle();
+    if (!oppAllowed) {
+      showToast(`${state.oppEmail} isn't on the allowlist yet — add them in Supabase first.`);
+      btn.disabled = false;
+      btn.textContent = '⚡ Send Invite';
+      return;
+    }
+
+    // Distill the opening into key points. If the AI is unavailable we still
+    // create the debate — the panel just shows the full opening instead.
+    const points = await distillArgument(state.opening.trim(), state.topic.trim());
+
+    btn.textContent = 'Creating…';
 
     // Create debate row
     const { data: debate, error } = await sb.from('debates').insert({
       creator_email: currentUser.email.toLowerCase(),
       opponent_email: state.oppEmail,
       topic: state.topic.trim(),
-      stance_a: state.stanceA.trim() || 'Affirmative',
-      stance_b: state.stanceB.trim() || 'Negative',
+      opening_a: state.opening.trim(),
+      points_a: points,
       mode: state.mode,
       turn_seconds: state.turnSeconds,
       message_cap: state.messageCap,
-      char_limit: state.charLimit,
-      guided_mode: true,
+      guided_mode: state.guidedMode,
       auto_concede: state.autoConcede,
       status: 'pending',
       current_turn: 'a',  // creator goes first
@@ -2349,6 +2425,10 @@ async function openDebate(debateId) {
   if (error || !debate) { showToast('Could not load debate.'); return; }
   currentDebate = debate;
 
+  // Keep the URL in sync so a refresh drops you back into this debate.
+  const url = `${window.location.pathname}?debate=${debateId}`;
+  window.history.replaceState({}, '', url);
+
   const email = currentUser.email.toLowerCase();
   const isCreator = debate.creator_email === email;
   const isOpponent = debate.opponent_email === email;
@@ -2383,7 +2463,6 @@ function showInviteLanding() {
   document.getElementById('inv-mode').textContent = currentDebate.mode.toUpperCase();
   document.getElementById('inv-turn').textContent = fmtTime(currentDebate.turn_seconds);
   document.getElementById('inv-cap').textContent = currentDebate.message_cap >= 9999 ? '∞' : `${currentDebate.message_cap} each`;
-  document.getElementById('inv-char').textContent = (currentDebate.char_limit ?? 99999) >= 99999 ? '∞' : `${currentDebate.char_limit} chars`;
   showScreen('invite');
 }
 
@@ -2393,45 +2472,92 @@ function showCreatorWaiting() {
   showScreen('waiting');
 }
 
-async function acceptInvite() {
-  const { error } = await sb
-    .from('debates')
-    .update({
-      status: 'active',
-      accepted_at: new Date().toISOString(),
-      turn_started_at: new Date().toISOString(), // start the persistent clock
-    })
-    .eq('id', currentDebate.id);
-  if (error) { showToast('Failed to accept: ' + error.message); return; }
+function acceptInvite() {
+  // No DB write yet — accepting just moves you to the opening-argument screen.
+  // The debate only goes active once your opening is locked in.
   closeNego();
-  // realtime will reload us into chat; force it for snappiness
-  await openDebate(currentDebate.id);
+  showOpeningScreen();
+}
+
+function showOpeningScreen() {
+  document.getElementById('opening-topic').textContent = `"${currentDebate.topic}"`;
+  document.getElementById('opening-b-input').value = '';
+  document.getElementById('opening-b-count').textContent = '0';
+  document.getElementById('opening-status').textContent = '';
+  showScreen('opening');
+}
+
+async function submitOpening() {
+  const text = document.getElementById('opening-b-input').value.trim();
+  if (text.length < 40) { showToast('Give it a few sentences at least — this is your opening case.'); return; }
+
+  const btn = document.getElementById('opening-submit-btn');
+  const status = document.getElementById('opening-status');
+  btn.disabled = true;
+  btn.textContent = 'Distilling…';
+  status.textContent = 'The mediator is distilling your argument into key points…';
+
+  try {
+    const points = await distillArgument(text, currentDebate.topic);
+    btn.textContent = 'Starting…';
+    const { error } = await sb
+      .from('debates')
+      .update({
+        opening_b: text,
+        points_b: points,
+        status: 'active',
+        accepted_at: new Date().toISOString(),
+        turn_started_at: new Date().toISOString(), // start the persistent clock
+      })
+      .eq('id', currentDebate.id);
+    if (error) throw error;
+    // Let the creator know the debate is live (fire-and-forget email nudge)
+    sendEmailNudge(currentDebate.id, 'debate_started');
+    // realtime will reload us into chat; force it for snappiness
+    await openDebate(currentDebate.id);
+  } catch (e) {
+    console.error(e);
+    status.innerHTML = `<span class="danger">Couldn't start the debate: ${escapeHtml(e.message || 'unknown error')}</span>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '⚡ Lock It In & Begin';
+  }
 }
 
 async function declineInvite() {
   if (!confirm('Decline this debate? It will be marked as finished without being played.')) return;
   await sb.from('debates').update({ status: 'finished', declined: true }).eq('id', currentDebate.id);
-  await loadDashboard();
+  await goToDashboard();
 }
 
 // ============================================================================
 // CHAT — show
 // ============================================================================
+// Scoreboard sub-labels. Legacy debates carry hand-written stances; debates
+// with opening arguments point at the openings instead.
+function stanceLabel(role) {
+  const legacy = role === 'a' ? currentDebate.stance_a : currentDebate.stance_b;
+  const opening = role === 'a' ? currentDebate.opening_a : currentDebate.opening_b;
+  if (opening) return role === 'a' ? 'Challenger' : 'Defender';
+  return legacy || (role === 'a' ? 'Affirmative' : 'Negative');
+}
+
 function showChat() {
   const email = currentUser.email.toLowerCase();
   const isCreator = currentDebate.creator_email === email;
 
   // creator is always "A" (left side / affirmative), opponent is "B"
   document.getElementById('player-a-name').textContent = currentDebate.creator_email.split('@')[0];
-  document.getElementById('player-a-stance').textContent = currentDebate.stance_a || 'Affirmative';
+  document.getElementById('player-a-stance').textContent = stanceLabel('a');
   document.getElementById('player-b-name').textContent = currentDebate.opponent_email.split('@')[0];
-  document.getElementById('player-b-stance').textContent = currentDebate.stance_b || 'Negative';
+  document.getElementById('player-b-stance').textContent = stanceLabel('b');
   document.getElementById('chat-topic').textContent = `"${currentDebate.topic}"`;
   document.getElementById('chat-mode-badge').textContent = currentDebate.mode.toUpperCase();
   document.getElementById('turn-cap').textContent = currentDebate.message_cap >= 9999 ? '∞' : currentDebate.message_cap;
-  document.getElementById('composer-hint').textContent = 'The mediator flags your message after you send.';
-  // wire up the live (Twitter-style) character counter for this debate
-  setupCharCounter();
+  document.getElementById('composer-hint').textContent = currentDebate.guided_mode
+    ? 'Guided mode on · preview before sending'
+    : 'Direct mode · flags appear after sending';
+  document.getElementById('btn-preview').style.display = currentDebate.guided_mode ? '' : 'none';
 
   // load both players' avatars, then repaint
   Promise.all([
@@ -2441,12 +2567,15 @@ function showChat() {
     const ea = document.getElementById('player-a-ava'); if (ea) ea.textContent = pa.avatar || '🦊';
     const eb = document.getElementById('player-b-ava'); if (eb) eb.textContent = pb.avatar || '🐙';
     renderMessages();
+    renderPointsWidget(); // repaint with real names/avatars now that profiles are cached
   });
 
   refreshTurnUI();
   renderMessages();
   startTimer();
+  ensureNotifyPermission();
   showScreen('chat');
+  renderPointsWidget();
 }
 
 function refreshTurnUI() {
@@ -2475,13 +2604,15 @@ function refreshTurnUI() {
     composer.classList.remove('locked');
     composer.classList.add('your-turn');
     tag.textContent = 'YOUR MOVE';
-    document.getElementById('composer-input').placeholder = 'Make your point. The mediator is watching.';
+    document.getElementById('composer-input').placeholder = 'Make your point.';
   } else {
     composer.classList.add('locked');
     composer.classList.remove('your-turn');
     tag.textContent = 'WAITING ON THEM';
     document.getElementById('composer-input').placeholder = `Waiting on ${turnName}…`;
   }
+  // Tab-title badge so a backgrounded tab shows it's your move
+  updateTitleBadge(myRole === currentTurn && currentDebate.status === 'active');
 }
 
 function computeScore(role) {
@@ -2494,11 +2625,16 @@ function computeScore(role) {
       else if (f.kind === 'amber') score -= 1;
     }
   }
-  // add concessions: a concession on opponent's message means I scored
+  // Concessions. When the opponent concedes one of MY messages, I scored the
+  // point (+3). Conceding is also a deliberate act of good sportsmanship, so
+  // the conceder banks +1 rather than nothing. (Previously this loop required
+  // m.role !== role AND conceded_by !== role at once, which no message can
+  // satisfy from the scorer's perspective — concessions were worth 0 to
+  // everyone.)
   for (const m of currentMessages) {
-    if (m.conceded_by && m.conceded_by !== role && m.role !== role) {
-      score += 3;
-    }
+    if (!m.conceded_by) continue;
+    if (m.role === role && m.conceded_by !== role) score += 3;  // my point, they conceded it
+    if (m.conceded_by === role) score += 1;                     // I conceded gracefully
   }
   return score;
 }
@@ -2515,9 +2651,38 @@ async function loadMessages(debateId) {
   currentMessages = msgs || [];
 }
 
+// Opening arguments render as pinned cards at the top of the thread —
+// they're position statements, not turns, so no flags and no concede button.
+function renderOpeningCard(role) {
+  const opening = role === 'a' ? currentDebate.opening_a : currentDebate.opening_b;
+  if (!opening) return null;
+  const side = role === 'a' ? 'left' : 'right';
+  const email = (role === 'a' ? currentDebate.creator_email : currentDebate.opponent_email || '').toLowerCase();
+  const name = email.split('@')[0];
+  const prof = profileCache[email];
+  const avaInner = prof && prof.avatar ? escapeHtml(prof.avatar) : escapeHtml(name[0].toUpperCase());
+  const avaClass = prof && prof.avatar ? 'avatar emoji' : 'avatar';
+  const div = document.createElement('div');
+  div.className = `msg ${side} opening`;
+  div.innerHTML = `
+    <div class="${avaClass}">${avaInner}</div>
+    <div>
+      <div class="msg-body"><span class="opening-tag">★ Opening Argument</span><br>${escapeHtml(opening)}</div>
+      <div class="msg-meta"><span>${escapeHtml(name)}</span></div>
+    </div>
+  `;
+  return div;
+}
+
 function renderMessages() {
   const container = document.getElementById('messages');
   container.innerHTML = '';
+  if (currentDebate) {
+    const oa = renderOpeningCard('a');
+    const ob = renderOpeningCard('b');
+    if (oa) container.appendChild(oa);
+    if (ob) container.appendChild(ob);
+  }
   for (const m of currentMessages) {
     const side = m.role === 'a' ? 'left' : 'right';
     const name = m.role === 'a'
@@ -2586,6 +2751,11 @@ function subscribeToMessages(debateId) {
             currentMessages.push(payload.new);
             renderMessages();
             refreshTurnUI();
+            // Their move just landed — nudge a backgrounded tab
+            if (payload.new.author_email !== currentUser.email.toLowerCase()) {
+              const who = payload.new.author_email.split('@')[0];
+              notifyLocal(`🎯 ${who} made their move`, `"${currentDebate.topic}" — the floor is yours.`);
+            }
           }
         } else if (payload.eventType === 'UPDATE') {
           const idx = currentMessages.findIndex(m => m.id === payload.new.id);
@@ -2613,6 +2783,7 @@ function subscribeToDebate(debateId) {
         // status changed pending -> active: jump into chat
         if (old.status === 'pending' && currentDebate.status === 'active') {
           closeNego();
+          notifyLocal('⚔ It\'s on!', `They accepted "${currentDebate.topic}" and made their opening argument.`);
           await loadMessages(debateId);
           showChat();
           subscribeToMessages(debateId);
@@ -2621,6 +2792,7 @@ function subscribeToDebate(debateId) {
         // status -> finished (includes win-by-forfeit)
         if (currentDebate.status === 'finished') {
           hideForfeitModal();
+          notifyLocal('🏁 Debate finished', `"${currentDebate.topic}" — the summary card is ready.`);
           showSummary();
           return;
         }
@@ -2705,11 +2877,7 @@ function updateTimerDisplay() {
 // raised the forfeit question, the player whose device notices it flags it in
 // the DB; both clients then show the modal via realtime + here.
 function maybeHandleTimeout() {
-  // Only ever relevant when signed in and actually viewing an active debate's
-  // chat screen. Guards against a stray timer tick firing on the auth screen.
-  if (!currentUser || !currentUser.email) return;
   if (!currentDebate || currentDebate.status !== 'active') return;
-  if (!document.getElementById('screen-chat').classList.contains('active')) return;
   const rem = remainingSeconds();
   if (rem > 0) return;
   // a unique key for THIS expired turn so we don't re-fire on every tick
@@ -2717,10 +2885,12 @@ function maybeHandleTimeout() {
   if (timeoutShownForTurn === turnKey && !document.getElementById('forfeit-modal').hidden) return;
 
   const me = currentUser.email.toLowerCase();
+  const isCreator = currentDebate.creator_email === me;
+  const myRole = isCreator ? 'a' : 'b';
   const lateRole = currentDebate.current_turn; // whoever's turn it is, is late
 
   // If nobody has raised it yet, the FIRST device to notice records it so both
-  // sides converge on the same prompt.
+  // sides converge on the same prompt. Auto-concede setting decides default.
   if (!currentDebate.forfeit_offered_by && !currentDebate.forfeit_decision) {
     sb.from('debates').update({ forfeit_offered_by: lateRole })
       .eq('id', currentDebate.id)
@@ -2734,14 +2904,7 @@ function maybeHandleTimeout() {
 // FORFEIT / TIMEOUT MODAL
 // ============================================================================
 function showForfeitModal() {
-  // SINGLE GATEKEEPER. The modal may ONLY appear when you're signed in and
-  // actively viewing the chat screen of the debate it refers to. Every caller
-  // (timer tick, realtime update) routes through here, so this one guard closes
-  // every path that could pop it on the dashboard or auth screen.
-  if (!currentUser || !currentUser.email || !currentDebate) { hideForfeitModal(); return; }
-  if (!document.getElementById('screen-chat').classList.contains('active')) { hideForfeitModal(); return; }
-  if (currentDebate.status !== 'active') { hideForfeitModal(); return; }
-
+  if (!currentDebate) return;
   const modal = document.getElementById('forfeit-modal');
   const me = currentUser.email.toLowerCase();
   const myRole = currentDebate.creator_email === me ? 'a' : 'b';
@@ -2753,7 +2916,6 @@ function showForfeitModal() {
     : currentDebate.opponent_email.split('@')[0];
 
   const tag = document.getElementById('ff-tag');
-  const context = document.getElementById('ff-context');
   const title = document.getElementById('ff-title');
   const body = document.getElementById('ff-body');
   const actions = document.getElementById('ff-actions');
@@ -2764,12 +2926,6 @@ function showForfeitModal() {
   // already resolved while we were away?
   if (currentDebate.forfeit_decision === 'continue') { hideForfeitModal(); return; }
   if (currentDebate.forfeit_decision === 'a' || currentDebate.forfeit_decision === 'b') { hideForfeitModal(); return; }
-
-  // context line: which debate, which opponent
-  const oppName = (currentDebate.creator_email === me
-    ? currentDebate.opponent_email
-    : currentDebate.creator_email).split('@')[0];
-  context.innerHTML = `Debate vs ${escapeHtml(oppName)} · <span class="ff-topic">"${escapeHtml(currentDebate.topic)}"</span>`;
 
   if (iAmLate) {
     tag.textContent = "⏱ YOU'RE OUT OF TIME";
@@ -2787,13 +2943,6 @@ function showForfeitModal() {
     actions.append(cont, claim);
   }
   modal.hidden = false;
-}
-
-// Dismiss without deciding — closes the modal but leaves the timeout state in
-// the DB, so the prompt returns next time you open this debate's chat. Lets you
-// step away and decide later instead of being trapped.
-function dismissForfeit() {
-  hideForfeitModal();
 }
 
 function mkBtn(cls, label, onClick) {
@@ -2839,52 +2988,9 @@ async function resolveForfeit(decision) {
 // ============================================================================
 // SEND MESSAGE + MEDIATOR CALL
 // ============================================================================
-// ---- Live character counter (counts DOWN, Twitter-style) -------------------
-// The limit comes from the debate's char_limit. Unlimited (∞) hides the counter
-// and removes the cap. We bind once per chat open and reuse updateCharCounter.
-function currentCharLimit() {
-  const lim = currentDebate && currentDebate.char_limit != null ? currentDebate.char_limit : 99999;
-  return lim;
-}
-function setupCharCounter() {
-  const input = document.getElementById('composer-input');
-  const counter = document.getElementById('char-counter');
-  if (!input || !counter) return;
-  const lim = currentCharLimit();
-  if (lim >= 99999) {
-    // unlimited — no cap, no counter
-    counter.hidden = true;
-    input.removeAttribute('maxlength');
-  } else {
-    counter.hidden = false;
-    // hard stop in the field itself, so a paste can't blow past the limit
-    input.setAttribute('maxlength', String(lim));
-  }
-  input.removeEventListener('input', updateCharCounter);
-  input.addEventListener('input', updateCharCounter);
-  updateCharCounter();
-}
-function updateCharCounter() {
-  const input = document.getElementById('composer-input');
-  const counter = document.getElementById('char-counter');
-  if (!input || !counter) return;
-  const lim = currentCharLimit();
-  if (lim >= 99999) { counter.hidden = true; return; }
-  const remaining = lim - input.value.length;
-  counter.textContent = remaining;
-  counter.classList.toggle('warn', remaining <= 50 && remaining > 0);
-  counter.classList.toggle('over', remaining <= 0);
-}
-
 async function sendMessage() {
   const text = document.getElementById('composer-input').value.trim();
   if (!text) return;
-  // belt-and-suspenders: enforce the limit even though the field has maxlength
-  const lim = currentCharLimit();
-  if (lim < 99999 && text.length > lim) {
-    showToast(`Keep it under ${lim} characters — this is ping-pong, not a novel.`);
-    return;
-  }
   const myRole = currentDebate.creator_email === currentUser.email.toLowerCase() ? 'a' : 'b';
   if (myRole !== currentDebate.current_turn) {
     showToast('Not your turn yet.');
@@ -2892,10 +2998,19 @@ async function sendMessage() {
   }
 
   document.getElementById('btn-send').disabled = true;
+  document.getElementById('btn-preview').disabled = true;
   appendThinkingIndicator();
 
   try {
-    const flags = await callMediator(text);
+    // If the mediator is down, the message still sends — you just don't get
+    // flags on it. Your argument should never be lost to an AI outage.
+    let flags = [];
+    try {
+      flags = await callMediator(text);
+    } catch (medErr) {
+      console.warn('Mediator unavailable; sending unflagged:', medErr.message || medErr);
+      showToast('Mediator unavailable — sent without flags.');
+    }
     // insert message
     const { data: inserted, error } = await sb.from('messages').insert({
       debate_id: currentDebate.id,
@@ -2919,6 +3034,7 @@ async function sendMessage() {
     const capReached = aMsgs >= currentDebate.message_cap && bMsgs >= currentDebate.message_cap;
     if (capReached) {
       await sb.from('debates').update({ status: 'finished' }).eq('id', currentDebate.id);
+      sendEmailNudge(currentDebate.id, 'debate_finished');
     } else {
       await sb.from('debates').update({
         current_turn: nextTurn,
@@ -2926,17 +3042,38 @@ async function sendMessage() {
         forfeit_offered_by: null, // a fresh turn clears any stale timeout state
         forfeit_decision: null,
       }).eq('id', currentDebate.id);
+      sendEmailNudge(currentDebate.id, 'your_turn');
     }
 
     document.getElementById('composer-input').value = '';
-    updateCharCounter();
+    document.getElementById('preview-area').innerHTML = '';
     renderMessages();
   } catch (e) {
     console.error(e);
     showToast('Send failed: ' + (e.message || ''));
   } finally {
     document.getElementById('btn-send').disabled = false;
+    document.getElementById('btn-preview').disabled = false;
     removeThinkingIndicator();
+  }
+}
+
+async function runPreview() {
+  const text = document.getElementById('composer-input').value.trim();
+  if (!text) return;
+  const previewArea = document.getElementById('preview-area');
+  previewArea.innerHTML = `<div class="mediator-thinking"><div class="dots"><span></span><span></span><span></span></div>Mediator reading your draft</div>`;
+  try {
+    const flags = await callMediator(text);
+    previewArea.innerHTML = `
+      <div class="preview-box">
+        <span class="ttl">↳ Pre-send Preview</span>
+        ${renderTextWithFlags(text, flags)}
+        ${flags.length === 0 ? '<div style="margin-top: 10px; color: var(--cyan); font-family: \'JetBrains Mono\', monospace; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;">✓ Clean · no flags</div>' : ''}
+      </div>
+    `;
+  } catch (e) {
+    previewArea.innerHTML = `<div class="preview-box" style="color: var(--hot-pink);"><span class="ttl">Preview failed</span>${escapeHtml(e.message || 'Mediator unavailable')}</div>`;
   }
 }
 
@@ -2976,6 +3113,98 @@ async function callMediator(text) {
   }
   const data = await response.json();
   return mapSpansToFlags(text, data.flags || []);
+}
+
+// Ask the mediator to distill an opening argument into key points.
+// Returns [] on any failure — the debate can proceed without points.
+async function distillArgument(text, topic) {
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/mediator`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ task: 'distill', text, topic }),
+    });
+    if (!response.ok) throw new Error(`distill ${response.status}`);
+    const data = await response.json();
+    return Array.isArray(data.points) ? data.points : [];
+  } catch (e) {
+    console.warn('Distill failed (continuing without points):', e.message || e);
+    return [];
+  }
+}
+
+// ============================================================================
+// NOTIFICATIONS — email nudges + browser notifications + title badge
+// ============================================================================
+
+// Fire-and-forget email to the OTHER participant via the notify edge function.
+// Silently does nothing if the function isn't deployed or email isn't set up.
+function sendEmailNudge(debateId, kind) {
+  (async () => {
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      const fromName = (currentProfile && currentProfile.display_name) || currentUser.email.split('@')[0];
+      await fetch(`${SUPABASE_URL}/functions/v1/notify`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ debateId, kind, fromName }),
+      });
+    } catch (e) {
+      console.warn('Email nudge failed (non-fatal):', e.message || e);
+    }
+  })();
+}
+
+// Browser notification permission — asked once, when you first enter a live chat.
+function ensureNotifyPermission() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default') {
+    Notification.requestPermission().catch(() => {});
+  }
+}
+
+// Desktop/mobile notification when the tab isn't focused.
+function notifyLocal(title, body) {
+  if (!('Notification' in window)) return;
+  if (Notification.permission !== 'granted') return;
+  if (!document.hidden) return; // they're already looking at it
+  try {
+    const n = new Notification(title, { body, icon: undefined, tag: 'discourse-turn' });
+    n.onclick = () => { window.focus(); n.close(); };
+  } catch (e) { /* some mobile browsers require a service worker — fine */ }
+}
+
+const BASE_TITLE = 'DISCOURSE // Mediated Debate';
+function updateTitleBadge(yourMove) {
+  document.title = yourMove ? '🔔 Your move — DISCOURSE' : BASE_TITLE;
+}
+
+// ============================================================================
+// NAVIGATION — always a way home
+// ============================================================================
+async function goToDashboard() {
+  // Tear down any live debate subscriptions so realtime updates from an old
+  // debate can't yank the screen around while you're on the dashboard.
+  if (messagesChannel) { sb.removeChannel(messagesChannel); messagesChannel = null; }
+  if (debateChannel) { sb.removeChannel(debateChannel); debateChannel = null; }
+  if (timerInterval) clearInterval(timerInterval);
+  currentDebate = null;
+  currentMessages = [];
+  updateTitleBadge(false);
+  // Clear ?debate=... so a refresh lands on the dashboard, not back in the debate
+  window.history.replaceState({}, '', window.location.pathname);
+  await loadDashboard();
+}
+
+function brandHome() {
+  if (currentUser) goToDashboard();
 }
 
 function mapSpansToFlags(text, rawFlags) {
@@ -3029,6 +3258,7 @@ async function concede(msgId) {
 async function endDebate(reason) {
   if (!confirm('End the debate now? Both sides will see the summary.')) return;
   await sb.from('debates').update({ status: 'finished' }).eq('id', currentDebate.id);
+  sendEmailNudge(currentDebate.id, 'debate_finished');
   // realtime triggers summary
 }
 
@@ -3116,7 +3346,9 @@ function showSummary() {
   else if (currentDebate.mode === 'exploratory') stamp.textContent = 'EXPLORED';
   else stamp.textContent = 'GG';
 
+  updateTitleBadge(false);
   showScreen('summary');
+  renderPointsWidget(); // key points stay available while reading the card
 }
 
 function screenshotHint() {
@@ -3131,32 +3363,16 @@ function showScreen(id) {
   const el = document.getElementById('screen-' + id);
   if (el) el.classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
-
-  // The timer + forfeit modal belong to the chat screen only. Leaving it must
-  // stop the countdown and dismiss any timeout prompt, so neither can fire on
-  // the auth/dashboard screens.
-  if (id !== 'chat') {
-    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-    hideForfeitModal();
-  }
-
-  // The dashboard is a clean home base — no debate should be "live" here. Tear
-  // down any lingering realtime subscriptions so a stale channel can't flip
-  // currentDebate or pop a modal while you're browsing the list.
-  if (id === 'dashboard') {
-    if (debateChannel) { sb.removeChannel(debateChannel); debateChannel = null; }
-    if (messagesChannel) { sb.removeChannel(messagesChannel); messagesChannel = null; }
-    timeoutShownForTurn = null;
-  }
-
   // The negotiation bubble only makes sense pre-match, when a debate row
   // exists to attach the thread to: the creator's "waiting" screen and the
   // opponent's "invite" landing. Tear it down everywhere else.
-  if ((id === 'waiting' || id === 'invite') && currentDebate && currentDebate.status === 'pending') {
+  if ((id === 'waiting' || id === 'invite' || id === 'opening') && currentDebate && currentDebate.status === 'pending') {
     openNegoFor(currentDebate.id);
   } else {
     closeNego();
   }
+  // The key-points bubble follows you through the chat (and summary) only.
+  if (id !== 'chat' && id !== 'summary') closePoints();
 }
 
 function showToast(msg, variant) {
@@ -3165,6 +3381,59 @@ function showToast(msg, variant) {
   t.className = 'toast show' + (variant === 'cyan' ? ' cyan' : '');
   clearTimeout(showToast._t);
   showToast._t = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+// ============================================================================
+// KEY-POINTS BUBBLE — each side's opening argument, distilled
+// ============================================================================
+let pointsOpen = false;
+
+function renderPointsWidget() {
+  const wrap = document.getElementById('points');
+  if (!currentDebate || (!currentDebate.opening_a && !currentDebate.opening_b)) {
+    wrap.hidden = true;
+    return;
+  }
+  wrap.hidden = false;
+
+  const body = document.getElementById('points-body');
+  const sides = [
+    { role: 'a', email: currentDebate.creator_email, opening: currentDebate.opening_a, points: currentDebate.points_a },
+    { role: 'b', email: currentDebate.opponent_email, opening: currentDebate.opening_b, points: currentDebate.points_b },
+  ];
+  body.innerHTML = sides.map(s => {
+    const email = (s.email || '').toLowerCase();
+    const prof = profileCache[email];
+    const name = (prof && prof.display_name) || email.split('@')[0];
+    const ava = (prof && prof.avatar) || (s.role === 'a' ? '🦊' : '🐙');
+    let content;
+    if (Array.isArray(s.points) && s.points.length) {
+      content = `<ul>${s.points.map(p => `<li>${escapeHtml(p)}</li>`).join('')}</ul>`;
+    } else if (s.opening) {
+      // distill failed or wasn't run — show the raw opening instead
+      content = `<div class="points-raw">${escapeHtml(s.opening)}</div>`;
+    } else {
+      content = `<div class="points-empty">No opening argument on record.</div>`;
+    }
+    return `<div class="points-side side-${s.role}">
+      <div class="ps-head"><span class="ps-ava">${escapeHtml(ava)}</span>${escapeHtml(name)}</div>
+      ${content}
+    </div>`;
+  }).join('');
+}
+
+function togglePoints() {
+  pointsOpen = !pointsOpen;
+  document.getElementById('points-panel').hidden = !pointsOpen;
+  if (pointsOpen) renderPointsWidget();
+}
+
+function closePoints() {
+  pointsOpen = false;
+  const panel = document.getElementById('points-panel');
+  const wrap = document.getElementById('points');
+  if (panel) panel.hidden = true;
+  if (wrap) wrap.hidden = true;
 }
 
 // ============================================================================
