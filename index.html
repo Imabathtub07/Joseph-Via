@@ -1382,6 +1382,66 @@
     box-shadow: 0 0 16px rgba(255, 211, 77, 0.5);
   }
 
+  /* ===== TUTORIAL COACH — a floating guide pinned above the whole UI ===== */
+  .coach {
+    position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
+    z-index: 215;
+    width: min(680px, calc(100vw - 20px));
+  }
+  .coach-card {
+    display: flex; gap: 14px; align-items: flex-start;
+    border: 1.5px solid var(--gold);
+    background: linear-gradient(180deg, rgba(29,18,64,0.97), rgba(13,8,28,0.98));
+    box-shadow: 0 0 30px rgba(255,211,77,0.3), 0 14px 40px rgba(0,0,0,0.6);
+    padding: 14px 16px;
+    animation: negoPop .2s cubic-bezier(.2,.7,.3,1);
+  }
+  .coach-ava {
+    width: 50px; height: 50px; flex-shrink: 0;
+    display: grid; place-items: center;
+    font-size: 28px;
+    border: 1px solid var(--gold);
+    background: var(--void);
+    box-shadow: 0 0 14px rgba(255,211,77,0.4);
+  }
+  .coach-main { flex: 1; min-width: 0; }
+  .coach-name {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.25em;
+    color: var(--gold); text-transform: uppercase;
+  }
+  .coach-dots { display: inline-flex; gap: 4px; }
+  .coach-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--rule-strong); }
+  .coach-dots span.done { background: var(--gold); box-shadow: 0 0 6px rgba(255,211,77,0.6); }
+  .coach-text { font-size: 14px; line-height: 1.5; color: var(--ink); margin: 7px 0 10px; }
+  .coach-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .coach-next { padding: 8px 18px; font-size: 11px; }
+  .coach-hint {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--cyan); text-shadow: 0 0 10px var(--cyan-glow);
+    animation: blink 1.6s infinite;
+  }
+  .coach-skip {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .coach-skip:hover { color: var(--ink); }
+  /* push the app down so the coach never covers the scoreboard */
+  body.coach-on .app { padding-top: 168px; }
+
+  /* ===== PRACTICE ARENA (solo mode) ===== */
+  .solo-del {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: var(--ink-3);
+    border: 1px solid var(--rule);
+    padding: 4px 9px; flex-shrink: 0;
+  }
+  .solo-del:hover { color: var(--hot-pink); border-color: var(--hot-pink); }
+
   /* ============================================
      📱 MOBILE — phones are the primary test surface
      ============================================ */
@@ -1422,6 +1482,11 @@
     /* composer + sliders */
     .composer textarea { font-size: 16px; } /* 16px stops iOS auto-zoom */
     .slider-val { min-width: 74px; font-size: 16px; }
+
+    /* tutorial coach needs more clearance on small screens */
+    body.coach-on .app { padding-top: 216px; }
+    .coach-text { font-size: 13px; }
+    .coach-ava { width: 40px; height: 40px; font-size: 22px; }
 
     /* dashboard profile card stacks on narrow screens */
     .profile-card { grid-template-columns: 1fr; gap: 16px; padding: 20px 18px; }
@@ -1487,7 +1552,9 @@
       <p class="lede" style="margin: 14px 0 22px; text-align: left;">Start a new debate or jump back into one you've got going.</p>
       <div style="display: flex; gap: 12px; flex-wrap: wrap;">
         <button class="btn btn-primary" onclick="goToContract()">+ New Debate</button>
-        <button class="btn btn-secondary" onclick="openProfileEditor()">Edit Profile</button>
+        <button class="btn btn-secondary" onclick="openSoloSetup()">🤖 Practice Arena</button>
+        <button class="btn btn-secondary" onclick="startTutorial()">🎓 Tutorial</button>
+        <button class="btn btn-ghost" onclick="openProfileEditor()">Edit Profile</button>
         <button class="btn btn-ghost" onclick="signOut()">Sign out</button>
       </div>
     </div>
@@ -1516,6 +1583,16 @@
       <div id="debate-list" class="debate-list">
         <p style="color: var(--ink-3); font-style: italic; padding: 12px 0;">Loading…</p>
       </div>
+    </div>
+
+    <!-- solo practice debates live in this browser only — no invites, no DB -->
+    <div class="panel" style="margin-top: 24px;">
+      <div class="panel-tag">Practice Arena</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
+        <p style="color:var(--ink-3);font-size:13px;">Solo bouts — spar with an AI opponent or argue both sides yourself. Stored on this device only.</p>
+        <button class="btn btn-secondary" onclick="openSoloSetup()" style="padding:9px 16px;font-size:11px;">🤖 New Practice</button>
+      </div>
+      <div id="solo-list" class="debate-list"></div>
     </div>
   </section>
 
@@ -1553,6 +1630,85 @@
           <button class="btn btn-ghost" onclick="goToDashboard()">Cancel</button>
         </div>
         <p id="prof-status" style="margin-top:12px;font-size:13px;min-height:18px;"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN: SOLO SETUP (practice arena) ============ -->
+  <section id="screen-solo" class="screen">
+    <div class="auth-wrap" style="max-width: 720px;">
+      <div class="panel">
+        <div class="panel-tag">Practice Arena</div>
+        <h2 style="font-family:'Bowlby One',serif;font-size:32px;margin-bottom:4px;background:linear-gradient(135deg,var(--ink),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Warm up.</h2>
+        <p class="sub" style="color:var(--ink-3);margin-bottom:24px;font-size:13px;">No stakes, no audience. The same AI referee flags every message — it just stays between you and the machine.</p>
+
+        <div class="field">
+          <label>Opponent</label>
+          <div class="mode-grid">
+            <button class="mode-card active" id="solo-kind-ai" onclick="setSoloKind('ai')">
+              <div class="mtitle">🤖 VS THE AI</div>
+              <div class="mdesc">Spar with an AI opponent that argues the other side of your topic. Pick how clean it fights.</div>
+            </button>
+            <button class="mode-card" id="solo-kind-self" onclick="setSoloKind('self')">
+              <div class="mtitle">🪞 VS YOURSELF</div>
+              <div class="mdesc">Argue both sides, turn by turn. The referee flags each message — great for stress-testing a case before a real match.</div>
+            </button>
+          </div>
+        </div>
+
+        <div class="field" id="solo-diff-field">
+          <label>AI Difficulty</label>
+          <div class="mode-grid">
+            <button class="mode-card active" data-diff="easy" onclick="setSoloDiff(this)">
+              <div class="mtitle">ROOKIE</div>
+              <div class="mdesc">ROOKIE-BOT fights dirty-by-accident: obvious fallacies, made-up stats, "everyone knows" energy. Spot the red flags and feast.</div>
+            </button>
+            <button class="mode-card" data-diff="medium" onclick="setSoloDiff(this)">
+              <div class="mtitle">CONTENDER</div>
+              <div class="mdesc">DUEL-BOT argues well but slips about once a message. The lapses are subtle — stay sharp.</div>
+            </button>
+            <button class="mode-card" data-diff="hard" onclick="setSoloDiff(this)">
+              <div class="mtitle">MASTER</div>
+              <div class="mdesc">LOGIC-9000 steelmans your case, fights clean, and concedes only when you truly earn it.</div>
+            </button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>The Topic</label>
+          <input type="text" id="solo-topic" placeholder="e.g. Cereal is a soup.">
+          <div class="chip-row" id="solo-topic-chips" style="margin-top:10px;"></div>
+        </div>
+
+        <div class="field" id="solo-opening-field">
+          <label>Your Opening Argument</label>
+          <textarea id="solo-opening" placeholder="Where do you stand, and why? The AI will read this and take the opposite corner." style="width:100%;min-height:120px;background:rgba(10,6,18,0.6);border:1px solid var(--rule-strong);padding:12px 14px;font-size:15px;line-height:1.55;color:var(--ink);"></textarea>
+          <div class="wordmeter">
+            <div class="wm-bar"><div class="wm-fill" id="solo-meter"></div></div>
+            <div class="wm-label" id="solo-meter-label"><span id="solo-count">0</span> / 250 words</div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-primary" id="solo-start-btn" onclick="startSoloDebate()">⚡ Enter the Arena</button>
+          <button class="btn btn-ghost" onclick="goToDashboard()">Cancel</button>
+        </div>
+        <p id="solo-status" style="margin-top:12px;font-size:13px;min-height:18px;color:var(--ink-3);"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN: TUTORIAL (scenario picker) ============ -->
+  <section id="screen-tutorial" class="screen">
+    <div class="auth-wrap" style="max-width: 720px;">
+      <div class="panel">
+        <div class="panel-tag">Tutorial</div>
+        <h2 style="font-family:'Bowlby One',serif;font-size:32px;margin-bottom:4px;background:linear-gradient(135deg,var(--ink),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Pick your practice bout.</h2>
+        <p class="sub" style="color:var(--ink-3);margin-bottom:24px;font-size:13px;">Low-stakes classics. COACH-BOT takes the other side; your coach calls the action from ringside.</p>
+        <div class="mode-grid" id="tut-scenarios"></div>
+        <div style="margin-top:18px;">
+          <button class="btn btn-ghost" onclick="endTutorial(true)">← Not now</button>
+        </div>
       </div>
     </div>
   </section>
@@ -1901,6 +2057,39 @@
   </div>
 </div>
 
+<!-- ============ TUTORIAL COACH — floats above everything during the tutorial ============ -->
+<div id="coach" class="coach" hidden>
+  <div class="coach-card">
+    <div class="coach-ava">🎓</div>
+    <div class="coach-main">
+      <div class="coach-name">
+        <span>COACH</span>
+        <span class="coach-dots" id="coach-dots"></span>
+      </div>
+      <div class="coach-text" id="coach-text"></div>
+      <div class="coach-actions">
+        <button class="btn btn-primary coach-next" id="coach-next" onclick="coachNext()">Next ▸</button>
+        <span class="coach-hint" id="coach-hint" hidden></span>
+        <button class="coach-skip" onclick="endTutorial(true)">Skip tutorial ✕</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TUTORIAL OFFER (first dashboard visit) ============ -->
+<div id="tutorial-offer" class="modal-backdrop" hidden>
+  <div class="modal-box" style="border-color: var(--gold); box-shadow: 0 0 50px rgba(255,211,77,0.4), 0 20px 60px rgba(0,0,0,0.7);">
+    <div class="modal-tag" style="color: var(--gold); text-shadow: 0 0 12px rgba(255,211,77,0.5);">🎓 NEW HERE?</div>
+    <h3 class="modal-title">Learn the ropes.</h3>
+    <p class="modal-body">Take a three-minute guided practice debate. Your coach walks you through the scoreboard, the referee's red / green / amber flags, and the art of the graceful concession — against a bot who argues like your uncle at Thanksgiving.</p>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="offerTutorial(true)">🎓 Start the Tutorial</button>
+      <button class="btn btn-ghost" onclick="offerTutorial(false)">Maybe later</button>
+    </div>
+    <p class="modal-note">You can always start it from the dashboard.</p>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <!-- Supabase JS SDK -->
@@ -1932,6 +2121,7 @@ const AVATARS = ['🦊','🐙','👾','🤖','🐉','🦄','🔥','⚡','🎭','
 const TOPIC_POOL = ['Politics','Philosophy','Movies','Tech','Sports','Food','Science','Music','Gaming','Ethics','History','Books','Economics','Relationships','Art','Space','Religion','Health','Travel','Pop Culture'];
 let editorDraft = { avatar: '🦊', topics: [] };
 let editingRules = false;     // contract screen doubles as a rules editor pre-debate
+let soloMode = null;          // null | 'tutorial' | 'ai' | 'self' — local debates never touch the DB
 
 const state = {
   // contract form
@@ -2066,6 +2256,9 @@ async function signOut() {
   if (debateChannel) sb.removeChannel(debateChannel);
   updateTitleBadge(false);
   closePoints();
+  soloMode = null;
+  tutState = null;
+  hideCoach();
   await sb.auth.signOut();
   // Clear URL params
   window.history.replaceState({}, '', window.location.pathname);
@@ -2217,6 +2410,8 @@ async function saveProfile() {
 async function loadDashboard() {
   showScreen('dashboard');
   renderDashboardProfile(null); // paint profile immediately
+  renderSoloList();             // solo practice list is local — paint it right away
+  maybeOfferTutorial();
   const list = document.getElementById('debate-list');
   list.innerHTML = '<p style="color: var(--ink-3); font-style: italic;">Loading…</p>';
 
@@ -2817,9 +3012,9 @@ function showChat() {
   const isCreator = currentDebate.creator_email === email;
 
   // creator is always "A" (left side / affirmative), opponent is "B"
-  document.getElementById('player-a-name').textContent = currentDebate.creator_email.split('@')[0];
+  document.getElementById('player-a-name').textContent = roleName('a');
   document.getElementById('player-a-stance').textContent = stanceLabel('a');
-  document.getElementById('player-b-name').textContent = currentDebate.opponent_email.split('@')[0];
+  document.getElementById('player-b-name').textContent = roleName('b');
   document.getElementById('player-b-stance').textContent = stanceLabel('b');
   document.getElementById('chat-topic').textContent = `"${currentDebate.topic}"`;
   document.getElementById('chat-mode-badge').textContent = currentDebate.mode.toUpperCase();
@@ -2851,9 +3046,7 @@ function refreshTurnUI() {
   const aMsgs = currentMessages.filter(m => m.role === 'a').length;
   const bMsgs = currentMessages.filter(m => m.role === 'b').length;
   const currentTurn = currentDebate.current_turn;
-  const turnName = currentTurn === 'a'
-    ? currentDebate.creator_email.split('@')[0]
-    : currentDebate.opponent_email.split('@')[0];
+  const turnName = roleName(currentTurn);
   const turnCount = currentTurn === 'a' ? aMsgs : bMsgs;
   document.getElementById('turn-name').textContent = turnName;
   document.getElementById('turn-count').textContent = turnCount;
@@ -2865,22 +3058,25 @@ function refreshTurnUI() {
   document.getElementById('player-b-score').textContent = scoreB;
 
   // composer lock
-  const myRole = currentDebate.creator_email === currentUser.email.toLowerCase() ? 'a' : 'b';
+  const myRole = getMyRole();
   const composer = document.getElementById('composer');
   const tag = document.getElementById('composer-tag');
   if (myRole === currentTurn) {
     composer.classList.remove('locked');
     composer.classList.add('your-turn');
-    tag.textContent = 'YOUR MOVE';
+    // vs-yourself: show which side you're arguing right now
+    tag.textContent = (currentDebate.solo_kind === 'self')
+      ? `YOUR MOVE — ARGUING ${roleName(currentTurn).toUpperCase()}`
+      : 'YOUR MOVE';
     document.getElementById('composer-input').placeholder = 'Make your point.';
   } else {
     composer.classList.add('locked');
     composer.classList.remove('your-turn');
-    tag.textContent = 'WAITING ON THEM';
+    tag.textContent = (currentDebate.solo_kind === 'ai') ? `${roleName('b').toUpperCase()} IS THINKING` : 'WAITING ON THEM';
     document.getElementById('composer-input').placeholder = `Waiting on ${turnName}…`;
   }
-  // Tab-title badge so a backgrounded tab shows it's your move
-  updateTitleBadge(myRole === currentTurn && currentDebate.status === 'active');
+  // Tab-title badge so a backgrounded tab shows it's your move (real debates only)
+  updateTitleBadge(!isLocalDebate() && myRole === currentTurn && currentDebate.status === 'active');
 }
 
 function computeScore(role) {
@@ -2934,7 +3130,7 @@ function renderOpeningCard(role) {
   const flags = (role === 'a' ? currentDebate.opening_flags_a : currentDebate.opening_flags_b) || [];
   const side = role === 'a' ? 'left' : 'right';
   const email = (role === 'a' ? currentDebate.creator_email : currentDebate.opponent_email || '').toLowerCase();
-  const name = email.split('@')[0];
+  const name = roleName(role);
   const prof = profileCache[email];
   const avaInner = prof && prof.avatar ? escapeHtml(prof.avatar) : escapeHtml(name[0].toUpperCase());
   const avaClass = prof && prof.avatar ? 'avatar emoji' : 'avatar';
@@ -2961,13 +3157,11 @@ function renderMessages() {
   }
   for (const m of currentMessages) {
     const side = m.role === 'a' ? 'left' : 'right';
-    const name = m.role === 'a'
-      ? currentDebate.creator_email.split('@')[0]
-      : currentDebate.opponent_email.split('@')[0];
+    const name = roleName(m.role);
     const div = document.createElement('div');
     div.className = `msg ${side}`;
     const stamp = new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const myRole = currentDebate.creator_email === currentUser.email.toLowerCase() ? 'a' : 'b';
+    const myRole = getMyRole();
     // can I concede this? Only if it's not mine and I haven't already
     const canConcede = m.role !== myRole && !m.conceded_by;
     const concedeBtn = canConcede
@@ -3152,6 +3346,8 @@ function remainingSeconds() {
 
 function startTimer() {
   if (timerInterval) clearInterval(timerInterval);
+  // Solo debates have no clock — practice is untimed.
+  if (isLocalDebate()) { updateTimerDisplay(); return; }
   // If the debate already finished, nothing to count.
   if (!currentDebate || currentDebate.status !== 'active') { updateTimerDisplay(); return; }
   updateTimerDisplay();
@@ -3165,6 +3361,7 @@ function startTimer() {
 function updateTimerDisplay() {
   const el = document.getElementById('timer');
   if (!el) return;
+  if (isLocalDebate()) { el.textContent = '∞'; el.classList.remove('warn'); return; }
   const rem = remainingSeconds();
   if (rem <= 0) {
     el.textContent = "TIME'S UP";
@@ -3186,7 +3383,7 @@ function updateTimerDisplay() {
 // raised the forfeit question, the player whose device notices it flags it in
 // the DB; both clients then show the modal via realtime + here.
 function maybeHandleTimeout() {
-  if (!currentDebate || currentDebate.status !== 'active') return;
+  if (!currentDebate || isLocalDebate() || currentDebate.status !== 'active') return;
   const rem = remainingSeconds();
   if (rem > 0) return;
   // a unique key for THIS expired turn so we don't re-fire on every tick
@@ -3305,11 +3502,12 @@ async function sendMessage() {
     showToast(`Over the word limit — this debate allows ${limit} words per message.`);
     return;
   }
-  const myRole = currentDebate.creator_email === currentUser.email.toLowerCase() ? 'a' : 'b';
+  const myRole = getMyRole();
   if (myRole !== currentDebate.current_turn) {
-    showToast('Not your turn yet.');
+    showToast(currentDebate.solo_kind === 'ai' ? 'Hold on — your opponent is mid-reply.' : 'Not your turn yet.');
     return;
   }
+  if (isLocalDebate()) return sendLocalMessage(text, myRole);
 
   document.getElementById('btn-send').disabled = true;
   appendThinkingIndicator();
@@ -3420,14 +3618,13 @@ function insertLink() {
   ta.setSelectionRange(pos, pos);
 }
 
-async function callMediator(text) {
-  // Call the Supabase Edge Function
-  const myRole = currentDebate.creator_email === currentUser.email.toLowerCase() ? 'a' : 'b';
+async function callMediator(text, asRole) {
+  // Call the Supabase Edge Function. asRole lets local/solo debates flag the
+  // AI opponent's messages too (the bot is judged by the same referee).
+  const myRole = asRole || getMyRole();
   const recentMessages = currentMessages.slice(-6).map(m => ({
     role: m.role,
-    name: m.role === 'a'
-      ? currentDebate.creator_email.split('@')[0]
-      : currentDebate.opponent_email.split('@')[0],
+    name: roleName(m.role),
     text: m.text,
   }));
 
@@ -3441,9 +3638,7 @@ async function callMediator(text) {
     body: JSON.stringify({
       text,
       role: myRole,
-      authorName: myRole === 'a'
-        ? currentDebate.creator_email.split('@')[0]
-        : currentDebate.opponent_email.split('@')[0],
+      authorName: roleName(myRole),
       topic: currentDebate.topic,
       mode: currentDebate.mode,
       priorMessages: recentMessages,
@@ -3514,7 +3709,7 @@ async function flagOpening(text, topic, mode) {
 // debate was created), re-run the AI once when the chat opens and save.
 let backfilledDebateId = null;
 async function backfillOpeningAI() {
-  if (!currentDebate || currentDebate.status === 'pending') return;
+  if (!currentDebate || isLocalDebate() || currentDebate.status === 'pending') return;
   if (backfilledDebateId === currentDebate.id) return;
   backfilledDebateId = currentDebate.id;
   const updates = {};
@@ -3548,6 +3743,7 @@ async function backfillOpeningAI() {
 // Fire-and-forget email to the OTHER participant via the notify edge function.
 // Silently does nothing if the function isn't deployed or email isn't set up.
 function sendEmailNudge(debateId, kind) {
+  if (isLocalDebate()) return; // solo practice — nobody to nudge
   (async () => {
     try {
       const { data: { session } } = await sb.auth.getSession();
@@ -3599,6 +3795,9 @@ async function goToDashboard() {
   if (messagesChannel) { sb.removeChannel(messagesChannel); messagesChannel = null; }
   if (debateChannel) { sb.removeChannel(debateChannel); debateChannel = null; }
   if (timerInterval) clearInterval(timerInterval);
+  soloMode = null;
+  tutState = null;
+  hideCoach();
   currentDebate = null;
   currentMessages = [];
   updateTitleBadge(false);
@@ -3628,14 +3827,14 @@ function mapSpansToFlags(text, rawFlags) {
   return flags;
 }
 
-function appendThinkingIndicator() {
+function appendThinkingIndicator(label) {
   const container = document.getElementById('messages');
   if (document.getElementById('mediator-thinking-indicator')) return;
   const div = document.createElement('div');
   div.id = 'mediator-thinking-indicator';
   div.className = 'mediator-thinking';
   div.style.alignSelf = 'center';
-  div.innerHTML = `<div class="dots"><span></span><span></span><span></span></div>Mediator reviewing`;
+  div.innerHTML = `<div class="dots"><span></span><span></span><span></span></div>${escapeHtml(label || 'Mediator reviewing')}`;
   container.appendChild(div);
 }
 function removeThinkingIndicator() {
@@ -3649,8 +3848,16 @@ function removeThinkingIndicator() {
 async function concede(msgId) {
   const m = currentMessages.find(x => x.id === msgId);
   if (!m) return;
-  const myRole = currentDebate.creator_email === currentUser.email.toLowerCase() ? 'a' : 'b';
+  const myRole = getMyRole();
   if (m.role === myRole) { showToast('You can only concede points to the other side.'); return; }
+  if (isLocalDebate()) {
+    m.conceded_by = myRole;
+    saveSoloState();
+    renderMessages();
+    refreshTurnUI();
+    showToast('Concession recorded ✓', 'cyan');
+    return;
+  }
   const { error } = await sb.from('messages').update({ conceded_by: myRole }).eq('id', msgId);
   if (error) { showToast('Concession failed: ' + error.message); return; }
   showToast('Concession recorded ✓', 'cyan');
@@ -3660,6 +3867,11 @@ async function concede(msgId) {
 // END / SUMMARY
 // ============================================================================
 async function endDebate(reason) {
+  if (isLocalDebate()) {
+    if (!confirm('End this practice bout now? You\'ll see the summary card.')) return;
+    finishLocalDebate();
+    return;
+  }
   if (!confirm('End the debate now? Both sides will see the summary.')) return;
   await sb.from('debates').update({ status: 'finished' }).eq('id', currentDebate.id);
   sendEmailNudge(currentDebate.id, 'debate_finished');
@@ -3690,8 +3902,8 @@ function showSummary() {
     }
   }
 
-  const nameA = currentDebate.creator_email.split('@')[0];
-  const nameB = currentDebate.opponent_email.split('@')[0];
+  const nameA = roleName('a');
+  const nameB = roleName('b');
   const scoreA = computeScore('a');
   const scoreB = computeScore('b');
 
@@ -3984,6 +4196,669 @@ function updateNegoBadge() {
   const unseen = negoOpen ? 0 : Math.max(0, negoMessages.length - negoSeen);
   if (unseen > 0) { badge.hidden = false; badge.textContent = unseen > 9 ? '9+' : unseen; }
   else { badge.hidden = true; }
+}
+
+// ============================================================================
+// LOCAL (SOLO) DEBATES — tutorial + practice arena
+//
+// Solo debates never touch Supabase tables. The debate object mimics a
+// `debates` row (same field names) so every existing render path — scoreboard,
+// messages, flags, score, summary card — works unchanged. Messages live in
+// currentMessages with generated ids; practice bouts persist in localStorage.
+// The mediator edge function is still used live for flags (and, vs the AI,
+// for the opponent's replies via the new "spar" task).
+// ============================================================================
+const BOT_EMAIL = 'sparbot@discourse.local';
+const TUT_BOT_EMAIL = 'coach-bot@discourse.local';
+const SOLO_KEY = 'discourse-solo-v1';
+let localMsgSeq = 0;
+let aiThinking = false;
+
+function localId() { return 'local-' + Date.now() + '-' + (++localMsgSeq); }
+function isLocalDebate() { return !!(currentDebate && currentDebate.solo_kind); }
+
+// Which side am I? Real debates: creator = a. Solo vs AI / tutorial: always a.
+// Solo vs yourself: you ARE whichever side's turn it is.
+function getMyRole() {
+  if (!currentDebate) return 'a';
+  if (currentDebate.solo_kind === 'self') return currentDebate.current_turn;
+  if (currentDebate.solo_kind) return 'a';
+  return currentDebate.creator_email === currentUser.email.toLowerCase() ? 'a' : 'b';
+}
+
+// Display name for a side. Solo debates carry explicit name_a / name_b;
+// real debates fall back to the email prefix as before.
+function roleName(role) {
+  if (!currentDebate) return '—';
+  if (role === 'a' && currentDebate.name_a) return currentDebate.name_a;
+  if (role === 'b' && currentDebate.name_b) return currentDebate.name_b;
+  const email = role === 'a' ? currentDebate.creator_email : currentDebate.opponent_email;
+  return (email || '—').split('@')[0];
+}
+
+function baseSoloDebate(topic, kind, extra) {
+  return Object.assign({
+    id: 'solo-' + Date.now(),
+    solo_kind: kind,
+    status: 'active',
+    topic,
+    mode: 'competitive',
+    creator_email: currentUser.email.toLowerCase(),
+    opponent_email: currentUser.email.toLowerCase(),
+    current_turn: 'a',
+    message_cap: 5,
+    message_word_cap: 200,
+    turn_seconds: 0,
+    turn_started_at: null,
+    auto_concede: false,
+    created_at: new Date().toISOString(),
+  }, extra || {});
+}
+
+// ---------- persistence (practice bouts only; the tutorial is one-shot) ----------
+function loadSoloDebates() {
+  try { return JSON.parse(localStorage.getItem(SOLO_KEY) || '[]'); } catch (e) { return []; }
+}
+function saveSoloDebates(all) {
+  try { localStorage.setItem(SOLO_KEY, JSON.stringify(all.slice(0, 20))); } catch (e) {}
+}
+function saveSoloState() {
+  if (!currentDebate || !currentDebate.solo_kind || currentDebate.solo_kind === 'tutorial') return;
+  const all = loadSoloDebates().filter(e => e.debate.id !== currentDebate.id);
+  all.unshift({ debate: currentDebate, messages: currentMessages });
+  saveSoloDebates(all);
+}
+function deleteSoloDebate(id, ev) {
+  if (ev) ev.stopPropagation();
+  saveSoloDebates(loadSoloDebates().filter(e => e.debate.id !== id));
+  renderSoloList();
+}
+
+function renderSoloList() {
+  const list = document.getElementById('solo-list');
+  if (!list) return;
+  const all = loadSoloDebates();
+  if (!all.length) {
+    list.innerHTML = '<p style="color:var(--ink-3);font-style:italic;padding:8px 0;">No practice bouts yet. Warm up before your next real match ⬆</p>';
+    return;
+  }
+  list.innerHTML = '';
+  for (const e of all) {
+    const d = e.debate;
+    const vsLabel = d.solo_kind === 'ai'
+      ? `vs. ${d.name_b || 'THE AI'} · ${(d.difficulty || 'easy').toUpperCase()}`
+      : 'vs. Yourself';
+    const item = document.createElement('div');
+    item.className = 'debate-item';
+    item.innerHTML = `
+      <div class="di-main">
+        <div class="di-topic">${escapeHtml(d.topic)}</div>
+        <div class="di-meta">${escapeHtml(vsLabel)} · SOLO</div>
+      </div>
+      <div class="di-status ${d.status === 'finished' ? 'finished' : 'active'}">${d.status === 'finished' ? 'Finished' : 'In progress'}</div>
+      <button class="solo-del" title="Delete this practice bout" onclick="deleteSoloDebate('${d.id}', event)">✕</button>
+    `;
+    item.onclick = () => openSoloDebate(d.id);
+    list.appendChild(item);
+  }
+}
+
+function openSoloDebate(id) {
+  const entry = loadSoloDebates().find(e => e.debate.id === id);
+  if (!entry) { showToast('Practice bout not found.'); return; }
+  currentDebate = entry.debate;
+  currentMessages = entry.messages || [];
+  soloMode = currentDebate.solo_kind;
+  seedBotProfile();
+  window.history.replaceState({}, '', window.location.pathname);
+  if (currentDebate.status === 'finished') {
+    showSummary();
+  } else {
+    showChat();
+    // resumed mid-bot-turn (page closed while it was replying)? finish the turn
+    if (currentDebate.solo_kind === 'ai' && currentDebate.current_turn === 'b') aiTakeTurn();
+  }
+}
+
+// ---------- the local send path (both solo modes + tutorial) ----------
+async function sendLocalMessage(text, myRole) {
+  const btn = document.getElementById('btn-send');
+  btn.disabled = true;
+  appendThinkingIndicator();
+  let flags = [];
+  try {
+    flags = await callMediator(text, myRole);
+  } catch (e) {
+    console.warn('Mediator unavailable; sending unflagged:', e.message || e);
+    showToast('Mediator unavailable — sent without flags.');
+  }
+  removeThinkingIndicator();
+  btn.disabled = false;
+
+  currentMessages.push({
+    id: localId(),
+    debate_id: currentDebate.id,
+    role: myRole,
+    author_email: currentUser.email.toLowerCase(),
+    text,
+    flags,
+    created_at: new Date().toISOString(),
+  });
+  document.getElementById('composer-input').value = '';
+  updateComposerHint();
+
+  // the tutorial script drives what happens next, not the cap logic
+  if (currentDebate.solo_kind === 'tutorial') {
+    renderMessages();
+    refreshTurnUI();
+    tutorialAfterPlayerSend();
+    return;
+  }
+
+  const cap = currentDebate.message_cap || 9999;
+  const aMsgs = currentMessages.filter(m => m.role === 'a').length;
+  const bMsgs = currentMessages.filter(m => m.role === 'b').length;
+  if (aMsgs >= cap && bMsgs >= cap) { finishLocalDebate(); return; }
+
+  currentDebate.current_turn = myRole === 'a' ? 'b' : 'a';
+  saveSoloState();
+  renderMessages();
+  refreshTurnUI();
+  if (currentDebate.solo_kind === 'ai') aiTakeTurn();
+}
+
+function finishLocalDebate() {
+  currentDebate.status = 'finished';
+  saveSoloState();
+  showSummary();
+}
+
+// ---------- the AI opponent ----------
+const SOLO_BOTS = {
+  easy:   { name: 'ROOKIE-BOT', avatar: '🤖' },
+  medium: { name: 'DUEL-BOT',   avatar: '🦾' },
+  hard:   { name: 'LOGIC-9000', avatar: '🧠' },
+};
+const SOLO_TOPIC_IDEAS = [
+  'Is a hot dog a sandwich?',
+  'Cereal is a soup.',
+  'Remote work beats the office.',
+  'Money can buy happiness.',
+  'Homework should be abolished.',
+  'Social media does more harm than good.',
+];
+
+function seedBotProfile() {
+  if (!currentDebate) return;
+  if (currentDebate.solo_kind === 'ai') {
+    const bot = SOLO_BOTS[currentDebate.difficulty] || SOLO_BOTS.easy;
+    profileCache[BOT_EMAIL] = { email: BOT_EMAIL, display_name: currentDebate.name_b || bot.name, avatar: bot.avatar, bio: '', topics: [] };
+  }
+  if (currentDebate.solo_kind === 'tutorial') {
+    profileCache[TUT_BOT_EMAIL] = { email: TUT_BOT_EMAIL, display_name: 'COACH-BOT', avatar: '🤖', bio: '', topics: [] };
+  }
+}
+
+// Ask the edge function's "spar" task for the bot's opening or next reply.
+async function sparCall(phase) {
+  const d = currentDebate;
+  const prior = [];
+  if (d.opening_a) prior.push({ name: roleName('a'), text: d.opening_a });
+  if (d.opening_b) prior.push({ name: roleName('b'), text: d.opening_b });
+  for (const m of currentMessages.slice(-8)) prior.push({ name: roleName(m.role), text: m.text });
+  const { data: { session } } = await sb.auth.getSession();
+  const resp = await fetch(`${SUPABASE_URL}/functions/v1/mediator`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify({
+      task: 'spar',
+      topic: d.topic,
+      difficulty: d.difficulty || 'easy',
+      phase,
+      playerName: roleName('a'),
+      botName: roleName('b'),
+      wordCap: Math.min(130, d.message_word_cap || 130),
+      playerOpening: d.opening_a || '',
+      priorMessages: prior,
+    }),
+  });
+  if (!resp.ok) throw new Error(`spar ${resp.status}`);
+  const data = await resp.json();
+  if (!data.reply || !data.reply.trim()) throw new Error('empty spar reply');
+  return data.reply.trim();
+}
+
+async function aiTakeTurn() {
+  if (aiThinking || !currentDebate || currentDebate.solo_kind !== 'ai' || currentDebate.status !== 'active') return;
+  aiThinking = true;
+  refreshTurnUI();
+  appendThinkingIndicator(`${roleName('b')} is typing`);
+  try {
+    const reply = await sparCall('reply');
+    // the bot faces the same referee — on ROOKIE this is where the red ink flows
+    let flags = [];
+    try { flags = await callMediator(reply, 'b'); } catch (e) { /* unflagged is fine */ }
+    currentMessages.push({
+      id: localId(),
+      debate_id: currentDebate.id,
+      role: 'b',
+      author_email: BOT_EMAIL,
+      text: reply,
+      flags,
+      created_at: new Date().toISOString(),
+    });
+    const cap = currentDebate.message_cap || 9999;
+    const aMsgs = currentMessages.filter(m => m.role === 'a').length;
+    const bMsgs = currentMessages.filter(m => m.role === 'b').length;
+    if (aMsgs >= cap && bMsgs >= cap) {
+      removeThinkingIndicator();
+      aiThinking = false;
+      finishLocalDebate();
+      return;
+    }
+    currentDebate.current_turn = 'a';
+    saveSoloState();
+    renderMessages();
+    refreshTurnUI();
+  } catch (e) {
+    console.warn('Spar failed:', e.message || e);
+    currentDebate.current_turn = 'a';
+    saveSoloState();
+    refreshTurnUI();
+    showToast('Your opponent glitched out — your move again.');
+  } finally {
+    removeThinkingIndicator();
+    aiThinking = false;
+  }
+}
+
+// ---------- solo setup screen ----------
+let soloSetup = { kind: 'ai', difficulty: 'easy' };
+
+function openSoloSetup() {
+  soloSetup = { kind: 'ai', difficulty: 'easy' };
+  document.getElementById('solo-topic').value = '';
+  const openingEl = document.getElementById('solo-opening');
+  openingEl.value = '';
+  enforceWordMeter(openingEl, 'solo-meter', 'solo-meter-label', 'solo-count');
+  document.getElementById('solo-status').textContent = '';
+  document.querySelectorAll('#solo-diff-field .mode-card').forEach(c => c.classList.toggle('active', c.dataset.diff === 'easy'));
+  // topic idea chips
+  const chips = document.getElementById('solo-topic-chips');
+  chips.innerHTML = '';
+  for (const t of SOLO_TOPIC_IDEAS) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip';
+    b.textContent = t;
+    b.onclick = () => { document.getElementById('solo-topic').value = t; };
+    chips.appendChild(b);
+  }
+  updateSoloKindUI();
+  showScreen('solo');
+}
+
+function setSoloKind(kind) {
+  soloSetup.kind = kind;
+  updateSoloKindUI();
+}
+
+function updateSoloKindUI() {
+  document.getElementById('solo-kind-ai').classList.toggle('active', soloSetup.kind === 'ai');
+  document.getElementById('solo-kind-self').classList.toggle('active', soloSetup.kind === 'self');
+  document.getElementById('solo-diff-field').style.display = soloSetup.kind === 'ai' ? '' : 'none';
+  document.getElementById('solo-opening-field').style.display = soloSetup.kind === 'ai' ? '' : 'none';
+}
+
+function setSoloDiff(el) {
+  soloSetup.difficulty = el.dataset.diff;
+  document.querySelectorAll('#solo-diff-field .mode-card').forEach(c => c.classList.toggle('active', c === el));
+}
+
+async function startSoloDebate() {
+  const topic = document.getElementById('solo-topic').value.trim();
+  if (!topic) { showToast('Pick a topic first.'); return; }
+  const myName = (currentProfile && currentProfile.display_name) || currentUser.email.split('@')[0];
+
+  // --- vs yourself: no openings, no AI setup — straight into the arena ---
+  if (soloSetup.kind === 'self') {
+    currentDebate = baseSoloDebate(topic, 'self', {
+      name_a: 'SIDE A',
+      name_b: 'SIDE B',
+      message_cap: 9999, // you decide when it's over
+    });
+    currentMessages = [];
+    soloMode = 'self';
+    saveSoloState();
+    showChat();
+    showToast('You\'re both fighters — argue Side A, then switch. End it any time.', 'cyan');
+    return;
+  }
+
+  // --- vs the AI ---
+  const opening = document.getElementById('solo-opening').value.trim();
+  if (countWords(opening) < OPENING_MIN_WORDS) {
+    showToast(`Write your opening first (at least ${OPENING_MIN_WORDS} words).`);
+    return;
+  }
+  const bot = SOLO_BOTS[soloSetup.difficulty];
+  const btn = document.getElementById('solo-start-btn');
+  const status = document.getElementById('solo-status');
+  btn.disabled = true;
+  btn.textContent = 'Summoning your opponent…';
+  status.textContent = `${bot.name} is preparing an opening argument…`;
+  try {
+    currentDebate = baseSoloDebate(topic, 'ai', {
+      name_a: myName,
+      name_b: bot.name,
+      opponent_email: BOT_EMAIL,
+      difficulty: soloSetup.difficulty,
+      opening_a: opening,
+      message_cap: 5,
+    });
+    seedBotProfile();
+    let botOpening;
+    try {
+      botOpening = await sparCall('opening');
+    } catch (e) {
+      // spar task not deployed / AI down — a canned opening keeps practice alive
+      console.warn('Spar opening failed, using fallback:', e.message || e);
+      botOpening = `I'll take the other side of "${topic}". Make your case — I'm arguing the opposite corner, point for point.`;
+    }
+    currentDebate.opening_b = botOpening;
+    // both openings face the referee, exactly like a real match
+    const [fa, fb] = await Promise.all([
+      flagOpening(opening, topic, currentDebate.mode),
+      flagOpening(botOpening, topic, currentDebate.mode),
+    ]);
+    currentDebate.opening_flags_a = fa;
+    currentDebate.opening_flags_b = fb;
+    currentMessages = [];
+    soloMode = 'ai';
+    saveSoloState();
+    showChat();
+  } catch (e) {
+    console.error(e);
+    status.innerHTML = `<span class="danger">Couldn't start: ${escapeHtml(e.message || 'unknown error')}</span>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '⚡ Enter the Arena';
+  }
+}
+
+// live word meter for the solo opening (script runs after DOM is parsed)
+(() => {
+  const el = document.getElementById('solo-opening');
+  if (el) el.addEventListener('input', e => enforceWordMeter(e.target, 'solo-meter', 'solo-meter-label', 'solo-count'));
+})();
+
+// ============================================================================
+// TUTORIAL — a scripted mock debate with a coach floating above the UI
+//
+// COACH-BOT's messages are canned, with hand-authored flags, so the teaching
+// beats always land (an obvious strawman to spot, a graceful concession to
+// admire). The PLAYER's messages are flagged live by the real mediator.
+// ============================================================================
+const TUT_SCENARIOS = [
+  {
+    id: 'hotdog',
+    emoji: '🌭',
+    topic: 'Is a hot dog a sandwich?',
+    blurb: 'The eternal classic. Structure, definitions, and deli law.',
+    points: [
+      'A sandwich requires two separate slices of bread.',
+      'Deli tradition has never counted hot dogs as sandwiches.',
+      'Loosening the definition makes the word meaningless.',
+    ],
+    botOpening: {
+      text: 'A hot dog is obviously not a sandwich — and honestly, everyone already agrees with me on this. A sandwich needs two separate slices of bread; that\'s just common sense. My uncle ran a deli for twenty years and never once called a hot dog a sandwich, which basically settles it. And if we start calling hot dogs sandwiches, next thing you know burritos and pop-tarts are sandwiches too and the word means nothing.',
+      flags: [
+        { kind: 'red', label: 'APPEAL TO POPULARITY', span: 'everyone already agrees with me on this', reason: 'Claims popular agreement as if it were evidence for the position.' },
+        { kind: 'amber', label: 'ANECDOTAL EVIDENCE', span: 'My uncle ran a deli for twenty years and never once called a hot dog a sandwich', reason: 'One personal story offered as if it settles a general question.' },
+        { kind: 'red', label: 'SLIPPERY SLOPE', span: 'next thing you know burritos and pop-tarts are sandwiches too and the word means nothing', reason: 'Assumes an inevitable chain of consequences without evidence.' },
+      ],
+    },
+    botReply: {
+      text: 'Interesting move, but you\'re basically arguing that anything inside bread counts as a sandwich, which would make lasagna a sandwich — absurd. Here\'s the thing though: a hot dog bun is hinged, not sliced, so the structure genuinely differs from a classic sandwich. And most people — like 90% of them — would laugh if you ordered a hot dog at a sandwich counter.',
+      flags: [
+        { kind: 'red', label: 'STRAWMAN', span: 'you\'re basically arguing that anything inside bread counts as a sandwich, which would make lasagna a sandwich', reason: 'Rebuts an exaggerated version of the argument rather than the actual claim.' },
+        { kind: 'green', label: 'WELL STRUCTURED', span: 'a hot dog bun is hinged, not sliced, so the structure genuinely differs from a classic sandwich', reason: 'A clear premise leading to a relevant conclusion — this is a real argument.' },
+        { kind: 'amber', label: 'VAGUE QUANTIFIER', span: 'most people — like 90% of them', reason: 'A load-bearing number with no source behind it.' },
+      ],
+    },
+    botClosing: {
+      text: 'Alright — you argued that better than I expected, and I\'ll concede your strongest point. I still think a sandwich wants two separate slices, but I can see the other corner from here. Good bout.',
+      flags: [
+        { kind: 'green', label: 'GRACEFUL CONCESSION', span: 'you argued that better than I expected, and I\'ll concede your strongest point', reason: 'Acknowledges the opponent\'s point before moving on — the referee rewards this.' },
+      ],
+    },
+  },
+  {
+    id: 'cats',
+    emoji: '🐈',
+    topic: 'Cats make better roommates than dogs.',
+    blurb: 'Affection, autonomy, and who actually pays rent in cuddles.',
+    points: [
+      'Dogs offer visible affection and companionship.',
+      'Cats are aloof and unpredictable housemates.',
+      'A dog\'s greeting proves the bond is real.',
+    ],
+    botOpening: {
+      text: 'Dogs are better roommates, full stop — literally everyone who has ever owned both will tell you the same thing. Cats never show affection and they always ignore you unless they want food. My roommate\'s cat scratched me once, so cats are clearly hostile animals. A dog will actually greet you at the door like you matter.',
+      flags: [
+        { kind: 'red', label: 'APPEAL TO POPULARITY', span: 'literally everyone who has ever owned both will tell you the same thing', reason: 'Popularity stands in for evidence.' },
+        { kind: 'red', label: 'OVERGENERALIZATION', span: 'Cats never show affection and they always ignore you unless they want food', reason: 'Absolute terms — never, always — presented as evidence.' },
+        { kind: 'red', label: 'HASTY GENERALIZATION', span: 'My roommate\'s cat scratched me once, so cats are clearly hostile animals', reason: 'A sweeping conclusion drawn from a single example.' },
+      ],
+    },
+    botReply: {
+      text: 'Sure, cats are "low maintenance" — if by that you mean they contribute nothing. But consider security: a dog deters break-ins, and something like 60% of burglars say they\'d skip a house with a dog. That said, I\'ll grant that a litter box beats a 6 AM walk in the rain. Doesn\'t it just feel wrong, though, coming home to total indifference?',
+      flags: [
+        { kind: 'amber', label: 'UNSUPPORTED CLAIM', span: 'something like 60% of burglars say they\'d skip a house with a dog', reason: 'A specific statistic with no source attached.' },
+        { kind: 'green', label: 'GRACEFUL CONCESSION', span: 'I\'ll grant that a litter box beats a 6 AM walk in the rain', reason: 'Gives honest ground on a real point — this earns green.' },
+        { kind: 'red', label: 'APPEAL TO EMOTION', span: 'Doesn\'t it just feel wrong, though, coming home to total indifference?', reason: 'Swaps a reason for a feeling — guilt is not an argument.' },
+      ],
+    },
+    botClosing: {
+      text: 'Okay, fair play — you made a genuinely strong case for the quiet-companion angle, and I\'ll concede that point. Dogs still win my heart, but this was a good scrap.',
+      flags: [
+        { kind: 'green', label: 'GRACEFUL CONCESSION', span: 'you made a genuinely strong case for the quiet-companion angle, and I\'ll concede that point', reason: 'Concedes a fair point cleanly — good sportsmanship, rewarded.' },
+      ],
+    },
+  },
+  {
+    id: 'pineapple',
+    emoji: '🍍',
+    topic: 'Pineapple belongs on pizza.',
+    blurb: 'Tradition vs. taste. Somebody has to defend the fruit.',
+    points: [
+      'Pizza tradition belongs to its inventors.',
+      'Sweet fruit clashes with savory cheese.',
+      'Permitting pineapple invites culinary chaos.',
+    ],
+    botOpening: {
+      text: 'Pineapple has no place on pizza. Italians invented pizza, so their word on toppings is final — and they would riot at the idea. Everybody with working taste buds already knows sweet fruit doesn\'t belong near melted cheese. Allow pineapple today, and soon people will be putting gummy bears and ketchup on pizza tomorrow.',
+      flags: [
+        { kind: 'red', label: 'APPEAL TO AUTHORITY', span: 'Italians invented pizza, so their word on toppings is final', reason: 'Origin and authority stand in for an actual argument about taste.' },
+        { kind: 'red', label: 'APPEAL TO POPULARITY', span: 'Everybody with working taste buds already knows sweet fruit doesn\'t belong near melted cheese', reason: '"Everybody knows" is doing the work evidence should be doing.' },
+        { kind: 'red', label: 'SLIPPERY SLOPE', span: 'soon people will be putting gummy bears and ketchup on pizza tomorrow', reason: 'Assumes an inevitable descent with nothing to support it.' },
+      ],
+    },
+    botReply: {
+      text: 'So your position is that literally anything edible counts as a topping as long as one person somewhere enjoys it? That\'s chaos, not cuisine. I\'ll admit the sweet-salty pairing has precedent — prosciutto and melon is a classic. But probably 9 out of 10 chefs would still refuse to serve a Hawaiian pie.',
+      flags: [
+        { kind: 'red', label: 'STRAWMAN', span: 'So your position is that literally anything edible counts as a topping as long as one person somewhere enjoys it?', reason: 'Inflates the claim into an extreme nobody made, then attacks that.' },
+        { kind: 'green', label: 'GRACEFUL CONCESSION', span: 'I\'ll admit the sweet-salty pairing has precedent — prosciutto and melon is a classic', reason: 'Acknowledges a fair counterpoint honestly before pressing on.' },
+        { kind: 'amber', label: 'VAGUE QUANTIFIER', span: 'probably 9 out of 10 chefs', reason: 'A confident-sounding figure with nothing behind it.' },
+      ],
+    },
+    botClosing: {
+      text: 'Fair play — your sweet-and-savory point landed harder than I expected, and I\'ll concede it. I\'m still scraping the pineapple off my own slice, but I respect the argument. Good match.',
+      flags: [
+        { kind: 'green', label: 'GRACEFUL CONCESSION', span: 'your sweet-and-savory point landed harder than I expected, and I\'ll concede it', reason: 'Gives earned ground gracefully — the referee\'s favorite move.' },
+      ],
+    },
+  },
+];
+
+const COACH_STEPS = [
+  { text: 'Hey — I\'m your Coach. 🎓 Welcome to Discourse! Pick one of these classic low-stakes topics and we\'ll run a short practice bout against COACH-BOT. I\'ll call the action from up here.', wait: 'pick' },
+  { text: 'This is the arena. Top row is the scoreboard — you on the left, COACH-BOT on the right. Green moves earn points (+3), red fallacies cost (−2), unsourced claims sting (−1)... and conceding a fair point is a badge of honor here, not a loss.', wait: 'next' },
+  { text: 'COACH-BOT\'s opening argument is already on the board — and the referee has been over it with a highlighter. Hover (or tap) the colored phrases: 🔴 red = a logical fallacy, 🟡 amber = a claim with no source. Each tooltip names the exact pattern.', wait: 'next' },
+  { text: 'Your move! Type your practice argument in the composer at the bottom — a few sentences is perfect — and hit Send ▸. The real AI referee will review it live, exactly like a real match.', wait: 'send' },
+  { text: 'See any highlights on your message? That\'s the referee\'s honest read — green earns, red costs, amber wants a source. No highlights at all is a clean move. Ready for the counterpunch?', wait: 'next' },
+  { text: 'Classic bot. There\'s at least one blatant fallacy in that reply — find the red highlight and hover it. And note the green: even opponents earn credit for good moves. If they ever make a genuinely GOOD point, tap "Concede ✓" under their message: +3 to them, +1 to you. Sportsmanship is a stat here.', wait: 'next' },
+  { text: 'Time to close it out. Send your final rebuttal — make it count.', wait: 'send' },
+  { text: 'GG! 🏆 That\'s the summary card — verdict, flag counts, concessions, and the strongest argument of the match. In a real debate you\'d screenshot and share it. You\'re ready: challenge a friend with + New Debate, or keep sharpening in the 🤖 Practice Arena.', wait: 'finish' },
+];
+
+let tutState = null; // { scenario, step }
+
+function startTutorial() {
+  tutState = { scenario: null, step: 0 };
+  soloMode = 'tutorial';
+  currentDebate = null;
+  currentMessages = [];
+  renderTutScenarios();
+  showScreen('tutorial');
+  showCoach();
+  coachGo(0);
+}
+
+function renderTutScenarios() {
+  const grid = document.getElementById('tut-scenarios');
+  grid.innerHTML = '';
+  for (const sc of TUT_SCENARIOS) {
+    const b = document.createElement('button');
+    b.className = 'mode-card';
+    b.innerHTML = `<div class="mtitle">${sc.emoji} ${escapeHtml(sc.topic)}</div><div class="mdesc">${escapeHtml(sc.blurb)}</div>`;
+    b.onclick = () => pickTutScenario(sc.id);
+    grid.appendChild(b);
+  }
+}
+
+function pickTutScenario(id) {
+  const sc = TUT_SCENARIOS.find(s => s.id === id);
+  if (!sc) return;
+  tutState.scenario = sc;
+  currentDebate = baseSoloDebate(sc.topic, 'tutorial', {
+    name_a: (currentProfile && currentProfile.display_name) || currentUser.email.split('@')[0],
+    name_b: 'COACH-BOT',
+    opponent_email: TUT_BOT_EMAIL,
+    message_cap: 3,
+    message_word_cap: 150,
+    opening_b: sc.botOpening.text,
+    opening_flags_b: mapSpansToFlags(sc.botOpening.text, sc.botOpening.flags),
+    points_b: sc.points,
+  });
+  currentMessages = [];
+  seedBotProfile();
+  showChat();
+  coachGo(1);
+}
+
+function tutBotSend(spec, cb) {
+  appendThinkingIndicator('COACH-BOT is typing');
+  setTimeout(() => {
+    removeThinkingIndicator();
+    currentMessages.push({
+      id: localId(),
+      debate_id: currentDebate.id,
+      role: 'b',
+      author_email: TUT_BOT_EMAIL,
+      text: spec.text,
+      flags: mapSpansToFlags(spec.text, spec.flags),
+      created_at: new Date().toISOString(),
+    });
+    renderMessages();
+    refreshTurnUI();
+    if (cb) cb();
+  }, 1100);
+}
+
+function tutorialAfterPlayerSend() {
+  if (!tutState) return;
+  if (tutState.step === 3) { coachGo(4); return; }
+  if (tutState.step === 6) {
+    tutBotSend(tutState.scenario.botClosing, () => {
+      setTimeout(() => {
+        currentDebate.status = 'finished';
+        showSummary();
+        coachGo(7);
+      }, 1200);
+    });
+  }
+}
+
+// ---------- the coach itself ----------
+function showCoach() {
+  document.getElementById('coach').hidden = false;
+  document.body.classList.add('coach-on');
+}
+function hideCoach() {
+  const c = document.getElementById('coach');
+  if (c) c.hidden = true;
+  document.body.classList.remove('coach-on');
+}
+
+function coachGo(n) {
+  if (!tutState) return;
+  tutState.step = n;
+  const step = COACH_STEPS[n];
+  document.getElementById('coach-text').textContent = step.text;
+  document.getElementById('coach-dots').innerHTML =
+    COACH_STEPS.map((_, i) => `<span class="${i <= n ? 'done' : ''}"></span>`).join('');
+  const next = document.getElementById('coach-next');
+  const hint = document.getElementById('coach-hint');
+  next.disabled = false;
+  if (step.wait === 'next') {
+    next.hidden = false; next.textContent = 'Next ▸'; hint.hidden = true;
+  } else if (step.wait === 'finish') {
+    next.hidden = false; next.textContent = 'Finish ✓'; hint.hidden = true;
+  } else {
+    next.hidden = true;
+    hint.hidden = false;
+    hint.textContent = step.wait === 'pick' ? '▸ pick a topic below' : '▸ write your argument below & hit send';
+  }
+}
+
+function coachNext() {
+  if (!tutState) return;
+  const n = tutState.step;
+  if (n === 7) { endTutorial(false); return; }
+  if (n === 4) {
+    // the counterpunch: canned bot reply with a planted fallacy to spot
+    document.getElementById('coach-next').disabled = true;
+    tutBotSend(tutState.scenario.botReply, () => coachGo(5));
+    return;
+  }
+  coachGo(n + 1);
+}
+
+function endTutorial(skipped) {
+  try { localStorage.setItem('discourse-tutorial-done', '1'); } catch (e) {}
+  const finished = !skipped;
+  tutState = null;
+  hideCoach();
+  soloMode = null;
+  goToDashboard();
+  if (finished) showToast('Tutorial complete 🎓 — now go start a real one!', 'cyan');
+}
+
+function maybeOfferTutorial() {
+  try {
+    if (localStorage.getItem('discourse-tutorial-offered') || localStorage.getItem('discourse-tutorial-done')) return;
+    localStorage.setItem('discourse-tutorial-offered', '1');
+    document.getElementById('tutorial-offer').hidden = false;
+  } catch (e) { /* storage blocked — just skip the offer */ }
+}
+
+function offerTutorial(accept) {
+  document.getElementById('tutorial-offer').hidden = true;
+  if (accept) startTutorial();
 }
 </script>
 </body>
