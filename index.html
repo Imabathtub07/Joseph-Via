@@ -361,7 +361,10 @@
     box-shadow: 0 0 18px var(--cyan-glow);
   }
 
-  .mode-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; align-items: stretch; }
+  /* minmax(0,1fr): a plain 1fr column can't shrink below its content's
+     min-width, and single-word mode titles ("COLLABORATIVE") are wide enough
+     to force the whole page past a phone viewport. */
+  .mode-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; align-items: stretch; }
   .mode-card {
     border: 1px solid var(--rule-strong);
     padding: 16px;
@@ -371,6 +374,7 @@
     position: relative;
     display: flex;
     flex-direction: column;
+    min-width: 0;
   }
   .mode-card .mchange { margin-top: auto; padding-top: 9px; }
   .mode-card:hover { transform: translateY(-2px); border-color: var(--violet); }
@@ -385,6 +389,7 @@
     margin-bottom: 6px;
     color: var(--ink);
     letter-spacing: 0.02em;
+    overflow-wrap: anywhere; /* last resort for long titles in narrow cards */
   }
   .mode-card.active .mtitle { color: var(--gold); }
   .mode-card .mdesc { font-size: 12px; color: var(--ink-2); line-height: 1.45; }
@@ -559,6 +564,41 @@
     font-weight: 700;
     flex-shrink: 0;
   }
+
+  /* Report / block — quiet flag in the chat header, panel-styled modal */
+  .safety-btn {
+    background: none;
+    border: 1px solid var(--rule);
+    color: var(--ink-3);
+    font-size: 13px;
+    padding: 4px 9px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .safety-btn:hover { color: var(--flag-red); border-color: var(--flag-red); }
+  .safety-overlay {
+    position: fixed; inset: 0; z-index: 400;
+    background: rgba(10, 6, 18, 0.82);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .safety-panel {
+    max-width: 440px; width: 100%;
+    background: var(--void-2);
+    border: 1px solid var(--rule-strong);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.7);
+  }
+  .safety-panel textarea {
+    width: 100%; min-height: 90px;
+    background: rgba(10, 6, 18, 0.6);
+    border: 1px solid var(--rule-strong);
+    padding: 10px 12px;
+    font-size: 14px; line-height: 1.5;
+    color: var(--ink);
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .safety-note { margin-top: 12px; font-size: 12px; color: var(--ink-3); }
 
   /* HUD strip — turn + timer */
   .hud {
@@ -1488,6 +1528,11 @@
     .coach-text { font-size: 13px; }
     .coach-ava { width: 40px; height: 40px; font-size: 22px; }
 
+    /* mode cards: fit two-up on a phone without forcing page overflow */
+    .mode-card { padding: 12px; }
+    .mode-card .mtitle { font-size: 13px; }
+    .mode-card .mdesc { font-size: 11px; }
+
     /* dashboard profile card stacks on narrow screens */
     .profile-card { grid-template-columns: 1fr; gap: 16px; padding: 20px 18px; }
     .profile-ava { width: 72px; height: 72px; font-size: 40px; }
@@ -1687,6 +1732,14 @@
             <div class="wm-bar"><div class="wm-fill" id="solo-meter"></div></div>
             <div class="wm-label" id="solo-meter-label"><span id="solo-count">0</span> / 250 words</div>
           </div>
+          <div class="link-bar" id="solo-cite" hidden>
+            <input type="url" id="solo-cite-url" placeholder="https://source.example.com/article">
+            <input type="text" id="solo-cite-label" placeholder="Label — e.g. CDC 2024 report" maxlength="60">
+            <button type="button" class="btn btn-secondary" onclick="insertCite('solo-opening', 'solo-cite')" style="padding: 8px 14px; font-size: 11px;">Insert ↵</button>
+          </div>
+          <div style="display:flex;justify-content:flex-end;margin-top:8px;">
+            <button type="button" class="btn btn-secondary" style="padding:7px 12px;font-size:10px;" onclick="toggleCiteBar('solo-cite')">🔗 Cite a source</button>
+          </div>
         </div>
 
         <div style="display:flex;gap:10px;">
@@ -1739,7 +1792,15 @@
             <div class="wm-bar"><div class="wm-fill" id="opening-meter"></div></div>
             <div class="wm-label" id="opening-meter-label"><span id="opening-count">0</span> / 250 words</div>
           </div>
-          <div class="slider-hint">They won't see this until they've written their own opening.</div>
+          <div class="link-bar" id="opening-cite" hidden>
+            <input type="url" id="opening-cite-url" placeholder="https://source.example.com/article">
+            <input type="text" id="opening-cite-label" placeholder="Label — e.g. CDC 2024 report" maxlength="60">
+            <button type="button" class="btn btn-secondary" onclick="insertCite('opening-arg', 'opening-cite')" style="padding: 8px 14px; font-size: 11px;">Insert ↵</button>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;">
+            <div class="slider-hint" style="margin-top:0;">They won't see this until they've written their own opening.</div>
+            <button type="button" class="btn btn-secondary" style="padding:7px 12px;font-size:10px;flex-shrink:0;" onclick="toggleCiteBar('opening-cite')">🔗 Cite a source</button>
+          </div>
         </div>
         </div><!-- /new-debate-only -->
 
@@ -1848,6 +1909,7 @@
             <button class="btn btn-ghost" onclick="declineInvite()">Decline</button>
           </div>
           <p style="margin-top: 14px; font-size: 12px; color: var(--ink-3);">Don't like the terms? Adjust them or talk it over in the 💬 bubble — rules stay negotiable until the debate begins.</p>
+          <p style="margin-top: 10px; font-size: 12px;"><a href="#" onclick="openSafetyMenu(); return false;" style="color: var(--ink-3); text-decoration: underline;">⚑ Report or block this player</a></p>
         </div>
       </div>
     </div>
@@ -1869,6 +1931,15 @@
           <div class="wordmeter">
             <div class="wm-bar"><div class="wm-fill" id="opening-b-meter"></div></div>
             <div class="wm-label" id="opening-b-meter-label"><span id="opening-b-count">0</span> / 250 words</div>
+          </div>
+          <div class="link-bar" id="opening-b-cite" hidden>
+            <input type="url" id="opening-b-cite-url" placeholder="https://source.example.com/article">
+            <input type="text" id="opening-b-cite-label" placeholder="Label — e.g. CDC 2024 report" maxlength="60">
+            <button type="button" class="btn btn-secondary" onclick="insertCite('opening-b-input', 'opening-b-cite')" style="padding: 8px 14px; font-size: 11px;">Insert ↵</button>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;">
+            <div class="slider-hint" style="margin-top:0;">Sources welcome — often the whole argument lives in the links.</div>
+            <button type="button" class="btn btn-secondary" style="padding:7px 12px;font-size:10px;flex-shrink:0;" onclick="toggleCiteBar('opening-b-cite')">🔗 Cite a source</button>
           </div>
         </div>
         <div style="display:flex;gap:10px;">
@@ -1920,6 +1991,7 @@
     <div class="topic-strip">
       <div class="topic" id="chat-topic">—</div>
       <div class="mode-badge" id="chat-mode-badge">COMPETITIVE</div>
+      <button class="safety-btn" id="chat-safety-btn" onclick="openSafetyMenu()" title="Report or block this player" hidden>⚑</button>
     </div>
 
     <div class="hud">
@@ -1934,15 +2006,15 @@
     <div class="composer" id="composer">
       <div class="composer-tag" id="composer-tag">YOUR MOVE</div>
       <textarea id="composer-input" placeholder="Make your point."></textarea>
-      <div class="link-bar" id="link-bar" hidden>
-        <input type="url" id="link-url" placeholder="https://source.example.com/article">
-        <input type="text" id="link-label" placeholder="Label — e.g. CDC 2024 report" maxlength="60">
-        <button class="btn btn-secondary" onclick="insertLink()" style="padding: 8px 14px; font-size: 11px;">Insert ↵</button>
+      <div class="link-bar" id="composer-cite" hidden>
+        <input type="url" id="composer-cite-url" placeholder="https://source.example.com/article">
+        <input type="text" id="composer-cite-label" placeholder="Label — e.g. CDC 2024 report" maxlength="60">
+        <button class="btn btn-secondary" onclick="insertCite('composer-input', 'composer-cite')" style="padding: 8px 14px; font-size: 11px;">Insert ↵</button>
       </div>
       <div class="composer-bar">
         <div class="composer-hint" id="composer-hint">Ctrl+Enter sends · 🔗 to cite a source</div>
         <div style="display: flex; gap: 8px;">
-          <button class="btn btn-secondary" id="btn-link" onclick="toggleLinkBar()">🔗 Cite</button>
+          <button class="btn btn-secondary" id="btn-link" onclick="toggleCiteBar('composer-cite')">🔗 Cite</button>
           <button class="btn btn-primary" id="btn-send" onclick="sendMessage()">Send ▸</button>
         </div>
       </div>
@@ -2092,6 +2164,25 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- ============ REPORT / BLOCK MODAL ============ -->
+<div class="safety-overlay" id="safety-overlay" hidden>
+  <div class="panel safety-panel">
+    <div class="panel-tag">Conduct Desk</div>
+    <h3 style="font-family:'Bowlby One',serif;font-size:22px;margin-bottom:6px;">Report <span id="safety-opp-name" style="color:var(--hot-pink);">this player</span>?</h3>
+    <p style="font-size:13px;color:var(--ink-2);margin-bottom:14px;">Sharp arguments are the game. Harassment, threats, and hate aren't. Tell the desk what happened — a human reviews every report.</p>
+    <div class="field">
+      <label>What happened? (optional)</label>
+      <textarea id="safety-reason" maxlength="500" placeholder="Slurs in their opening, threatening messages, spam…"></textarea>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;">
+      <button class="btn btn-primary" onclick="submitReport(false)">⚑ Report</button>
+      <button class="btn btn-secondary" onclick="submitReport(true)">🚫 Report &amp; Block</button>
+      <button class="btn btn-ghost" onclick="closeSafetyMenu()">Cancel</button>
+    </div>
+    <p class="safety-note">Blocking stops any new debates between you two, in both directions. This debate stays as-is — you can still decline, bow out, or let the clock run.</p>
+  </div>
+</div>
+
 <!-- Supabase JS SDK -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -2100,6 +2191,28 @@
 // ============================================================================
 const SUPABASE_URL = 'https://kxbopuwmpvohgjevwiww.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_flkVZjZgDxbofEGjvP6B1A_fSJlQjwf';
+
+// ---------------------------------------------------------------------------
+// NATIVE (Capacitor Android) SUPPORT
+// Inside the Android app, window.location.origin is the Capacitor shell
+// (https://localhost), so anything that builds a URL for the outside world —
+// magic-link redirects, invite emails — must not use it. Auth redirects use a
+// custom scheme the app claims via an intent filter; invite links always point
+// at the live website so invitees without the app land somewhere real.
+// ---------------------------------------------------------------------------
+const IS_NATIVE = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+const APP_WEB_URL = 'https://josephvia.com/';                 // production web app
+const NATIVE_AUTH_REDIRECT = 'disagreebetter://auth-callback'; // must be listed in Supabase → Auth → URL Configuration → Redirect URLs
+
+// Base URL for links that leave the app (invite emails, share links).
+function webBaseUrl() {
+  return IS_NATIVE ? APP_WEB_URL : window.location.origin + window.location.pathname;
+}
+
+// Where a magic link should land THIS device after the user taps it.
+function authRedirectUrl() {
+  return IS_NATIVE ? NATIVE_AUTH_REDIRECT : window.location.origin + window.location.pathname;
+}
 
 // ============================================================================
 // STATE
@@ -2150,6 +2263,24 @@ async function init() {
   }
 
   sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // Native shell: catch deep links (magic-link auth callback) and the
+  // hardware back button. window.Capacitor.Plugins.App is injected by the
+  // native bridge — no bundler needed.
+  if (IS_NATIVE && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+    const CapApp = window.Capacitor.Plugins.App;
+    CapApp.addListener('appUrlOpen', ({ url }) => { handleDeepLink(url); });
+    CapApp.addListener('backButton', ({ canGoBack }) => {
+      // In-app "back" means back to the dashboard; from the dashboard or
+      // auth screen it backgrounds the app like a normal Android app.
+      const dash = document.getElementById('screen-dashboard');
+      const auth = document.getElementById('screen-auth');
+      const onHome = (dash && dash.classList.contains('active')) || (auth && auth.classList.contains('active'));
+      if (onHome) CapApp.exitApp();
+      else if (currentUser) goToDashboard();
+      else CapApp.exitApp();
+    });
+  }
 
   // Handle auth state changes.
   // IMPORTANT: Supabase re-fires SIGNED_IN every time the tab regains focus
@@ -2227,6 +2358,40 @@ function updateMastUser() {
 // ============================================================================
 // AUTH
 // ============================================================================
+// Native only: a magic link tapped in the phone's email app re-enters here as
+// disagreebetter://auth-callback#access_token=…&refresh_token=… — pull the
+// tokens out of the fragment and hand them to Supabase. onAuthStateChange
+// then routes to the dashboard exactly like a web login.
+async function handleDeepLink(url) {
+  if (!url) return;
+  try {
+    const hashIdx = url.indexOf('#');
+    const hash = hashIdx >= 0 ? url.slice(hashIdx + 1) : '';
+    const params = new URLSearchParams(hash);
+    if (params.get('error_description')) {
+      showToast(params.get('error_description'));
+      return;
+    }
+    const access_token = params.get('access_token');
+    const refresh_token = params.get('refresh_token');
+    if (access_token && refresh_token) {
+      const { error } = await sb.auth.setSession({ access_token, refresh_token });
+      if (error) throw error;
+      return;
+    }
+    // Not an auth link — maybe a debate link (https App Links, if added later).
+    const qIdx = url.indexOf('?');
+    if (qIdx >= 0) {
+      const q = new URLSearchParams(url.slice(qIdx + 1).split('#')[0]);
+      const debateId = q.get('debate');
+      if (debateId && currentUser) await openDebate(debateId);
+    }
+  } catch (e) {
+    console.error('Deep link failed:', e);
+    showToast('Sign-in link failed — request a fresh one.');
+  }
+}
+
 async function sendMagicLink() {
   const email = document.getElementById('auth-email').value.trim().toLowerCase();
   if (!email || !email.includes('@')) {
@@ -2239,7 +2404,7 @@ async function sendMagicLink() {
   try {
     const { error } = await sb.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: window.location.origin + window.location.pathname }
+      options: { emailRedirectTo: authRedirectUrl() }
     });
     if (error) throw error;
     document.getElementById('auth-status').innerHTML = `<span class="success">✓ Check ${escapeHtml(email)} for the link.</span>`;
@@ -2802,6 +2967,14 @@ async function createDebate() {
     // Public app: anyone with a valid email can be invited — the magic-link
     // email doubles as their sign-up. (See SUPABASE_GO_PUBLIC_RUNBOOK.md §2b.)
 
+    // Blocks cut both ways: no new debates in either direction.
+    if (await isBlockedPair(state.oppEmail)) {
+      showToast('No rematch — one of you has blocked the other.');
+      btn.disabled = false;
+      btn.textContent = '⚡ Send Invite';
+      return;
+    }
+
     // Distill the opening into key points AND have the mediator judge it as
     // an opening (thesis clarity, scoping, framing) — in parallel. If the AI
     // is unavailable we still create the debate; backfill heals it later.
@@ -2833,8 +3006,9 @@ async function createDebate() {
     if (error) throw error;
     clearContractDraft();
 
-    // Send invite email via Supabase magic link, with redirect to the debate
-    const redirectUrl = `${window.location.origin}${window.location.pathname}?debate=${debate.id}`;
+    // Send invite email via Supabase magic link, with redirect to the debate.
+    // Always the WEB url — the invitee may not have the app installed.
+    const redirectUrl = `${webBaseUrl()}?debate=${debate.id}`;
     const { error: inviteErr } = await sb.auth.signInWithOtp({
       email: state.oppEmail,
       options: { emailRedirectTo: redirectUrl }
@@ -2928,9 +3102,13 @@ function showCreatorWaiting() {
   showScreen('waiting');
 }
 
-function acceptInvite() {
+async function acceptInvite() {
   // No DB write yet — accepting just moves you to the opening-argument screen.
   // The debate only goes active once your opening is locked in.
+  if (await isBlockedPair(currentDebate.creator_email)) {
+    showToast('No rematch — one of you has blocked the other.');
+    return;
+  }
   closeNego();
   showOpeningScreen();
 }
@@ -2996,6 +3174,72 @@ async function declineInvite() {
 }
 
 // ============================================================================
+// REPORT / BLOCK — Play UGC compliance. Tables + RLS live in REPORTS_BLOCKS.sql.
+// Blocks are enforced client-side at debate creation and invite acceptance;
+// both directions of a block kill the match.
+// ============================================================================
+function currentOpponentEmail() {
+  if (!currentDebate || currentDebate.solo_kind || !currentUser) return null;
+  const me = currentUser.email.toLowerCase();
+  const other = currentDebate.creator_email === me ? currentDebate.opponent_email : currentDebate.creator_email;
+  return (other || '').toLowerCase() || null;
+}
+
+async function isBlockedPair(otherEmail) {
+  otherEmail = (otherEmail || '').toLowerCase();
+  if (!otherEmail || !currentUser) return false;
+  const me = currentUser.email.toLowerCase();
+  try {
+    const { data, error } = await sb.from('blocks').select('id')
+      .or(`and(blocker_email.eq.${me},blocked_email.eq.${otherEmail}),and(blocker_email.eq.${otherEmail},blocked_email.eq.${me})`)
+      .limit(1);
+    if (error) throw error;
+    return !!(data && data.length);
+  } catch (e) {
+    // Table not deployed yet — degrade open rather than bricking invites.
+    console.warn('Blocks unavailable:', e.message || e);
+    return false;
+  }
+}
+
+function openSafetyMenu() {
+  const opp = currentOpponentEmail();
+  if (!opp) { showToast('Nobody to report here — this bout is local.'); return; }
+  document.getElementById('safety-opp-name').textContent = opp.split('@')[0];
+  document.getElementById('safety-reason').value = '';
+  document.getElementById('safety-overlay').hidden = false;
+}
+
+function closeSafetyMenu() {
+  document.getElementById('safety-overlay').hidden = true;
+}
+
+async function submitReport(alsoBlock) {
+  const opp = currentOpponentEmail();
+  if (!opp) { closeSafetyMenu(); return; }
+  const me = currentUser.email.toLowerCase();
+  const reason = document.getElementById('safety-reason').value.trim();
+  try {
+    const { error } = await sb.from('reports').insert({
+      reporter_email: me,
+      reported_email: opp,
+      debate_id: currentDebate.id,
+      reason: reason || null,
+    });
+    if (error) throw error;
+    if (alsoBlock) {
+      const { error: blockErr } = await sb.from('blocks').insert({ blocker_email: me, blocked_email: opp });
+      if (blockErr && blockErr.code !== '23505') throw blockErr; // 23505 = already blocked, fine
+    }
+    closeSafetyMenu();
+    showToast(alsoBlock ? 'Filed & blocked. No rematches. ✓' : 'Report filed — the desk has it. ✓', 'cyan');
+  } catch (e) {
+    console.error(e);
+    showToast('Couldn\'t file that: ' + (e.message || 'unknown error'));
+  }
+}
+
+// ============================================================================
 // CHAT — show
 // ============================================================================
 // Scoreboard sub-labels. Legacy debates carry hand-written stances; debates
@@ -3018,6 +3262,8 @@ function showChat() {
   document.getElementById('player-b-stance').textContent = stanceLabel('b');
   document.getElementById('chat-topic').textContent = `"${currentDebate.topic}"`;
   document.getElementById('chat-mode-badge').textContent = currentDebate.mode.toUpperCase();
+  // Report/block only makes sense against a real human opponent
+  document.getElementById('chat-safety-btn').hidden = isLocalDebate();
   document.getElementById('turn-cap').textContent = currentDebate.message_cap >= 9999 ? '∞' : currentDebate.message_cap;
   updateComposerHint();
 
@@ -3061,6 +3307,16 @@ function refreshTurnUI() {
   const myRole = getMyRole();
   const composer = document.getElementById('composer');
   const tag = document.getElementById('composer-tag');
+  // Tutorial: the composer stays locked until the coach hands you the mic —
+  // sending early just confused people (the script only advances on cue).
+  if (currentDebate.solo_kind === 'tutorial' && !tutorialCanSend()) {
+    composer.classList.add('locked');
+    composer.classList.remove('your-turn');
+    tag.textContent = 'FOLLOW THE COACH';
+    document.getElementById('composer-input').placeholder = 'Your coach will tell you when it\'s time to argue…';
+    updateTitleBadge(false);
+    return;
+  }
   if (myRole === currentTurn) {
     composer.classList.remove('locked');
     composer.classList.add('your-turn');
@@ -3507,6 +3763,11 @@ async function sendMessage() {
     showToast(currentDebate.solo_kind === 'ai' ? 'Hold on — your opponent is mid-reply.' : 'Not your turn yet.');
     return;
   }
+  // belt & suspenders — the composer is also visually locked at these steps
+  if (currentDebate.solo_kind === 'tutorial' && !tutorialCanSend()) {
+    showToast('Follow the coach — it\'ll tell you when to send.');
+    return;
+  }
   if (isLocalDebate()) return sendLocalMessage(text, myRole);
 
   document.getElementById('btn-send').disabled = true;
@@ -3585,17 +3846,19 @@ function updateComposerHint() {
 }
 
 // ============================================================================
-// CITATION LINKS — insert [label](url) from the composer's 🔗 bar
+// CITATION LINKS — insert [label](url) markdown into any textarea
+// Shared by the chat composer and all three opening-argument editors. Each
+// cite bar follows the id scheme: <barId>, <barId>-url, <barId>-label.
 // ============================================================================
-function toggleLinkBar() {
-  const bar = document.getElementById('link-bar');
+function toggleCiteBar(barId) {
+  const bar = document.getElementById(barId);
   bar.hidden = !bar.hidden;
-  if (!bar.hidden) document.getElementById('link-url').focus();
+  if (!bar.hidden) document.getElementById(barId + '-url').focus();
 }
 
-function insertLink() {
-  const urlEl = document.getElementById('link-url');
-  const labelEl = document.getElementById('link-label');
+function insertCite(taId, barId) {
+  const urlEl = document.getElementById(barId + '-url');
+  const labelEl = document.getElementById(barId + '-label');
   let url = urlEl.value.trim();
   if (!url) { showToast('Paste a URL first.'); return; }
   if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
@@ -3605,17 +3868,20 @@ function insertLink() {
     try { label = new URL(url).hostname.replace(/^www\./, ''); } catch (e) { label = 'source'; }
   }
   const md = `[${label}](${url})`;
-  const ta = document.getElementById('composer-input');
+  const ta = document.getElementById(taId);
   const start = ta.selectionStart ?? ta.value.length;
   const end = ta.selectionEnd ?? ta.value.length;
   const pad = start > 0 && !/\s/.test(ta.value[start - 1]) ? ' ' : '';
   ta.value = ta.value.slice(0, start) + pad + md + ta.value.slice(end);
   urlEl.value = '';
   labelEl.value = '';
-  document.getElementById('link-bar').hidden = true;
+  document.getElementById(barId).hidden = true;
   ta.focus();
   const pos = start + pad.length + md.length;
   ta.setSelectionRange(pos, pos);
+  // fire the textarea's input pipeline so word meters, drafts, and the
+  // contract summary all see the inserted citation
+  ta.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
 async function callMediator(text, asRole) {
@@ -4717,6 +4983,11 @@ const COACH_STEPS = [
 
 let tutState = null; // { scenario, step }
 
+// The player may only send when the coach's current step asks for it.
+function tutorialCanSend() {
+  return !!(tutState && COACH_STEPS[tutState.step] && COACH_STEPS[tutState.step].wait === 'send');
+}
+
 function startTutorial() {
   tutState = { scenario: null, step: 0 };
   soloMode = 'tutorial';
@@ -4823,6 +5094,8 @@ function coachGo(n) {
     hint.hidden = false;
     hint.textContent = step.wait === 'pick' ? '▸ pick a topic below' : '▸ write your argument below & hit send';
   }
+  // the composer's lock follows the coach: open only on 'send' steps
+  if (currentDebate && currentDebate.solo_kind === 'tutorial') refreshTurnUI();
 }
 
 function coachNext() {
