@@ -6,45 +6,49 @@
 <title>DISCOURSE // Mediated Debate</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700;800&family=Bowlby+One&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   /* ============================================
-     ⚡ DISCOURSE — DARK ARCADE EDITION ⚡
+     📜 DISCOURSE — THE CHRONICLE EDITION 📜
+     Text-first darkness: near-black, ivory serif,
+     candlelight gold, muted violet. Variable names
+     kept from the arcade era ("hot-pink" = gold,
+     "cyan" = violet) so selectors didn't churn.
      ============================================ */
   :root {
-    --void: #0a0612;
-    --void-2: #14092b;
-    --void-3: #1d1240;
-    --void-4: #2a1858;
-    --ink: #ece3ff;
-    --ink-2: #b4a8d4;
-    --ink-3: #7a6f9c;
+    --void: #0d0e13;
+    --void-2: #14151c;
+    --void-3: #1b1c25;
+    --void-4: #23242f;
+    --ink: #e8e4d8;
+    --ink-2: #b9b2a0;
+    --ink-3: #7d7867;
 
-    --hot-pink: #ff2e88;
-    --hot-pink-dim: rgba(255, 46, 136, 0.18);
-    --hot-pink-glow: rgba(255, 46, 136, 0.5);
+    --hot-pink: #c9a86a;                       /* candlelight gold — primary */
+    --hot-pink-dim: rgba(201, 168, 106, 0.15);
+    --hot-pink-glow: rgba(201, 168, 106, 0.3);
 
-    --cyan: #5ef9d4;
-    --cyan-dim: rgba(94, 249, 212, 0.18);
-    --cyan-glow: rgba(94, 249, 212, 0.5);
+    --cyan: #9d8fc9;                           /* dusk violet — the other side */
+    --cyan-dim: rgba(157, 143, 201, 0.15);
+    --cyan-glow: rgba(157, 143, 201, 0.3);
 
-    --amber: #ffb547;
-    --amber-dim: rgba(255, 181, 71, 0.18);
-    --amber-glow: rgba(255, 181, 71, 0.5);
+    --amber: #d4a94f;
+    --amber-dim: rgba(212, 169, 79, 0.15);
+    --amber-glow: rgba(212, 169, 79, 0.3);
 
-    --gold: #ffd34d;
-    --violet: #b388ff;
+    --gold: #d4b478;
+    --violet: #847c95;                         /* the mediator's voice */
 
-    /* solid, opaque mediator-flag fills (inverted readable text) */
-    --flag-green: #2ee6a0;
-    --flag-green-glow: rgba(46, 230, 160, 0.55);
-    --flag-red: #ff3366;
-    --flag-red-glow: rgba(255, 51, 102, 0.55);
-    --flag-amber: #ffce3a;
-    --flag-amber-glow: rgba(255, 206, 58, 0.55);
+    /* solid, opaque mediator-flag fills — always green/red/yellow, every skin */
+    --flag-green: #3fd675;
+    --flag-green-glow: rgba(63, 214, 117, 0.3);
+    --flag-red: #ff6259;
+    --flag-red-glow: rgba(255, 98, 89, 0.3);
+    --flag-amber: #ffd94a;
+    --flag-amber-glow: rgba(255, 217, 74, 0.3);
 
-    --rule: rgba(236, 227, 255, 0.12);
-    --rule-strong: rgba(236, 227, 255, 0.25);
+    --rule: rgba(232, 228, 216, 0.1);
+    --rule-strong: rgba(232, 228, 216, 0.22);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   /* An element with the hidden attribute stays hidden even when its class
@@ -53,43 +57,21 @@
   [hidden] { display: none !important; }
   html, body { height: 100%; }
   body {
-    font-family: 'Space Grotesk', -apple-system, sans-serif;
+    font-family: 'Lora', Georgia, serif;
     background: var(--void);
     color: var(--ink);
-    line-height: 1.5;
+    line-height: 1.55;
     overflow-x: hidden;
     background-image:
-      radial-gradient(ellipse 80% 60% at 20% 0%, rgba(179, 136, 255, 0.18), transparent 60%),
-      radial-gradient(ellipse 70% 50% at 90% 100%, rgba(94, 249, 212, 0.12), transparent 60%),
-      radial-gradient(ellipse 50% 40% at 50% 50%, rgba(255, 46, 136, 0.05), transparent 70%);
+      radial-gradient(ellipse 90% 70% at 50% -10%, rgba(90, 80, 140, 0.14), transparent 60%);
     min-height: 100vh;
   }
-  /* faint scanline texture */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    background: repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px);
-    z-index: 1;
-    mix-blend-mode: overlay;
-  }
-  /* grain */
-  body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 2;
-    opacity: 0.5;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.08 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
-  }
-  .display { font-family: 'Bowlby One', serif; letter-spacing: 0; line-height: 0.9; }
+  .display { font-family: 'Lora', Georgia, serif; font-style: italic; font-weight: 500; letter-spacing: 0; line-height: 1; }
   /* Gradient text via background-clip clips to the text box with no trailing
      bearing, so the last glyph (e.g. the "e" in "Disagree") can get shaved.
      A hair of inline padding + visible overflow gives the glyph room. */
   .display, .hero h1 { padding-right: 0.06em; overflow: visible; }
-  .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+  .mono { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; }
   button {
     font-family: inherit;
     font-size: inherit;
@@ -124,7 +106,7 @@
     padding: 14px 18px;
     margin-bottom: 28px;
     border: 1px solid var(--rule);
-    background: linear-gradient(180deg, rgba(29, 18, 64, 0.6), rgba(20, 9, 43, 0.4));
+    background: linear-gradient(180deg, rgba(27, 28, 37, 0.6), rgba(19, 20, 27, 0.4));
     backdrop-filter: blur(8px);
     position: relative;
     overflow: hidden;
@@ -135,15 +117,17 @@
     background: linear-gradient(90deg, transparent, var(--hot-pink), var(--violet), var(--cyan), transparent);
   }
   .masthead .brand {
-    font-family: 'Bowlby One', serif;
-    font-size: 22px;
-    letter-spacing: 0.08em;
-    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.45em;
+    text-transform: uppercase;
+    color: var(--ink-2);
   }
   .masthead .brand .slash { color: var(--hot-pink); margin: 0 4px; }
-  .masthead .brand .sub { color: var(--cyan); font-size: 12px; letter-spacing: 0.3em; margin-left: 8px; font-family: 'JetBrains Mono', monospace; }
-  .masthead .user { display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--ink-2); font-family: 'JetBrains Mono', monospace; letter-spacing: 0.08em; }
-  .masthead .user .pill { padding: 4px 10px; border: 1px solid var(--rule-strong); background: rgba(94, 249, 212, 0.08); color: var(--cyan); }
+  .masthead .brand .sub { color: var(--cyan); font-size: 12px; letter-spacing: 0.3em; margin-left: 8px; font-family: 'Inter', sans-serif; }
+  .masthead .user { display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--ink-2); font-family: 'Inter', sans-serif; letter-spacing: 0.08em; }
+  .masthead .user .pill { padding: 4px 10px; border: 1px solid var(--rule-strong); background: rgba(157, 143, 201, 0.08); color: var(--cyan); }
 
   /* screens */
   .screen { display: none; animation: fadein 0.4s cubic-bezier(.2,.7,.3,1); }
@@ -154,7 +138,7 @@
   .auth-wrap { max-width: 480px; margin: 40px auto; }
   .auth-card {
     border: 1px solid var(--rule);
-    background: linear-gradient(180deg, rgba(29, 18, 64, 0.6), rgba(20, 9, 43, 0.4));
+    background: linear-gradient(180deg, rgba(27, 28, 37, 0.6), rgba(19, 20, 27, 0.4));
     padding: 36px;
     position: relative;
   }
@@ -167,7 +151,7 @@
   /* ===== WELCOME / HERO ===== */
   .hero { text-align: center; padding: 24px 0 16px; position: relative; }
   .hero .kicker {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 11px;
     color: var(--cyan);
     text-transform: uppercase;
@@ -176,9 +160,11 @@
     text-shadow: 0 0 12px var(--cyan-glow);
   }
   .hero h1 {
-    font-family: 'Bowlby One', serif;
-    font-size: clamp(64px, 11vw, 144px);
-    line-height: 0.85;
+    font-family: 'Lora', Georgia, serif;
+    font-style: italic;
+    font-weight: 600;
+    font-size: clamp(56px, 10vw, 124px);
+    line-height: 1;
     letter-spacing: -0.01em;
     margin-bottom: 24px;
     padding: 0 0.08em;
@@ -191,14 +177,14 @@
     position: relative;
   }
   .hero h1 em {
-    font-style: normal;
+    font-style: italic;
     background: linear-gradient(135deg, var(--hot-pink), var(--gold));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     /* a tight, subtle glow — the old 22px blur smeared short words ("it!")
        into a melty blob */
-    filter: drop-shadow(0 1px 4px rgba(255, 46, 136, 0.3));
+    filter: drop-shadow(0 1px 4px rgba(201, 168, 106, 0.3));
   }
   .hero .lede {
     font-size: 18px;
@@ -213,27 +199,27 @@
   @media (max-width: 720px) { .rules-grid { grid-template-columns: repeat(2, 1fr); } }
   .rule-card {
     border: 1px solid var(--rule);
-    background: rgba(20, 9, 43, 0.4);
+    background: rgba(19, 20, 27, 0.4);
     padding: 20px 18px;
     text-align: left;
     transition: all .2s;
     position: relative;
     overflow: hidden;
   }
-  .rule-card:hover { transform: translateY(-3px); border-color: var(--rule-strong); background: rgba(42, 24, 88, 0.5); }
+  .rule-card:hover { transform: translateY(-3px); border-color: var(--rule-strong); background: rgba(35, 36, 47, 0.5); }
   .rule-card:nth-child(1) { --hue: var(--hot-pink); --hue-glow: var(--hot-pink-glow); }
-  .rule-card:nth-child(2) { --hue: var(--violet); --hue-glow: rgba(179, 136, 255, 0.5); }
+  .rule-card:nth-child(2) { --hue: var(--violet); --hue-glow: rgba(132, 124, 149, 0.5); }
   .rule-card:nth-child(3) { --hue: var(--cyan); --hue-glow: var(--cyan-glow); }
-  .rule-card:nth-child(4) { --hue: var(--gold); --hue-glow: rgba(255, 211, 77, 0.5); }
+  .rule-card:nth-child(4) { --hue: var(--gold); --hue-glow: rgba(212, 180, 120, 0.5); }
   .rule-card .num {
-    font-family: 'Bowlby One', serif;
+    font-family: 'Lora', Georgia, serif;
     font-size: 44px; line-height: 1;
     color: var(--hue);
     text-shadow: 0 0 18px var(--hue-glow);
     margin-bottom: 10px;
   }
   .rule-card .lbl {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.15em;
@@ -247,24 +233,25 @@
   /* ===== BUTTONS (arcade) ===== */
   .btn {
     padding: 14px 28px;
-    font-weight: 700;
-    font-size: 13px;
+    font-weight: 600;
+    font-size: 12px;
     text-transform: uppercase;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.2em;
     transition: all .15s;
     position: relative;
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Inter', sans-serif;
+    border-radius: 3px;
   }
   .btn-primary {
     background: var(--hot-pink);
-    color: var(--void);
-    box-shadow: 0 0 0 1px var(--hot-pink), 4px 4px 0 var(--void-3), 4px 4px 0 1px var(--hot-pink);
+    color: #16130d;
+    box-shadow: 0 2px 14px var(--hot-pink-dim);
   }
   .btn-primary:hover:not(:disabled) {
-    transform: translate(-2px,-2px);
-    box-shadow: 0 0 0 1px var(--hot-pink), 6px 6px 0 var(--void-3), 6px 6px 0 1px var(--hot-pink), 0 0 24px var(--hot-pink-glow);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px var(--hot-pink-glow);
   }
-  .btn-primary:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 1px var(--hot-pink); }
+  .btn-primary:active:not(:disabled) { transform: translateY(1px); box-shadow: none; }
 
   .btn-secondary {
     background: transparent;
@@ -289,7 +276,7 @@
 
   .panel {
     border: 1px solid var(--rule);
-    background: linear-gradient(180deg, rgba(29, 18, 64, 0.5), rgba(20, 9, 43, 0.35));
+    background: linear-gradient(180deg, rgba(27, 28, 37, 0.5), rgba(19, 20, 27, 0.35));
     padding: 28px;
     position: relative;
   }
@@ -298,14 +285,14 @@
     top: -10px; left: 18px;
     background: var(--void);
     padding: 0 10px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 10px;
     letter-spacing: 0.25em;
     color: var(--cyan);
     text-transform: uppercase;
   }
   .panel h2 {
-    font-family: 'Bowlby One', serif;
+    font-family: 'Lora', Georgia, serif;
     font-size: 36px;
     margin-bottom: 6px;
     background: linear-gradient(135deg, var(--ink), var(--violet));
@@ -318,7 +305,7 @@
   .field { margin-bottom: 24px; }
   .field label {
     display: block;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.25em;
@@ -328,7 +315,7 @@
   }
   .field input[type="text"], .field input[type="email"], .field textarea {
     width: 100%;
-    background: rgba(10, 6, 18, 0.6);
+    background: rgba(9, 10, 14, 0.6);
     border: 1px solid var(--rule-strong);
     padding: 12px 14px;
     font-size: 16px;
@@ -345,10 +332,10 @@
   .chip {
     border: 1px solid var(--rule-strong);
     padding: 8px 14px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 11px;
     font-weight: 600;
-    background: rgba(10, 6, 18, 0.4);
+    background: rgba(9, 10, 14, 0.4);
     color: var(--ink-2);
     transition: all .12s;
     letter-spacing: 0.06em;
@@ -369,7 +356,7 @@
     border: 1px solid var(--rule-strong);
     padding: 16px;
     text-align: left;
-    background: rgba(10, 6, 18, 0.4);
+    background: rgba(9, 10, 14, 0.4);
     transition: all .15s;
     position: relative;
     display: flex;
@@ -379,12 +366,12 @@
   .mode-card .mchange { margin-top: auto; padding-top: 9px; }
   .mode-card:hover { transform: translateY(-2px); border-color: var(--violet); }
   .mode-card.active {
-    background: linear-gradient(135deg, rgba(179, 136, 255, 0.15), rgba(255, 46, 136, 0.15));
+    background: linear-gradient(135deg, rgba(132, 124, 149, 0.15), rgba(201, 168, 106, 0.15));
     border-color: var(--violet);
-    box-shadow: 0 0 22px rgba(179, 136, 255, 0.3);
+    box-shadow: 0 0 22px rgba(132, 124, 149, 0.3);
   }
   .mode-card .mtitle {
-    font-family: 'Bowlby One', serif;
+    font-family: 'Lora', Georgia, serif;
     font-size: 18px;
     margin-bottom: 6px;
     color: var(--ink);
@@ -397,14 +384,14 @@
     margin-top: 9px;
     padding-top: 9px;
     border-top: 1px dashed var(--rule);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 10px;
     line-height: 1.5;
     letter-spacing: 0.02em;
     color: var(--ink-3);
     text-transform: uppercase;
   }
-  .mode-card.active .mchange { color: var(--cyan); border-top-color: rgba(94,249,212,0.25); }
+  .mode-card.active .mchange { color: var(--cyan); border-top-color: rgba(157,143,201,0.25); }
 
   .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px dashed var(--rule); }
   .toggle-row:last-child { border-bottom: none; }
@@ -412,7 +399,7 @@
   .toggle-row .thint { font-size: 12px; color: var(--ink-3); margin-top: 2px; }
   .switch {
     width: 48px; height: 26px;
-    background: rgba(10, 6, 18, 0.6);
+    background: rgba(9, 10, 14, 0.6);
     border: 1px solid var(--rule-strong);
     border-radius: 999px;
     position: relative;
@@ -433,7 +420,7 @@
   /* contract sidebar */
   .contract-side { align-self: start; position: sticky; top: 24px; }
   .contract-side h3 {
-    font-family: 'Bowlby One', serif;
+    font-family: 'Lora', Georgia, serif;
     font-size: 20px;
     margin-bottom: 16px;
     color: var(--gold);
@@ -450,7 +437,7 @@
     text-transform: uppercase;
     letter-spacing: 0.12em;
     font-size: 10px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-weight: 600;
   }
   .summary-row .v { text-align: right; font-weight: 600; color: var(--ink); }
@@ -460,19 +447,19 @@
     text-align: center;
     padding: 24px;
     border: 1px solid var(--rule);
-    background: rgba(29, 18, 64, 0.4);
+    background: rgba(27, 28, 37, 0.4);
     margin-bottom: 24px;
   }
   .invite-pending .from {
     color: var(--cyan);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 11px;
     letter-spacing: 0.2em;
     text-transform: uppercase;
     margin-bottom: 8px;
   }
   .invite-pending .vs-block {
-    font-family: 'Bowlby One', serif;
+    font-family: 'Lora', Georgia, serif;
     font-size: 28px;
     margin: 12px 0;
   }
@@ -490,7 +477,7 @@
   /* ===== CHAT SCREEN — SCOREBOARD ===== */
   .scoreboard {
     border: 1px solid var(--rule-strong);
-    background: linear-gradient(180deg, rgba(29, 18, 64, 0.7), rgba(20, 9, 43, 0.5));
+    background: linear-gradient(180deg, rgba(27, 28, 37, 0.7), rgba(19, 20, 27, 0.5));
     padding: 20px 24px;
     margin-bottom: 16px;
     display: grid;
@@ -509,13 +496,13 @@
   .player.left { text-align: left; }
   .player.right { text-align: right; align-items: flex-end; }
   .player .pname {
-    font-family: 'Bowlby One', serif;
+    font-family: 'Lora', Georgia, serif;
     font-size: 22px;
     line-height: 1;
     color: var(--ink);
   }
   .player .pstance {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.18em;
@@ -524,7 +511,7 @@
   .player.left .pstance { color: var(--cyan); }
   .player.right .pstance { color: var(--hot-pink); }
   .pscore {
-    font-family: 'Bowlby One', serif;
+    font-family: 'Lora', Georgia, serif;
     font-size: 52px;
     line-height: 0.9;
     margin-top: 4px;
@@ -533,11 +520,12 @@
   .player.left .pscore { color: var(--cyan); text-shadow: 0 0 16px var(--cyan-glow); }
   .player.right .pscore { color: var(--hot-pink); text-shadow: 0 0 16px var(--hot-pink-glow); }
   .vs-divider {
-    font-family: 'Bowlby One', serif;
+    font-family: 'Lora', Georgia, serif;
     font-size: 36px;
     color: var(--gold);
-    text-shadow: 0 0 22px rgba(255, 211, 77, 0.7);
-    transform: rotate(-4deg);
+    text-shadow: 0 0 22px rgba(212, 180, 120, 0.7);
+    transform: none;
+    font-style: italic;
   }
 
   .topic-strip {
@@ -554,7 +542,7 @@
     color: var(--ink);
   }
   .mode-badge {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.2em;
@@ -579,7 +567,7 @@
   .safety-btn:hover { color: var(--flag-red); border-color: var(--flag-red); }
   .safety-overlay {
     position: fixed; inset: 0; z-index: 400;
-    background: rgba(10, 6, 18, 0.82);
+    background: rgba(9, 10, 14, 0.82);
     display: flex; align-items: center; justify-content: center;
     padding: 20px;
   }
@@ -591,12 +579,12 @@
   }
   .safety-panel textarea {
     width: 100%; min-height: 90px;
-    background: rgba(10, 6, 18, 0.6);
+    background: rgba(9, 10, 14, 0.6);
     border: 1px solid var(--rule-strong);
     padding: 10px 12px;
     font-size: 14px; line-height: 1.5;
     color: var(--ink);
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Lora', Georgia, serif;
   }
   .safety-note { margin-top: 12px; font-size: 12px; color: var(--ink-3); }
 
@@ -604,12 +592,12 @@
   .hud {
     display: flex; align-items: center; justify-content: space-between;
     border: 1px solid var(--rule-strong);
-    background: rgba(10, 6, 18, 0.5);
+    background: rgba(9, 10, 14, 0.5);
     padding: 12px 18px;
     margin-bottom: 18px;
   }
   .turn-indicator {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 12px;
     letter-spacing: 0.1em;
     color: var(--ink-2);
@@ -621,14 +609,14 @@
   }
   @keyframes blink { 50% { opacity: 0.3; } }
   .timer {
-    font-family: 'Bowlby One', serif;
-    font-size: 28px;
-    color: var(--cyan);
-    text-shadow: 0 0 14px var(--cyan-glow);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 24px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--ink);
   }
   .timer.warn {
-    color: var(--hot-pink);
-    text-shadow: 0 0 14px var(--hot-pink-glow);
+    color: var(--flag-red);
     animation: warn-pulse 0.8s infinite;
   }
   @keyframes warn-pulse { 50% { opacity: 0.5; transform: scale(0.96); } }
@@ -643,7 +631,7 @@
   .avatar {
     width: 38px; height: 38px;
     display: grid; place-items: center;
-    font-family: 'Bowlby One', serif;
+    font-family: 'Lora', Georgia, serif;
     font-size: 16px;
     flex-shrink: 0;
     border: 1px solid;
@@ -653,7 +641,7 @@
   .msg.right .avatar { color: var(--hot-pink); border-color: var(--hot-pink); box-shadow: 0 0 10px var(--hot-pink-glow); }
 
   .msg-body {
-    background: rgba(29, 18, 64, 0.55);
+    background: rgba(27, 28, 37, 0.55);
     border: 1px solid var(--rule-strong);
     padding: 14px 18px;
     font-size: 15px;
@@ -664,7 +652,7 @@
   .msg.right .msg-body { border-right: 3px solid var(--hot-pink); }
 
   .msg-meta {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 10px;
     color: var(--ink-3);
     margin-top: 8px;
@@ -674,7 +662,7 @@
   }
   .msg.right .msg-meta { justify-content: flex-end; }
   .concede-btn {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.12em;
@@ -707,21 +695,18 @@
   .hl { font-weight: 600; }
   .hl-red {
     background: var(--flag-red);
-    color: #ffffff;
-    border-bottom: 2px solid #c2003e;
-    box-shadow: 0 0 10px var(--flag-red-glow);
+    color: #1c1610;
+    border-bottom: 2px solid #d4443c;
   }
   .hl-green {
     background: var(--flag-green);
-    color: #04231a;
-    border-bottom: 2px solid #15a06f;
-    box-shadow: 0 0 10px var(--flag-green-glow);
+    color: #1c1610;
+    border-bottom: 2px solid #2aa356;
   }
   .hl-amber {
     background: var(--flag-amber);
-    color: #2c1c00;
-    border-bottom: 2px solid #d99a00;
-    box-shadow: 0 0 10px var(--flag-amber-glow);
+    color: #1c1610;
+    border-bottom: 2px solid #d9ae1f;
   }
   .hl:hover { transform: translateY(-1px); }
   .hl-red:hover { box-shadow: 0 0 20px var(--flag-red-glow); }
@@ -749,7 +734,7 @@
   .hl-tooltip.amber { border-color: var(--flag-amber); box-shadow: 0 0 24px var(--flag-amber-glow); color: var(--ink); }
   .hl:hover .hl-tooltip { display: block; }
   .hl-tooltip .tt-label {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.2em;
@@ -763,7 +748,7 @@
   /* composer */
   .composer {
     border: 1.5px solid var(--rule-strong);
-    background: linear-gradient(180deg, rgba(29, 18, 64, 0.6), rgba(20, 9, 43, 0.5));
+    background: linear-gradient(180deg, rgba(27, 28, 37, 0.6), rgba(19, 20, 27, 0.5));
     padding: 16px;
     position: relative;
   }
@@ -772,7 +757,7 @@
   .composer-tag {
     position: absolute; top: -10px; left: 14px;
     background: var(--void); padding: 0 8px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 10px; letter-spacing: 0.2em;
     color: var(--hot-pink);
     text-transform: uppercase;
@@ -785,7 +770,7 @@
   }
   .composer textarea::placeholder { color: var(--ink-3); }
   .composer-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; gap: 12px; }
-  .composer-hint { font-size: 11px; color: var(--ink-3); font-family: 'JetBrains Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; }
+  .composer-hint { font-size: 11px; color: var(--ink-3); font-family: 'Inter', sans-serif; letter-spacing: 0.06em; text-transform: uppercase; }
   .composer .btn { padding: 10px 22px; font-size: 12px; }
 
   .preview-box {
@@ -797,7 +782,7 @@
     color: var(--ink-2);
   }
   .preview-box .ttl {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.2em;
@@ -825,7 +810,7 @@
   }
   .link-bar input {
     flex: 1; min-width: 160px;
-    background: rgba(10, 6, 18, 0.6);
+    background: rgba(9, 10, 14, 0.6);
     border: 1px solid var(--rule-strong);
     padding: 9px 11px;
     font-size: 13px;
@@ -836,7 +821,7 @@
   /* mediator thinking */
   .mediator-thinking {
     display: flex; align-items: center; gap: 10px;
-    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    font-family: 'Inter', sans-serif; font-size: 11px;
     color: var(--violet); text-transform: uppercase; letter-spacing: 0.2em;
     padding: 10px 0;
   }
@@ -846,7 +831,7 @@
     background: var(--violet);
     border-radius: 50%;
     animation: bounce 1.2s infinite;
-    box-shadow: 0 0 8px rgba(179, 136, 255, 0.6);
+    box-shadow: 0 0 8px rgba(132, 124, 149, 0.6);
   }
   .dots span:nth-child(2) { animation-delay: .15s; }
   .dots span:nth-child(3) { animation-delay: .3s; }
@@ -854,7 +839,7 @@
 
   .end-debate { margin-top: 14px; text-align: center; }
   .end-debate button {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.18em;
@@ -867,11 +852,11 @@
   /* ===== SUMMARY ===== */
   .summary-wrap { max-width: 720px; margin: 0 auto; }
   .summary-card {
-    background: linear-gradient(180deg, rgba(29, 18, 64, 0.95), rgba(10, 6, 18, 0.95));
+    background: linear-gradient(180deg, rgba(27, 28, 37, 0.95), rgba(9, 10, 14, 0.95));
     border: 2px solid var(--gold);
     padding: 40px;
     position: relative;
-    box-shadow: 0 0 60px rgba(255, 211, 77, 0.25), 12px 12px 0 var(--hot-pink), 12px 12px 0 1px var(--hot-pink);
+    box-shadow: 0 0 60px rgba(212, 180, 120, 0.18), 0 24px 70px rgba(0, 0, 0, 0.55);
   }
   .summary-card::before {
     content: '';
@@ -884,7 +869,7 @@
     background: var(--hot-pink);
     color: var(--void);
     padding: 6px 18px;
-    font-family: 'Bowlby One', serif;
+    font-family: 'Lora', Georgia, serif;
     font-size: 14px;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -893,13 +878,13 @@
   }
   .sum-mast { text-align: center; padding-bottom: 18px; margin-bottom: 22px; border-bottom: 1px solid var(--rule-strong); }
   .sum-mast .pub {
-    font-family: 'Bowlby One', serif;
+    font-family: 'Lora', Georgia, serif;
     font-size: 36px;
     letter-spacing: 0.05em;
   }
   .sum-mast .pub .slash { color: var(--hot-pink); }
   .sum-mast .dateline {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.25em;
@@ -907,7 +892,7 @@
     margin-top: 8px;
   }
   .sum-topic {
-    font-family: 'Bowlby One', serif;
+    font-family: 'Lora', Georgia, serif;
     font-size: 26px;
     line-height: 1.15;
     margin: 14px 0 22px;
@@ -916,24 +901,24 @@
   }
   .verdict { text-align: center; padding: 22px 0; margin-bottom: 22px; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
   .verdict .lbl {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 11px; text-transform: uppercase; letter-spacing: 0.25em;
     color: var(--ink-3); margin-bottom: 10px;
   }
   .verdict .winner {
-    font-family: 'Bowlby One', serif;
+    font-family: 'Lora', Georgia, serif;
     font-size: 44px;
     background: linear-gradient(135deg, var(--gold), var(--hot-pink));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    filter: drop-shadow(0 0 16px rgba(255, 211, 77, 0.6));
+    filter: drop-shadow(0 0 16px rgba(212, 180, 120, 0.6));
   }
   .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--rule-strong); margin-bottom: 20px; }
   .stat-col { padding: 20px; position: relative; }
   .stat-col + .stat-col { border-left: 1px solid var(--rule-strong); }
   .stat-col .name {
-    font-family: 'Bowlby One', serif;
+    font-family: 'Lora', Georgia, serif;
     font-size: 22px;
     margin-bottom: 14px;
     padding-bottom: 10px;
@@ -942,7 +927,7 @@
   .stat-col:first-child .name { color: var(--cyan); }
   .stat-col:last-child .name { color: var(--hot-pink); }
   .stat-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; color: var(--ink-2); }
-  .stat-row .v { font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+  .stat-row .v { font-family: 'Inter', sans-serif; font-weight: 700; }
   .stat-row .v.red { color: var(--hot-pink); }
   .stat-row .v.green { color: var(--cyan); }
   .stat-row .v.amber { color: var(--amber); }
@@ -950,12 +935,12 @@
   .strongest {
     padding: 18px;
     border: 1px solid var(--gold);
-    background: rgba(255, 211, 77, 0.06);
+    background: rgba(212, 180, 120, 0.06);
     margin-bottom: 20px;
     position: relative;
   }
   .strongest .lbl {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 10px; text-transform: uppercase; letter-spacing: 0.25em;
     color: var(--gold); margin-bottom: 8px;
   }
@@ -965,11 +950,11 @@
     line-height: 1.5;
     color: var(--ink);
   }
-  .strongest .attr { text-align: right; font-size: 12px; color: var(--ink-3); margin-top: 8px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.1em; }
+  .strongest .attr { text-align: right; font-size: 12px; color: var(--ink-3); margin-top: 8px; font-family: 'Inter', sans-serif; letter-spacing: 0.1em; }
 
   .sum-footer {
     text-align: center;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.25em;
@@ -986,7 +971,7 @@
   }
   .loading-screen .dots { transform: scale(1.5); }
   .loading-screen .text {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     color: var(--ink-3);
     text-transform: uppercase;
     letter-spacing: 0.25em;
@@ -1007,7 +992,7 @@
     opacity: 0;
     transition: all .25s;
     box-shadow: 0 0 24px var(--hot-pink-glow);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     letter-spacing: 0.05em;
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -1021,12 +1006,12 @@
     border-radius: 50%;
     border: 1px solid var(--violet);
     background: linear-gradient(135deg, var(--void-3), var(--void-2));
-    box-shadow: 0 0 24px rgba(179,136,255,0.45), 0 6px 20px rgba(0,0,0,0.5);
+    box-shadow: 0 0 24px rgba(132,124,149,0.45), 0 6px 20px rgba(0,0,0,0.5);
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     transition: transform .15s, box-shadow .15s;
   }
-  .nego-fab:hover { transform: translateY(-2px) scale(1.04); box-shadow: 0 0 32px rgba(179,136,255,0.65), 0 8px 24px rgba(0,0,0,0.5); }
+  .nego-fab:hover { transform: translateY(-2px) scale(1.04); box-shadow: 0 0 32px rgba(132,124,149,0.65), 0 8px 24px rgba(0,0,0,0.5); }
   .nego-fab-icon { font-size: 26px; line-height: 1; }
   .nego-fab-badge {
     position: absolute; top: -4px; right: -4px;
@@ -1034,7 +1019,7 @@
     border-radius: 11px;
     background: var(--hot-pink);
     color: #fff;
-    font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700;
+    font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700;
     display: flex; align-items: center; justify-content: center;
     box-shadow: 0 0 12px var(--hot-pink-glow);
     border: 2px solid var(--void);
@@ -1044,9 +1029,9 @@
     width: min(380px, calc(100vw - 36px));
     max-height: min(560px, calc(100vh - 130px));
     display: flex; flex-direction: column;
-    background: linear-gradient(180deg, rgba(29,18,64,0.96), rgba(13,8,28,0.98));
+    background: linear-gradient(180deg, rgba(27,28,37,0.96), rgba(15,16,22,0.98));
     border: 1px solid var(--rule-strong);
-    box-shadow: 0 18px 50px rgba(0,0,0,0.6), 0 0 40px rgba(179,136,255,0.18);
+    box-shadow: 0 18px 50px rgba(0,0,0,0.6), 0 0 40px rgba(132,124,149,0.18);
     backdrop-filter: blur(8px);
     animation: negoPop .18s cubic-bezier(.2,.7,.3,1);
     overflow: hidden;
@@ -1056,24 +1041,24 @@
     display: flex; align-items: flex-start; justify-content: space-between;
     padding: 14px 16px;
     border-bottom: 1px solid var(--rule);
-    background: linear-gradient(90deg, rgba(179,136,255,0.12), transparent);
+    background: linear-gradient(90deg, rgba(132,124,149,0.12), transparent);
   }
-  .nego-title { font-family: 'Bowlby One', serif; font-size: 15px; letter-spacing: 0.02em; }
-  .nego-sub { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 3px; }
+  .nego-title { font-family: 'Lora', Georgia, serif; font-size: 15px; letter-spacing: 0.02em; }
+  .nego-sub { font-family: 'Inter', sans-serif; font-size: 10px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 3px; }
   .nego-close { background: none; border: none; color: var(--ink-3); font-size: 16px; cursor: pointer; padding: 2px 6px; line-height: 1; }
   .nego-close:hover { color: var(--ink); }
   .nego-thread { flex: 1; overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
   .nego-empty { color: var(--ink-3); font-size: 13px; line-height: 1.5; text-align: center; margin: auto 0; padding: 12px; }
   .nego-msg { max-width: 82%; padding: 9px 12px; font-size: 13.5px; line-height: 1.45; border: 1px solid var(--rule); position: relative; }
-  .nego-msg .nego-who { font-family: 'JetBrains Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-3); margin-bottom: 3px; }
-  .nego-msg.them { align-self: flex-start; background: rgba(94,249,212,0.08); border-color: rgba(94,249,212,0.28); }
-  .nego-msg.me { align-self: flex-end; background: rgba(255,46,136,0.10); border-color: rgba(255,46,136,0.3); }
+  .nego-msg .nego-who { font-family: 'Inter', sans-serif; font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-3); margin-bottom: 3px; }
+  .nego-msg.them { align-self: flex-start; background: rgba(157,143,201,0.08); border-color: rgba(157,143,201,0.28); }
+  .nego-msg.me { align-self: flex-end; background: rgba(201,168,106,0.10); border-color: rgba(201,168,106,0.3); }
   .nego-compose { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--rule); align-items: flex-end; }
   .nego-compose textarea {
     flex: 1; resize: none; max-height: 120px;
-    background: rgba(10,6,18,0.6); border: 1px solid var(--rule-strong);
+    background: rgba(9,10,14,0.6); border: 1px solid var(--rule-strong);
     color: var(--ink); padding: 9px 11px; font-size: 13.5px;
-    font-family: 'Space Grotesk', sans-serif; line-height: 1.4;
+    font-family: 'Lora', Georgia, serif; line-height: 1.4;
   }
   .nego-compose textarea:focus { outline: none; border-color: var(--violet); }
   .nego-send { padding: 9px 14px; font-size: 12px; white-space: nowrap; }
@@ -1081,15 +1066,15 @@
   /* ===== FLOATING KEY-POINTS BUBBLE (reuses nego shell) ===== */
   .points-fab {
     border-color: var(--gold);
-    box-shadow: 0 0 24px rgba(255, 211, 77, 0.4), 0 6px 20px rgba(0,0,0,0.5);
+    box-shadow: 0 0 24px rgba(212, 180, 120, 0.4), 0 6px 20px rgba(0,0,0,0.5);
   }
-  .points-fab:hover { box-shadow: 0 0 32px rgba(255, 211, 77, 0.6), 0 8px 24px rgba(0,0,0,0.5); }
+  .points-fab:hover { box-shadow: 0 0 32px rgba(212, 180, 120, 0.6), 0 8px 24px rgba(0,0,0,0.5); }
   .points-body { flex: 1; overflow-y: auto; padding: 14px 16px; }
   .points-side { margin-bottom: 18px; }
   .points-side:last-child { margin-bottom: 4px; }
   .points-side .ps-head {
     display: flex; align-items: center; gap: 8px;
-    font-family: 'Bowlby One', serif;
+    font-family: 'Lora', Georgia, serif;
     font-size: 15px;
     margin-bottom: 8px;
     padding-bottom: 6px;
@@ -1106,7 +1091,7 @@
   .points-side li::before {
     content: '▸';
     position: absolute; left: 0;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
   }
   .points-side.side-a li::before { color: var(--cyan); }
   .points-side.side-b li::before { color: var(--hot-pink); }
@@ -1120,10 +1105,10 @@
   .points-empty { font-size: 12px; color: var(--ink-3); font-style: italic; }
 
   /* ===== OPENING ARGUMENT CARDS (pinned at top of chat) ===== */
-  .msg.opening .msg-body { background: rgba(42, 24, 88, 0.45); }
+  .msg.opening .msg-body { background: rgba(35, 36, 47, 0.45); }
   .opening-tag {
     display: inline-block;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 9px;
     font-weight: 700;
     letter-spacing: 0.2em;
@@ -1132,13 +1117,13 @@
     margin-bottom: 8px;
     border: 1px solid var(--gold);
     color: var(--gold);
-    background: rgba(255, 211, 77, 0.08);
+    background: rgba(212, 180, 120, 0.08);
   }
 
   /* ===== TIMEOUT / FORFEIT MODAL ===== */
   .modal-backdrop {
     position: fixed; inset: 0; z-index: 220;
-    background: rgba(5,3,12,0.8);
+    background: rgba(6,6,10,0.8);
     backdrop-filter: blur(4px);
     display: flex; align-items: center; justify-content: center;
     padding: 24px;
@@ -1146,26 +1131,26 @@
   }
   .modal-box {
     width: min(460px, 100%);
-    background: linear-gradient(180deg, rgba(29,18,64,0.98), rgba(13,8,28,0.99));
+    background: linear-gradient(180deg, rgba(27,28,37,0.98), rgba(15,16,22,0.99));
     border: 1px solid var(--hot-pink);
     box-shadow: 0 0 50px var(--hot-pink-glow), 0 20px 60px rgba(0,0,0,0.7);
     padding: 30px 28px;
     position: relative;
   }
   .modal-box::before { content: ''; position: absolute; top: -1px; left: -1px; right: -1px; height: 3px; background: linear-gradient(90deg, var(--hot-pink), var(--gold)); }
-  .modal-tag { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.25em; color: var(--hot-pink); text-transform: uppercase; margin-bottom: 14px; text-shadow: 0 0 12px var(--hot-pink-glow); }
-  .modal-title { font-family: 'Bowlby One', serif; font-size: 26px; line-height: 1.05; margin-bottom: 12px; }
+  .modal-tag { font-family: 'Inter', sans-serif; font-size: 11px; letter-spacing: 0.25em; color: var(--hot-pink); text-transform: uppercase; margin-bottom: 14px; text-shadow: 0 0 12px var(--hot-pink-glow); }
+  .modal-title { font-family: 'Lora', Georgia, serif; font-size: 26px; line-height: 1.05; margin-bottom: 12px; }
   .modal-body { color: var(--ink-2); font-size: 15px; line-height: 1.55; margin-bottom: 22px; }
   .modal-actions { display: flex; flex-direction: column; gap: 10px; }
   .modal-actions .btn { width: 100%; }
-  .modal-note { margin-top: 14px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-3); text-align: center; min-height: 14px; letter-spacing: 0.04em; }
+  .modal-note { margin-top: 14px; font-family: 'Inter', sans-serif; font-size: 11px; color: var(--ink-3); text-align: center; min-height: 14px; letter-spacing: 0.04em; }
 
   @media (max-width: 520px) {
     .nego { right: 14px; bottom: 14px; }
     .nego-panel { bottom: 70px; }
   }
 
-  .footnote { text-align: center; color: var(--ink-3); font-size: 12px; margin-top: 36px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.1em; }
+  .footnote { text-align: center; color: var(--ink-3); font-size: 12px; margin-top: 36px; font-family: 'Inter', sans-serif; letter-spacing: 0.1em; }
 
   /* config-missing banner */
   .config-banner {
@@ -1177,7 +1162,7 @@
     color: var(--ink);
   }
   .config-banner strong { color: var(--amber); }
-  .config-banner code { background: var(--void); padding: 2px 6px; border: 1px solid var(--rule-strong); font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--cyan); }
+  .config-banner code { background: var(--void); padding: 2px 6px; border: 1px solid var(--rule-strong); font-family: 'Inter', sans-serif; font-size: 12px; color: var(--cyan); }
 
   .danger { color: var(--hot-pink); }
   .success { color: var(--cyan); }
@@ -1188,7 +1173,7 @@
   .debate-list { display: flex; flex-direction: column; gap: 12px; }
   .debate-item {
     border: 1px solid var(--rule-strong);
-    background: rgba(29, 18, 64, 0.4);
+    background: rgba(27, 28, 37, 0.4);
     padding: 16px 20px;
     display: flex; align-items: center; justify-content: space-between;
     gap: 16px;
@@ -1198,9 +1183,9 @@
   .debate-item:hover { border-color: var(--cyan); transform: translateX(4px); }
   .debate-item .di-main { flex: 1; min-width: 0; }
   .debate-item .di-topic { font-size: 15px; font-weight: 600; color: var(--ink); margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .debate-item .di-meta { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-3); letter-spacing: 0.08em; }
+  .debate-item .di-meta { font-family: 'Inter', sans-serif; font-size: 11px; color: var(--ink-3); letter-spacing: 0.08em; }
   .debate-item .di-status {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.15em;
@@ -1219,7 +1204,7 @@
     gap: 22px;
     align-items: start;
     border: 1px solid var(--rule-strong);
-    background: linear-gradient(135deg, rgba(42, 24, 88, 0.55), rgba(20, 9, 43, 0.4));
+    background: linear-gradient(135deg, rgba(35, 36, 47, 0.55), rgba(19, 20, 27, 0.4));
     padding: 24px 26px;
     position: relative;
     overflow: hidden;
@@ -1235,20 +1220,20 @@
     font-size: 46px; line-height: 1;
     border: 1.5px solid var(--violet);
     background: var(--void);
-    box-shadow: 0 0 22px rgba(179, 136, 255, 0.35);
+    box-shadow: 0 0 22px rgba(132, 124, 149, 0.35);
     flex-shrink: 0;
     border-radius: 4px;
   }
   .profile-main { min-width: 0; }
   .profile-name {
-    font-family: 'Bowlby One', serif;
+    font-family: 'Lora', Georgia, serif;
     font-size: 30px; line-height: 1;
     color: var(--ink);
     margin-bottom: 6px;
     word-break: break-word;
   }
   .profile-email {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 11px; letter-spacing: 0.08em;
     color: var(--cyan);
     margin-bottom: 14px;
@@ -1257,12 +1242,12 @@
   .profile-bio.empty { color: var(--ink-3); font-style: italic; }
   .profile-topics { display: flex; flex-wrap: wrap; gap: 6px; }
   .topic-tag {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 11px; font-weight: 600;
     letter-spacing: 0.04em;
     padding: 5px 11px;
     border: 1px solid var(--violet);
-    background: rgba(179, 136, 255, 0.12);
+    background: rgba(132, 124, 149, 0.12);
     color: var(--violet);
   }
   .profile-actions { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
@@ -1278,23 +1263,23 @@
   @media (max-width: 640px) { .stat-tiles { grid-template-columns: repeat(2, 1fr); } }
   .stat-tile {
     border: 1px solid var(--rule-strong);
-    background: rgba(10, 6, 18, 0.45);
+    background: rgba(9, 10, 14, 0.45);
     padding: 14px 16px;
     text-align: center;
     transition: all .15s;
   }
   .stat-tile:hover { border-color: var(--rule-strong); transform: translateY(-2px); }
   .stat-tile .num {
-    font-family: 'Bowlby One', serif;
+    font-family: 'Lora', Georgia, serif;
     font-size: 32px; line-height: 1;
     color: var(--cyan);
     text-shadow: 0 0 14px var(--cyan-glow);
   }
-  .stat-tile.v2 .num { color: var(--gold); text-shadow: 0 0 14px rgba(255, 211, 77, 0.5); }
-  .stat-tile.v3 .num { color: var(--violet); text-shadow: 0 0 14px rgba(179, 136, 255, 0.5); }
+  .stat-tile.v2 .num { color: var(--gold); text-shadow: 0 0 14px rgba(212, 180, 120, 0.5); }
+  .stat-tile.v3 .num { color: var(--violet); text-shadow: 0 0 14px rgba(132, 124, 149, 0.5); }
   .stat-tile.v4 .num { color: var(--hot-pink); text-shadow: 0 0 14px var(--hot-pink-glow); }
   .stat-tile .lbl {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 9px; text-transform: uppercase; letter-spacing: 0.16em;
     color: var(--ink-3); margin-top: 8px;
   }
@@ -1311,15 +1296,15 @@
     display: grid; place-items: center;
     font-size: 26px;
     border: 1px solid var(--rule-strong);
-    background: rgba(10, 6, 18, 0.4);
+    background: rgba(9, 10, 14, 0.4);
     transition: all .12s;
     border-radius: 4px;
   }
-  .ava-pick:hover { border-color: var(--cyan); transform: translateY(-2px); background: rgba(94, 249, 212, 0.08); }
+  .ava-pick:hover { border-color: var(--cyan); transform: translateY(-2px); background: rgba(157, 143, 201, 0.08); }
   .ava-pick.active {
     border-color: var(--violet);
-    background: rgba(179, 136, 255, 0.18);
-    box-shadow: 0 0 16px rgba(179, 136, 255, 0.45);
+    background: rgba(132, 124, 149, 0.18);
+    box-shadow: 0 0 16px rgba(132, 124, 149, 0.45);
     transform: translateY(-2px);
   }
 
@@ -1333,7 +1318,7 @@
     margin-right: 2px;
   }
   .masthead .user .pill { display: inline-flex; align-items: center; gap: 7px; cursor: pointer; }
-  .masthead .user .pill:hover { background: rgba(94, 249, 212, 0.16); }
+  .masthead .user .pill:hover { background: rgba(157, 143, 201, 0.16); }
 
   /* message + scoreboard avatars can hold an emoji */
   .avatar.emoji { font-family: inherit; font-size: 20px; }
@@ -1344,7 +1329,7 @@
   .slider-row input[type="range"] {
     -webkit-appearance: none; appearance: none;
     flex: 1; height: 6px; border-radius: 999px;
-    background: rgba(10, 6, 18, 0.7);
+    background: rgba(9, 10, 14, 0.7);
     border: 1px solid var(--rule-strong);
     cursor: pointer;
     outline: none;
@@ -1366,7 +1351,7 @@
   }
   .slider-row input[type="range"]:disabled { opacity: 0.35; cursor: not-allowed; }
   .slider-val {
-    font-family: 'Bowlby One', serif;
+    font-family: 'Lora', Georgia, serif;
     font-size: 18px;
     color: var(--cyan);
     min-width: 96px;
@@ -1376,17 +1361,17 @@
   }
   .slider-hint {
     font-size: 11px; color: var(--ink-3);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     letter-spacing: 0.04em; margin-top: 10px;
   }
   .inf-btn {
-    font-family: 'Bowlby One', serif;
+    font-family: 'Lora', Georgia, serif;
     font-size: 22px; line-height: 1;
     width: 48px; height: 40px;
     flex-shrink: 0;
     display: grid; place-items: center;
     border: 1.5px solid var(--rule-strong);
-    background: rgba(10, 6, 18, 0.4);
+    background: rgba(9, 10, 14, 0.4);
     color: var(--ink-2);
     transition: all .15s;
   }
@@ -1396,7 +1381,7 @@
   .wordmeter { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
   .wm-bar {
     flex: 1; height: 6px; border-radius: 999px;
-    background: rgba(10, 6, 18, 0.7);
+    background: rgba(9, 10, 14, 0.7);
     border: 1px solid var(--rule-strong);
     overflow: hidden;
   }
@@ -1409,7 +1394,7 @@
   .wm-fill.warn { background: linear-gradient(90deg, var(--amber), var(--hot-pink)); }
   .wm-fill.full { background: var(--hot-pink); box-shadow: 0 0 10px var(--hot-pink-glow); }
   .wm-label {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 10px; letter-spacing: 0.06em;
     color: var(--ink-3);
     white-space: nowrap;
@@ -1419,7 +1404,7 @@
   .inf-btn.active {
     background: var(--gold); color: var(--void);
     border-color: var(--gold);
-    box-shadow: 0 0 16px rgba(255, 211, 77, 0.5);
+    box-shadow: 0 0 16px rgba(212, 180, 120, 0.5);
   }
 
   /* ===== TUTORIAL COACH — a floating guide pinned above the whole UI ===== */
@@ -1431,8 +1416,8 @@
   .coach-card {
     display: flex; gap: 14px; align-items: flex-start;
     border: 1.5px solid var(--gold);
-    background: linear-gradient(180deg, rgba(29,18,64,0.97), rgba(13,8,28,0.98));
-    box-shadow: 0 0 30px rgba(255,211,77,0.3), 0 14px 40px rgba(0,0,0,0.6);
+    background: linear-gradient(180deg, rgba(27,28,37,0.97), rgba(15,16,22,0.98));
+    box-shadow: 0 0 30px rgba(212,180,120,0.3), 0 14px 40px rgba(0,0,0,0.6);
     padding: 14px 16px;
     animation: negoPop .2s cubic-bezier(.2,.7,.3,1);
   }
@@ -1442,30 +1427,30 @@
     font-size: 28px;
     border: 1px solid var(--gold);
     background: var(--void);
-    box-shadow: 0 0 14px rgba(255,211,77,0.4);
+    box-shadow: 0 0 14px rgba(212,180,120,0.4);
   }
   .coach-main { flex: 1; min-width: 0; }
   .coach-name {
     display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 10px; font-weight: 700; letter-spacing: 0.25em;
     color: var(--gold); text-transform: uppercase;
   }
   .coach-dots { display: inline-flex; gap: 4px; }
   .coach-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--rule-strong); }
-  .coach-dots span.done { background: var(--gold); box-shadow: 0 0 6px rgba(255,211,77,0.6); }
+  .coach-dots span.done { background: var(--gold); box-shadow: 0 0 6px rgba(212,180,120,0.6); }
   .coach-text { font-size: 14px; line-height: 1.5; color: var(--ink); margin: 7px 0 10px; }
   .coach-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   .coach-next { padding: 8px 18px; font-size: 11px; }
   .coach-hint {
-    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    font-family: 'Inter', sans-serif; font-size: 10px;
     letter-spacing: 0.15em; text-transform: uppercase;
     color: var(--cyan); text-shadow: 0 0 10px var(--cyan-glow);
     animation: blink 1.6s infinite;
   }
   .coach-skip {
     margin-left: auto;
-    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    font-family: 'Inter', sans-serif; font-size: 10px;
     letter-spacing: 0.1em; text-transform: uppercase;
     color: var(--ink-3);
   }
@@ -1475,7 +1460,7 @@
 
   /* ===== PRACTICE ARENA (solo mode) ===== */
   .solo-del {
-    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    font-family: 'Inter', sans-serif; font-size: 12px;
     color: var(--ink-3);
     border: 1px solid var(--rule);
     padding: 4px 9px; flex-shrink: 0;
@@ -1500,7 +1485,7 @@
       gap: 8px;
       row-gap: 6px;
     }
-    .masthead .brand { font-size: 17px; }
+    .masthead .brand { font-size: 12px; letter-spacing: 0.3em; }
     .masthead .brand .sub { display: none; }
 
     /* CHAT: wider bubbles = more words per line */
@@ -1646,7 +1631,7 @@
     <div class="auth-wrap" style="max-width: 640px;">
       <div class="panel">
         <div class="panel-tag">Your Profile</div>
-        <h2 style="font-family:'Bowlby One',serif;font-size:32px;margin-bottom:4px;background:linear-gradient(135deg,var(--ink),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Make it yours.</h2>
+        <h2 style="font-family:'Lora',Georgia,serif;font-style:italic;font-weight:600;font-size:32px;margin-bottom:4px;background:linear-gradient(135deg,var(--ink),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Make it yours.</h2>
         <p class="sub" style="color:var(--ink-3);margin-bottom:24px;font-size:13px;">Pick a fighter, write a line about yourself, and tag what you love to argue about.</p>
 
         <div class="field">
@@ -1661,8 +1646,8 @@
 
         <div class="field">
           <label>Bio</label>
-          <textarea id="prof-bio" placeholder="One or two lines. Who are you in the arena?" maxlength="160" style="width:100%;min-height:70px;background:rgba(10,6,18,0.6);border:1px solid var(--rule-strong);padding:12px 14px;font-size:15px;color:var(--ink);"></textarea>
-          <div style="text-align:right;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-3);margin-top:4px;"><span id="bio-count">0</span>/160</div>
+          <textarea id="prof-bio" placeholder="One or two lines. Who are you in the arena?" maxlength="160" style="width:100%;min-height:70px;background:rgba(9,10,14,0.6);border:1px solid var(--rule-strong);padding:12px 14px;font-size:15px;color:var(--ink);"></textarea>
+          <div style="text-align:right;font-family:'Inter',sans-serif;font-size:10px;color:var(--ink-3);margin-top:4px;"><span id="bio-count">0</span>/160</div>
         </div>
 
         <div class="field">
@@ -1684,7 +1669,7 @@
     <div class="auth-wrap" style="max-width: 720px;">
       <div class="panel">
         <div class="panel-tag">Practice Arena</div>
-        <h2 style="font-family:'Bowlby One',serif;font-size:32px;margin-bottom:4px;background:linear-gradient(135deg,var(--ink),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Warm up.</h2>
+        <h2 style="font-family:'Lora',Georgia,serif;font-style:italic;font-weight:600;font-size:32px;margin-bottom:4px;background:linear-gradient(135deg,var(--ink),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Warm up.</h2>
         <p class="sub" style="color:var(--ink-3);margin-bottom:24px;font-size:13px;">No stakes, no audience. The same AI referee flags every message — it just stays between you and the machine.</p>
 
         <div class="field">
@@ -1727,7 +1712,7 @@
 
         <div class="field" id="solo-opening-field">
           <label>Your Opening Argument</label>
-          <textarea id="solo-opening" placeholder="Where do you stand, and why? The AI will read this and take the opposite corner." style="width:100%;min-height:120px;background:rgba(10,6,18,0.6);border:1px solid var(--rule-strong);padding:12px 14px;font-size:15px;line-height:1.55;color:var(--ink);"></textarea>
+          <textarea id="solo-opening" placeholder="Where do you stand, and why? The AI will read this and take the opposite corner." style="width:100%;min-height:120px;background:rgba(9,10,14,0.6);border:1px solid var(--rule-strong);padding:12px 14px;font-size:15px;line-height:1.55;color:var(--ink);"></textarea>
           <div class="wordmeter">
             <div class="wm-bar"><div class="wm-fill" id="solo-meter"></div></div>
             <div class="wm-label" id="solo-meter-label"><span id="solo-count">0</span> / 250 words</div>
@@ -1756,7 +1741,7 @@
     <div class="auth-wrap" style="max-width: 720px;">
       <div class="panel">
         <div class="panel-tag">Tutorial</div>
-        <h2 style="font-family:'Bowlby One',serif;font-size:32px;margin-bottom:4px;background:linear-gradient(135deg,var(--ink),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Pick your practice bout.</h2>
+        <h2 style="font-family:'Lora',Georgia,serif;font-style:italic;font-weight:600;font-size:32px;margin-bottom:4px;background:linear-gradient(135deg,var(--ink),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Pick your practice bout.</h2>
         <p class="sub" style="color:var(--ink-3);margin-bottom:24px;font-size:13px;">Low-stakes classics. COACH-BOT takes the other side; your coach calls the action from ringside.</p>
         <div class="mode-grid" id="tut-scenarios"></div>
         <div style="margin-top:18px;">
@@ -1787,7 +1772,7 @@
 
         <div class="field">
           <label>Your Opening Argument</label>
-          <textarea id="opening-arg" placeholder="Make your case. Where do you stand on this topic, and why? The AI will distill this into quick-reference key points for the debate." style="width:100%;min-height:140px;background:rgba(10,6,18,0.6);border:1px solid var(--rule-strong);padding:12px 14px;font-size:15px;line-height:1.55;color:var(--ink);"></textarea>
+          <textarea id="opening-arg" placeholder="Make your case. Where do you stand on this topic, and why? The AI will distill this into quick-reference key points for the debate." style="width:100%;min-height:140px;background:rgba(9,10,14,0.6);border:1px solid var(--rule-strong);padding:12px 14px;font-size:15px;line-height:1.55;color:var(--ink);"></textarea>
           <div class="wordmeter">
             <div class="wm-bar"><div class="wm-fill" id="opening-meter"></div></div>
             <div class="wm-label" id="opening-meter-label"><span id="opening-count">0</span> / 250 words</div>
@@ -1897,7 +1882,7 @@
           <div class="from">You've been invited by</div>
           <div class="vs-block"><span id="inv-from">—</span> <span class="vs">VS</span> <span style="color: var(--cyan);">YOU</span></div>
           <div class="topic" id="inv-topic">—</div>
-          <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink-3); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 16px;">
+          <div style="font-family: 'Inter', sans-serif; font-size: 12px; color: var(--ink-3); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 16px;">
             Mode: <span id="inv-mode" style="color: var(--gold);">—</span> · Turn: <span id="inv-turn" style="color: var(--ink-2);">—</span> · Cap: <span id="inv-cap" style="color: var(--ink-2);">—</span> · Words/Msg: <span id="inv-words" style="color: var(--ink-2);">—</span>
           </div>
         </div>
@@ -1920,14 +1905,14 @@
     <div class="auth-wrap" style="max-width: 640px;">
       <div class="panel">
         <div class="panel-tag">Opening Argument</div>
-        <h2 style="font-family:'Bowlby One',serif;font-size:32px;margin-bottom:6px;background:linear-gradient(135deg,var(--ink),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Make your case.</h2>
+        <h2 style="font-family:'Lora',Georgia,serif;font-style:italic;font-weight:600;font-size:32px;margin-bottom:6px;background:linear-gradient(135deg,var(--ink),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Make your case.</h2>
         <p class="sub" style="color:var(--ink-3);margin-bottom:18px;font-size:13px;">The topic on the table:</p>
         <div class="invite-pending" style="margin-bottom:20px;">
           <div class="topic" id="opening-topic" style="margin:0;">—</div>
         </div>
         <div class="field">
           <label>Your Opening Argument</label>
-          <textarea id="opening-b-input" placeholder="Where do you stand on this topic, and why? You haven't seen their opening — and they haven't seen yours. Both are revealed when the debate begins." style="width:100%;min-height:160px;background:rgba(10,6,18,0.6);border:1px solid var(--rule-strong);padding:12px 14px;font-size:15px;line-height:1.55;color:var(--ink);"></textarea>
+          <textarea id="opening-b-input" placeholder="Where do you stand on this topic, and why? You haven't seen their opening — and they haven't seen yours. Both are revealed when the debate begins." style="width:100%;min-height:160px;background:rgba(9,10,14,0.6);border:1px solid var(--rule-strong);padding:12px 14px;font-size:15px;line-height:1.55;color:var(--ink);"></textarea>
           <div class="wordmeter">
             <div class="wm-bar"><div class="wm-fill" id="opening-b-meter"></div></div>
             <div class="wm-label" id="opening-b-meter-label"><span id="opening-b-count">0</span> / 250 words</div>
@@ -1957,9 +1942,9 @@
       <div class="panel">
         <div class="panel-tag">Invite Sent</div>
         <div style="text-align: center; padding: 24px;">
-          <div style="font-family: 'Bowlby One', serif; font-size: 72px; margin-bottom: 16px;">⏳</div>
+          <div style="font-family: 'Lora', Georgia, serif; font-size: 72px; margin-bottom: 16px;">⏳</div>
           <h2 class="display" style="font-size: 32px; margin-bottom: 12px; color: var(--gold);">Waiting on <span id="wait-name">your opponent</span>…</h2>
-          <p style="color: var(--ink-2); margin-bottom: 8px;">They'll get a magic-link email at <span id="wait-email" style="color: var(--cyan); font-family: 'JetBrains Mono', monospace;">—</span></p>
+          <p style="color: var(--ink-2); margin-bottom: 8px;">They'll get a magic-link email at <span id="wait-email" style="color: var(--cyan); font-family: 'Inter', sans-serif;">—</span></p>
           <p style="color: var(--ink-3); font-size: 13px; margin-bottom: 28px;">They'll see the topic, write their own opening argument, and then the debate begins. Your opening stays sealed until theirs is in.</p>
           <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
             <button class="btn btn-secondary" onclick="openRulesEditor()">⚙ Adjust the Rules</button>
@@ -2150,8 +2135,8 @@
 
 <!-- ============ TUTORIAL OFFER (first dashboard visit) ============ -->
 <div id="tutorial-offer" class="modal-backdrop" hidden>
-  <div class="modal-box" style="border-color: var(--gold); box-shadow: 0 0 50px rgba(255,211,77,0.4), 0 20px 60px rgba(0,0,0,0.7);">
-    <div class="modal-tag" style="color: var(--gold); text-shadow: 0 0 12px rgba(255,211,77,0.5);">🎓 NEW HERE?</div>
+  <div class="modal-box" style="border-color: var(--gold); box-shadow: 0 0 50px rgba(212,180,120,0.4), 0 20px 60px rgba(0,0,0,0.7);">
+    <div class="modal-tag" style="color: var(--gold); text-shadow: 0 0 12px rgba(212,180,120,0.5);">🎓 NEW HERE?</div>
     <h3 class="modal-title">Learn the ropes.</h3>
     <p class="modal-body">Take a three-minute guided practice debate. Your coach walks you through the scoreboard, the referee's red / green / amber flags, and the art of the graceful concession — against a bot who argues like your uncle at Thanksgiving.</p>
     <div class="modal-actions">
@@ -2168,7 +2153,7 @@
 <div class="safety-overlay" id="safety-overlay" hidden>
   <div class="panel safety-panel">
     <div class="panel-tag">Conduct Desk</div>
-    <h3 style="font-family:'Bowlby One',serif;font-size:22px;margin-bottom:6px;">Report <span id="safety-opp-name" style="color:var(--hot-pink);">this player</span>?</h3>
+    <h3 style="font-family:'Lora',Georgia,serif;font-style:italic;font-weight:600;font-size:22px;margin-bottom:6px;">Report <span id="safety-opp-name" style="color:var(--hot-pink);">this player</span>?</h3>
     <p style="font-size:13px;color:var(--ink-2);margin-bottom:14px;">Sharp arguments are the game. Harassment, threats, and hate aren't. Tell the desk what happened — a human reviews every report.</p>
     <div class="field">
       <label>What happened? (optional)</label>
