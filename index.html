@@ -3884,7 +3884,7 @@ async function callMediator(text, asRole) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${session.access_token}`,
+      'Authorization': `Bearer ${session?.access_token || SUPABASE_ANON_KEY}`,
     },
     body: JSON.stringify({
       text,
@@ -3913,7 +3913,7 @@ async function distillArgument(text, topic) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.access_token}`,
+        'Authorization': `Bearer ${session?.access_token || SUPABASE_ANON_KEY}`,
       },
       body: JSON.stringify({ task: 'distill', text, topic }),
     });
@@ -3935,7 +3935,7 @@ async function flagOpening(text, topic, mode) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.access_token}`,
+        'Authorization': `Bearer ${session?.access_token || SUPABASE_ANON_KEY}`,
       },
       body: JSON.stringify({
         text,
@@ -4003,7 +4003,7 @@ function sendEmailNudge(debateId, kind) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
+          'Authorization': `Bearer ${session?.access_token || SUPABASE_ANON_KEY}`,
         },
         body: JSON.stringify({ debateId, kind, fromName }),
       });
@@ -4662,7 +4662,7 @@ async function sparCall(phase) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${session.access_token}`,
+      'Authorization': `Bearer ${session?.access_token || SUPABASE_ANON_KEY}`,
     },
     body: JSON.stringify({
       task: 'spar',
