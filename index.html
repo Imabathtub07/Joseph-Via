@@ -680,6 +680,22 @@
     cursor: default;
     box-shadow: 0 0 10px var(--cyan-glow);
   }
+  /* Regenerate mediation — recovery for a message that went ungraded (e.g. the
+     mediator was briefly unreachable when it was sent). Styled like concede
+     but in the mediator's violet voice. */
+  .regrade-btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-3);
+    border: 1px solid var(--rule-strong);
+    padding: 3px 9px;
+    background: transparent;
+    transition: all .15s;
+  }
+  .regrade-btn:hover { background: var(--cyan-dim); color: var(--cyan); border-color: var(--cyan); }
+  .regrade-btn:disabled { opacity: .6; cursor: default; }
 
   /* highlights — the stars of the show */
   .hl {
@@ -2212,6 +2228,7 @@ let timerInterval = null;
 let timeoutShownForTurn = null; // de-dupes the timeout modal per expired turn
 let messagesChannel = null;
 let debateChannel = null;
+const regradingMsgIds = new Set(); // messages currently being re-graded (spinner state)
 
 // preset avatars (no uploads needed — fast, reliable, on-brand)
 const AVATARS = ['🦊','🐙','👾','🤖','🐉','🦄','🔥','⚡','🎭','🃏','🐺','🦅','🦉','🐝','🦁','🐯','🦖','🪐','💎','🌶️','🧠','👑','🎯','🦂'];
@@ -3408,6 +3425,15 @@ function renderMessages() {
     const concedeBtn = canConcede
       ? `<button class="concede-btn" onclick="concede('${m.id}')">Concede ✓</button>`
       : (m.conceded_by ? `<span class="concede-btn conceded">✓ Conceded</span>` : '');
+    // Regenerate mediation — offered on any message that carries no flags, so a
+    // message that slipped through ungraded (e.g. the mediator was briefly
+    // unreachable) can be re-run on demand. Hidden in the scripted tutorial.
+    const ungraded = !(m.flags && m.flags.length);
+    const isRegrading = regradingMsgIds.has(m.id);
+    const showRegrade = ungraded && !(currentDebate && currentDebate.solo_kind === 'tutorial');
+    const regradeBtn = showRegrade
+      ? `<button class="regrade-btn" onclick="regenerateMediation('${m.id}')"${isRegrading ? ' disabled' : ''}>${isRegrading ? 'Grading…' : '⟳ Regenerate'}</button>`
+      : '';
     const authEmail = (m.role === 'a' ? currentDebate.creator_email : currentDebate.opponent_email || '').toLowerCase();
     const prof = profileCache[authEmail];
     const avaInner = prof && prof.avatar ? escapeHtml(prof.avatar) : escapeHtml(name[0].toUpperCase());
@@ -3420,6 +3446,7 @@ function renderMessages() {
           <span>${escapeHtml(name)}</span>
           <span>· ${stamp}</span>
           ${concedeBtn}
+          ${regradeBtn}
         </div>
       </div>
     `;
@@ -4112,6 +4139,39 @@ async function concede(msgId) {
   const { error } = await sb.from('messages').update({ conceded_by: myRole }).eq('id', msgId);
   if (error) { showToast('Concession failed: ' + error.message); return; }
   showToast('Concession recorded ✓', 'cyan');
+}
+
+// Re-run the mediator on a message that carries no flags and save the result.
+// The recovery path for a message that slipped through ungraded (e.g. the
+// mediator was briefly unreachable when it was sent). The DB only accepts this
+// while the message's flags are still empty — once graded, flags are locked,
+// so this can never overwrite an existing verdict.
+async function regenerateMediation(msgId) {
+  const m = currentMessages.find(x => x.id === msgId);
+  if (!m || regradingMsgIds.has(msgId)) return;
+  if (m.flags && m.flags.length) { showToast('This message is already graded.'); return; }
+  regradingMsgIds.add(msgId);
+  renderMessages();
+  try {
+    const flags = await callMediator(m.text, m.role);
+    if (isLocalDebate()) {
+      m.flags = flags;
+      saveSoloState();
+    } else {
+      const { data, error } = await sb.from('messages')
+        .update({ flags }).eq('id', msgId).select().single();
+      if (error) throw error;
+      const idx = currentMessages.findIndex(x => x.id === msgId);
+      if (idx >= 0) currentMessages[idx] = data; // realtime will echo the same
+    }
+    showToast(flags.length ? 'Mediation regenerated ✓' : 'Mediator found nothing to flag.', 'cyan');
+  } catch (e) {
+    console.error('Regenerate mediation failed:', e);
+    showToast('Regenerate failed: ' + (e.message || e));
+  } finally {
+    regradingMsgIds.delete(msgId);
+    renderMessages();
+  }
 }
 
 // ============================================================================
