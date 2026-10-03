@@ -2265,6 +2265,7 @@ async function init() {
   }
 
   sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  registerNotifyWorker();
 
   // Native shell: catch deep links (magic-link auth callback) and the
   // hardware back button. window.Capacitor.Plugins.App is injected by the
@@ -2333,6 +2334,7 @@ async function onSignedIn(user) {
   // Load (or create) this user's profile, then refresh the masthead with it
   await loadOrCreateProfile();
   updateMastUser();
+  flushNudgeOutbox(); // replay any alerts that failed to send last session
 
   // Check URL for debate invite (?debate=xyz)
   const params = new URLSearchParams(window.location.search);
@@ -2614,7 +2616,7 @@ async function loadDashboard() {
     const isCreator = d.creator_email === email;
     const opponent = isCreator ? d.opponent_email : d.creator_email;
     const statusLabel = d.status === 'pending' ? (isCreator ? 'Waiting on them' : 'Your move') :
-                        d.status === 'active' ? 'Active' : 'Finished';
+                        d.status === 'active' ? (d.current_turn === (isCreator ? 'a' : 'b') ? 'Your move' : 'Active') : 'Finished';
     const statusClass = d.status;
     const item = document.createElement('div');
     item.className = 'debate-item';
@@ -3517,7 +3519,7 @@ function subscribeToMessages(debateId) {
         }
       }
     )
-    .subscribe();
+    .subscribe((status) => watchChannel(status, debateId, subscribeToMessages));
 }
 
 function subscribeToDebate(debateId) {
@@ -3587,7 +3589,7 @@ function subscribeToDebate(debateId) {
         }
       }
     )
-    .subscribe();
+    .subscribe((status) => watchChannel(status, debateId, subscribeToDebate));
 }
 
 // ============================================================================
@@ -3816,17 +3818,29 @@ async function sendMessage() {
     const aMsgs = currentMessages.filter(m => m.role === 'a').length;
     const bMsgs = currentMessages.filter(m => m.role === 'b').length;
     const capReached = aMsgs >= currentDebate.message_cap && bMsgs >= currentDebate.message_cap;
-    if (capReached) {
-      await sb.from('debates').update({ status: 'finished' }).eq('id', currentDebate.id);
-      sendEmailNudge(currentDebate.id, 'debate_finished');
+    // The turn flip is what actually hands the floor over. If it silently
+    // fails, the message exists but the opponent never gets their turn (or a
+    // notification), so retry once and tell the sender if it still fails.
+    const turnPatch = capReached
+      ? { status: 'finished' }
+      : {
+          current_turn: nextTurn,
+          turn_started_at: new Date().toISOString(), // restart the clock for them
+          forfeit_offered_by: null, // a fresh turn clears any stale timeout state
+          forfeit_decision: null,
+        };
+    let flipErr = null;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const { error: upErr } = await sb.from('debates').update(turnPatch).eq('id', currentDebate.id);
+      flipErr = upErr;
+      if (!upErr) break;
+      await new Promise(r => setTimeout(r, 600));
+    }
+    if (flipErr) {
+      console.error('Turn flip failed:', flipErr);
+      showToast('Message sent, but the turn did not pass — check your connection and refresh.');
     } else {
-      await sb.from('debates').update({
-        current_turn: nextTurn,
-        turn_started_at: new Date().toISOString(), // restart the clock for them
-        forfeit_offered_by: null, // a fresh turn clears any stale timeout state
-        forfeit_decision: null,
-      }).eq('id', currentDebate.id);
-      sendEmailNudge(currentDebate.id, 'your_turn');
+      sendEmailNudge(currentDebate.id, capReached ? 'debate_finished' : 'your_turn');
     }
 
     document.getElementById('composer-input').value = '';
@@ -4018,29 +4032,105 @@ async function backfillOpeningAI() {
 // NOTIFICATIONS — email nudges + browser notifications + title badge
 // ============================================================================
 
-// Fire-and-forget email to the OTHER participant via the notify edge function.
-// Silently does nothing if the function isn't deployed or email isn't set up.
+// Email the OTHER participant via the notify edge function.
+//
+// Delivery is made robust three ways:
+//   1. Retries with backoff (network blips, cold starts, 5xx).
+//   2. A localStorage outbox: if every attempt fails (or the tab closes
+//      mid-send) the nudge is replayed on the next load / when we come back
+//      online, so a dropped request is delayed rather than lost.
+//   3. The sender is told when the email couldn't go out, so they know to
+//      ping their opponent some other way instead of assuming it landed.
+const NUDGE_OUTBOX_KEY = 'discourse-nudge-outbox';
+const NUDGE_MAX_AGE_MS = 6 * 60 * 60 * 1000; // a stale "your move" is noise
+let nudgeFlushing = false;
+
+function readNudgeOutbox() {
+  try { return JSON.parse(localStorage.getItem(NUDGE_OUTBOX_KEY) || '[]'); } catch (e) { return []; }
+}
+function writeNudgeOutbox(items) {
+  try { localStorage.setItem(NUDGE_OUTBOX_KEY, JSON.stringify(items)); } catch (e) { /* private mode */ }
+}
+
+// One delivery attempt. Returns 'sent' | 'retry' | 'drop'.
+async function postNudge(item) {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return 'retry'; // not signed in right now — try again later
+  let resp;
+  try {
+    resp = await fetch(`${SUPABASE_URL}/functions/v1/notify`, {
+      method: 'POST',
+      keepalive: true, // survive the tab being closed/backgrounded mid-request
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+        'apikey': SUPABASE_ANON_KEY,
+      },
+      body: JSON.stringify({ debateId: item.debateId, kind: item.kind, fromName: item.fromName }),
+    });
+  } catch (e) {
+    return 'retry'; // network error
+  }
+  if (resp.status === 401 || resp.status === 429 || resp.status >= 500) return 'retry';
+  if (!resp.ok) return 'drop'; // 400/403/404: retrying can't help
+  let body = {};
+  try { body = await resp.json(); } catch (e) { /* empty body */ }
+  if (body && body.sent === false) {
+    // Function ran but the email provider refused/isn't configured.
+    console.warn('Notify: email not sent —', body.reason);
+    return body.retryable ? 'retry' : 'drop-unsent';
+  }
+  return 'sent';
+}
+
+async function deliverNudge(item) {
+  const delays = [0, 1500, 4000];
+  let result = 'retry';
+  for (const d of delays) {
+    if (d) await new Promise(r => setTimeout(r, d));
+    result = await postNudge(item);
+    if (result !== 'retry') break;
+  }
+  return result;
+}
+
+async function flushNudgeOutbox() {
+  if (nudgeFlushing || !currentUser || !sb) return;
+  nudgeFlushing = true;
+  try {
+    const now = Date.now();
+    let items = readNudgeOutbox().filter(i => now - i.ts < NUDGE_MAX_AGE_MS);
+    const remaining = [];
+    for (const item of items) {
+      const r = await postNudge(item);
+      if (r === 'retry') remaining.push(item);
+    }
+    writeNudgeOutbox(remaining);
+  } finally {
+    nudgeFlushing = false;
+  }
+}
+
 function sendEmailNudge(debateId, kind) {
   if (isLocalDebate()) return; // solo practice — nobody to nudge
+  const fromName = (currentProfile && currentProfile.display_name) || currentUser.email.split('@')[0];
+  const item = { debateId, kind, fromName, ts: Date.now() };
+  // Persist first so a closed tab can't lose it; drop it once delivered.
+  writeNudgeOutbox([...readNudgeOutbox(), item]);
   (async () => {
-    try {
-      const { data: { session } } = await sb.auth.getSession();
-      const fromName = (currentProfile && currentProfile.display_name) || currentUser.email.split('@')[0];
-      await fetch(`${SUPABASE_URL}/functions/v1/notify`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.access_token || SUPABASE_ANON_KEY}`,
-        },
-        body: JSON.stringify({ debateId, kind, fromName }),
-      });
-    } catch (e) {
-      console.warn('Email nudge failed (non-fatal):', e.message || e);
+    const result = await deliverNudge(item);
+    if (result === 'retry') {
+      showToast('Couldn\'t reach the notification service — we\'ll keep retrying. You may want to ping them too.');
+      return; // stays in the outbox for the next flush
+    }
+    writeNudgeOutbox(readNudgeOutbox().filter(i => i.ts !== item.ts));
+    if (result === 'drop-unsent' || result === 'drop') {
+      showToast('Heads up: the email alert couldn\'t be sent. They\'ll see your move when they open the app.');
     }
   })();
 }
 
-// Browser notification permission — asked once, when you first enter a live chat.
+// Browser notification permission — asked when you first enter a live chat.
 function ensureNotifyPermission() {
   if (!('Notification' in window)) return;
   if (Notification.permission === 'default') {
@@ -4048,15 +4138,79 @@ function ensureNotifyPermission() {
   }
 }
 
+// Mobile browsers (Android Chrome, iOS PWAs) throw on `new Notification()`;
+// they only allow notifications through a service worker registration.
+let swReg = null;
+function registerNotifyWorker() {
+  if (!('serviceWorker' in navigator) || IS_NATIVE) return;
+  navigator.serviceWorker.register('sw.js').then(r => { swReg = r; }).catch(() => {});
+}
+
 // Desktop/mobile notification when the tab isn't focused.
 function notifyLocal(title, body) {
   if (!('Notification' in window)) return;
   if (Notification.permission !== 'granted') return;
   if (!document.hidden) return; // they're already looking at it
+  const url = currentDebate ? `${window.location.pathname}?debate=${currentDebate.id}` : window.location.pathname;
+  const opts = { body, tag: 'discourse-turn', renotify: true, data: { url } };
+  const viaWorker = swReg && swReg.showNotification;
+  if (viaWorker) {
+    swReg.showNotification(title, opts).catch(() => {});
+    return;
+  }
   try {
-    const n = new Notification(title, { body, icon: undefined, tag: 'discourse-turn' });
+    const n = new Notification(title, opts);
     n.onclick = () => { window.focus(); n.close(); };
-  } catch (e) { /* some mobile browsers require a service worker — fine */ }
+  } catch (e) { /* no service worker and constructor unsupported — email covers it */ }
+}
+
+// Realtime sockets die quietly when a phone locks or the network flips, and
+// events fired in that gap are never replayed. Re-fetch the truth whenever
+// we come back, and poll lightly while a live debate is open.
+let resyncing = false;
+async function resyncLiveDebate() {
+  if (resyncing || !currentUser || !currentDebate || isLocalDebate()) return;
+  if (currentDebate.status !== 'active') return;
+  resyncing = true;
+  try {
+    const debateId = currentDebate.id;
+    const { data: fresh, error } = await sb.from('debates').select('*').eq('id', debateId).single();
+    if (error || !fresh || !currentDebate || currentDebate.id !== debateId) return;
+    const before = currentMessages.length;
+    const wasMyTurn = currentDebate.current_turn === getMyRole();
+    await loadMessages(debateId);
+    const old = currentDebate;
+    currentDebate = fresh;
+    if (fresh.status === 'finished') { showSummary(); return; }
+    if (old.current_turn !== fresh.current_turn || old.turn_started_at !== fresh.turn_started_at) {
+      timeoutShownForTurn = null;
+      startTimer();
+    }
+    renderMessages();
+    refreshTurnUI();
+    if (!wasMyTurn && fresh.current_turn === getMyRole() && currentMessages.length > before) {
+      notifyLocal('🎯 Your move', `"${fresh.topic}" — the floor is yours.`);
+    }
+  } finally {
+    resyncing = false;
+  }
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) return;
+  resyncLiveDebate();
+  flushNudgeOutbox();
+});
+window.addEventListener('online', () => { resyncLiveDebate(); flushNudgeOutbox(); });
+setInterval(() => { if (!document.hidden) resyncLiveDebate(); }, 20000);
+
+// Resubscribe a realtime channel that errored or timed out.
+// (CLOSED is deliberately ignored: removeChannel() emits it on purpose.)
+function watchChannel(status, debateId, resubscribe) {
+  if (status !== 'CHANNEL_ERROR' && status !== 'TIMED_OUT') return;
+  setTimeout(() => {
+    if (currentDebate && currentDebate.id === debateId && !isLocalDebate()) resubscribe(debateId);
+  }, 3000);
 }
 
 const BASE_TITLE = 'DISCOURSE // Mediated Debate';
