@@ -3,6 +3,24 @@
 Clockwork brass and silver, with a red dragon coiled around the bezel. Made for Ren Faire.
 Sized for the Galaxy Watch 8 Classic (round screen, 438×438).
 
+## The app (moving version)
+`app/dist/ClockworkDragon.apk` is a real Wear OS watch face (Watch Face Format, no code).
+- The gears and the hairspring turn, the second hand sweeps smoothly, the dragon's eye glows and pulses,
+  and smoke curls from its nostrils.
+- **Always On:** the whole face stays visible at about 40% brightness. The second hand and smoke hide to save battery.
+
+### Installing over wireless debugging
+1. Watch: Settings → About watch → Software → tap *Software version* 5 times to turn on Developer options.
+2. Watch: Settings → Developer options → turn on **ADB debugging** and **Wireless debugging**.
+3. Phone: open your ADB app (Bugjaeger, Wear Installer 2, etc.), pair with the code the watch shows, then install
+   `ClockworkDragon.apk`. From a computer: `adb install ClockworkDragon.apk`.
+4. Watch: long-press the current face → swipe to **+ Add** → pick **Clockwork Dragon**
+   (or Galaxy Wearable app → Watch faces → Downloaded).
+5. For the always-on look: Settings → Display → **Always On Display** → on.
+
+Rebuild with `ANDROID_JAR=/path/to/android.jar python3 app/build_app.py`
+(needs aapt, zipalign, apksigner, ImageMagick).
+
 ## Files
 - `png/preview_*.png`: the full face with hands, for showing it off
 - `png/dial_450.png`: the face with no hands. Use this as a photo watch face.

@@ -100,6 +100,9 @@ DEFS = """
   <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
     <feDropShadow dx="2" dy="3" stdDeviation="3" flood-color="#000" flood-opacity="0.55"/>
   </filter>
+  <filter id="spinShadow" x="-20%" y="-20%" width="140%" height="140%">
+    <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#000" flood-opacity="0.75"/>
+  </filter>
   <filter id="glow" x="-100%" y="-100%" width="300%" height="300%">
     <feGaussianBlur stdDeviation="4" result="b"/>
     <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
@@ -126,7 +129,7 @@ def fonts_css():
 
 
 # --------------------------------------------------------------------------- gears
-def gear(cx, cy, r, teeth, fill, spokes=5, depth=None, hub=None, rot=0.0):
+def gear(cx, cy, r, teeth, fill, spokes=5, depth=None, hub=None, rot=0.0, shadow="shadow"):
     depth = depth or max(8, r * 0.12)
     root = r - depth
     step = 2 * math.pi / teeth
@@ -157,7 +160,7 @@ def gear(cx, cy, r, teeth, fill, spokes=5, depth=None, hub=None, rot=0.0):
     hole = hub * 0.35
     d += f" M {f(cx + hole)},{f(cy)} A {f(hole)} {f(hole)} 0 1 0 {f(cx - hole)},{f(cy)} A {f(hole)} {f(hole)} 0 1 0 {f(cx + hole)},{f(cy)} Z"
     return (
-        f'<g filter="url(#shadow)">'
+        f'<g filter="url(#{shadow})">'
         f'<path d="{d}" fill="{fill}" fill-rule="evenodd" stroke="#2a1a08" stroke-width="2"/>'
         f'<circle cx="{f(cx)}" cy="{f(cy)}" r="{f(inner)}" fill="none" stroke="#000" stroke-opacity="0.35" stroke-width="2"/>'
         f'<circle cx="{f(cx)}" cy="{f(cy)}" r="{f(hub)}" fill="none" stroke="#fff6d8" stroke-opacity="0.35" stroke-width="2"/>'
@@ -165,26 +168,38 @@ def gear(cx, cy, r, teeth, fill, spokes=5, depth=None, hub=None, rot=0.0):
     )
 
 
-def gears():
-    g = [
-        gear(360, 610, 215, 28, "url(#brass)", spokes=6, rot=4),
-        gear(668, 372, 150, 22, "url(#silver)", spokes=5, rot=10),
-        gear(660, 668, 96, 16, "url(#copper)", spokes=4, rot=3),
-        gear(338, 330, 78, 13, "url(#brass)", spokes=4, rot=8),
-        gear(520, 250, 52, 10, "url(#silver)", spokes=3, rot=0),
-    ]
-    # screws and a pivot jewel or two
-    extras = ""
-    for x, y in ((360, 610), (668, 372), (660, 668), (338, 330), (520, 250)):
-        extras += f'<circle cx="{x}" cy="{y}" r="9" fill="url(#ruby)" stroke="#3a2408" stroke-width="2"/>'
-    # a little coiled spring / balance wheel
-    spiral = []
+# (cx, cy, radius, teeth, fill, spokes, rotation offset, spin in degrees per second)
+GEARS = [
+    (360, 610, 215, 28, "url(#brass)", 6, 4, 3.0),
+    (668, 372, 150, 22, "url(#silver)", 5, 10, -4.5),
+    (660, 668, 96, 16, "url(#copper)", 4, 3, -8.0),
+    (338, 330, 78, 13, "url(#brass)", 4, 8, -9.0),
+    (520, 250, 52, 10, "url(#silver)", 3, 0, 12.0),
+]
+SPIRAL_CENTER = (560, 520)
+
+
+def one_gear(i, shadow="shadow"):
+    cx, cy, r, teeth, fill, spokes, rot, _ = GEARS[i]
+    return (
+        gear(cx, cy, r, teeth, fill, spokes=spokes, rot=rot, shadow=shadow)
+        + f'<circle cx="{cx}" cy="{cy}" r="9" fill="url(#ruby)" stroke="#3a2408" stroke-width="2"/>'
+    )
+
+
+def spiral():
+    """A little coiled hairspring."""
+    sx, sy = SPIRAL_CENTER
+    p = []
     for i in range(260):
         t = i / 259 * 4 * 2 * math.pi
         rr = 6 + t * 3.0
-        spiral.append((560 + rr * math.cos(t), 520 + rr * math.sin(t)))
-    extras += f'<polyline points="{pts(spiral)}" fill="none" stroke="#e7c873" stroke-width="2.2" opacity="0.9"/>'
-    return f'<g clip-path="url(#dialClip)">{"".join(g)}{extras}</g>'
+        p.append((sx + rr * math.cos(t), sy + rr * math.sin(t)))
+    return f'<polyline points="{pts(p)}" fill="none" stroke="#e7c873" stroke-width="2.2" opacity="0.9"/>'
+
+
+def gears():
+    return f'<g clip-path="url(#dialClip)">{"".join(one_gear(i) for i in range(len(GEARS)))}{spiral()}</g>'
 
 
 # --------------------------------------------------------------------------- dial
@@ -301,7 +316,10 @@ def body_width(u):
     return lerp(60, 42, smooth((u - 0.82) / 0.18))
 
 
-def dragon():
+EYE = {}
+
+
+def dragon(smoke=True):
     N = 220
     cl, nrm, tan, w = [], [], [], []
     for i in range(N + 1):
@@ -472,14 +490,19 @@ def dragon():
     </g>
     """
     # wisps of smoke from the nostrils
-    smoke = f"""
+    smoke_svg = f"""
     <g transform="translate({f(hx)},{f(hy)}) rotate({f(ang)}) scale(1.6)" opacity="0.55">
       <path d="M 96,-6 C 108,-14 104,-24 116,-30 C 128,-36 124,-46 136,-50" fill="none" stroke="#e9e2d6" stroke-width="3" stroke-linecap="round"/>
       <path d="M 98,-2 C 114,-4 116,-14 128,-16" fill="none" stroke="#e9e2d6" stroke-width="2" stroke-linecap="round"/>
     </g>
     """
     s.append(head)
-    s.append(smoke)
+    if smoke:
+        s.append(smoke_svg)
+    # where the eye ends up on the canvas (for the animated glow layer)
+    rad = math.radians(ang)
+    ex, ey = 56 * 1.6, -11 * 1.6
+    EYE.update(smoke=smoke_svg, x=hx + ex * math.cos(rad) - ey * math.sin(rad), y=hy + ex * math.sin(rad) + ey * math.cos(rad), ang=ang)
     return "".join(s)
 
 

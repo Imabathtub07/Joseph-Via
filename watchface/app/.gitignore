@@ -1,0 +1,3 @@
+build/
+dist/*.apk.idsig
+debug.keystore
